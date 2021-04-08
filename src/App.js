@@ -6,9 +6,6 @@ import AuthActions from './services/AuthActions';
 import MercureHub from './components/Mercure/MercureHub';
 import AdminRoute from './components/route/AdminRoute';
 import PrivateRoute from './components/route/PrivateRoute';
-import UserActions from './services/UserActions';
-import ProductActions from './services/ProductActions';
-import axios from 'axios';
 
 const loading = (
   <div className="pt-3 text-center">
@@ -33,21 +30,10 @@ const App = () => {
 
     useEffect(() => {
       AuthActions.setErrorHandler(setCurrentUser, setIsAuthenticated);
-      // ProductActions.findAll()
-      //               .then(data => {
-      //                   setProducts(data);
-      //               })
-      //               .catch(error => console.log(error.response));
   }, []);
 
   useEffect(() => {
       setCurrentUser(AuthActions.getCurrentUser());
-      if (isAuthenticated) {
-        UserActions.findAll()
-                   .then(response => console.log(response));
-        ProductActions.findAll()
-                      .then(data => console.log(data));
-      }
   }, [isAuthenticated]);
 
     return (

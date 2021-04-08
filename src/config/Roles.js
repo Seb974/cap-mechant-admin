@@ -46,11 +46,18 @@ function getDefaultRole() {
     return "ROLE_USER";
 }
 
+function getRoleLabel(userRoles) {
+    const roles = getRoles();
+    const userRole = filterRoles(userRoles);
+    return roles.find(role => userRole === role.value).label;
+}
+
 export default {
     getRoles,
     filterRoles,
     getDefaultRole,
     hasPrivileges,
     hasAdminPrivileges,
-    hasAllPrivileges
+    hasAllPrivileges,
+    getRoleLabel
 }
