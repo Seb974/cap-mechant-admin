@@ -6,6 +6,8 @@ import ContactPanel from 'src/components/userPages/ContactPanel';
 import AuthContext from 'src/contexts/AuthContext';
 import UserActions from 'src/services/UserActions';
 import Roles from 'src/config/Roles';
+import { CButton, CCard, CCardBody, CCardFooter, CCardHeader, CCol, CForm, CFormGroup, CRow } from '@coreui/react';
+import CIcon from '@coreui/icons-react';
 
 const UserPage = ({ history, match }) => {
 
@@ -110,22 +112,36 @@ const UserPage = ({ history, match }) => {
     };
 
     return (
-        <div className="container">
-            <div className="row mb-3"><h2>{!editing ? "Créer un utilisateur" : "Modifier l'utilisateur '" + user.name + "'"}</h2></div>
-            <form onSubmit={ handleSubmit }>
-                <ContactPanel user={ user } phone={ informations.phone } onUserChange={ onUserInputChange } onPhoneChange={ onPhoneChange } errors={ errors }/>
-                { Roles.hasAllPrivileges(currentUser) && <AdminSection user={ user } onUserChange={ onUserInputChange } errors={ errors } /> }
-                <hr/>
-                <div className="row"><h4>Adresse</h4></div>
-                <AddressPanel informations={ informations } onInformationsChange={ onInformationsChange } onPositionChange={ onUpdatePosition } errors={ errors }/>
-                <div className="form-group text-center">
-                    <button type="submit" className="btn btn-success mb-2">Enregistrer</button>
-                </div>
-            </form>
-            <div className="row mb-5">
-                <Link to="/components/users" className="btn btn-link">Retour à la liste</Link>
-            </div>
-        </div>
+        // <div className="container">
+            <CRow>
+                <CCol xs="12" sm="12">
+                    <CCard>
+                        <CCardHeader>
+                            <h3>{!editing ? "Créer un utilisateur" : "Modifier l'utilisateur " + user.name }</h3>
+                        </CCardHeader>
+                        <CCardBody>
+                            <CForm onSubmit={ handleSubmit }>
+                                <ContactPanel user={ user } phone={ informations.phone } onUserChange={ onUserInputChange } onPhoneChange={ onPhoneChange } errors={ errors }/>
+                                { Roles.hasAllPrivileges(currentUser) && 
+                                    <AdminSection user={ user } onUserChange={ onUserInputChange } errors={ errors } />
+                                }
+                                <hr/>
+                                <CRow>
+                                    <h4>Adresse</h4>
+                                </CRow>
+                                <AddressPanel informations={ informations } onInformationsChange={ onInformationsChange } onPositionChange={ onUpdatePosition } errors={ errors }/>
+                                <CRow alignHorizontal>
+                                    <CButton type="submit" size="sm" color="success"><CIcon name="cil-save"/> Enregistrer</CButton>
+                                </CRow>
+                            </CForm>
+                        </CCardBody>
+                        <CCardFooter>
+                            <Link to="/components/users" className="btn btn-link">Retour à la liste</Link>
+                        </CCardFooter>
+                    </CCard>
+                </CCol>
+            </CRow>
+        // </div>
     );
 }
 
