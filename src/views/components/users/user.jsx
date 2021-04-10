@@ -130,7 +130,7 @@ const UserPage = ({ history, match }) => {
                                     <h4>Adresse</h4>
                                 </CRow>
                                 <AddressPanel informations={ informations } onInformationsChange={ onInformationsChange } onPositionChange={ onUpdatePosition } errors={ errors }/>
-                                <CRow alignHorizontal>
+                                <CRow>
                                     <CButton type="submit" size="sm" color="success"><CIcon name="cil-save"/> Enregistrer</CButton>
                                 </CRow>
                             </CForm>

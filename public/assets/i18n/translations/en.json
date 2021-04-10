@@ -1,0 +1,15 @@
+{
+    "component.label": "Components",
+    "colors.label": "Colors",
+    "typography.label": "Typography",
+    "categories.label": "Categories",
+    "products.label": "Products",
+    "users.label": "Users",
+    "ui.components.label": "Core UI components",
+    "login.title.label": "Login",
+    "login.text-muted.label": "Sign In to your account",
+    "login.username.label": "Email",
+    "login.password.label": "Password",
+    "login.button.label": "Login",
+    "login.forgot-pwd.label": "Forgot password?"
+}

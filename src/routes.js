@@ -4,15 +4,27 @@ const Products = React.lazy(() => import('./views/components/products/products')
 const Categories = React.lazy(() => import('./views/components/categories/categories'));
 const Users = React.lazy(() => import('./views/components/users/users'));
 const User = React.lazy(() => import('./views/components/users/user'));
+const CodeEditors = React.lazy(() => import('./views/editors/code-editors/CodeEditors'));
+const TextEditors = React.lazy(() => import('./views/editors/text-editors/TextEditors'));
 
+const Invoice = React.lazy(() => import('./views/apps/invoicing/Invoice'));
+
+const AdvancedForms = React.lazy(() => import('./views/forms/advanced-forms/AdvancedForms'));
+const BasicForms = React.lazy(() => import('./views/forms/basic-forms/BasicForms'));
+const ValidationForms = React.lazy(() => import('./views/forms/validation-forms/ValidationForms'));
+const GoogleMaps = React.lazy(() => import('./views/google-maps/GoogleMaps'));
 const Toaster = React.lazy(() => import('./views/notifications/toaster/Toaster'));
-const Tables = React.lazy(() => import('./views/base/tables/Tables'));
+const Calendar = React.lazy(() => import('./views/plugins/calendar/Calendar'));
+const Draggable = React.lazy(() => import('./views/plugins/draggable/Draggable'));
+const Spinners = React.lazy(() => import('./views/plugins/spinners/Spinners'));
+const AdvancedTables = React.lazy(() => import('./views/tables/advanced-tables/AdvancedTables'));
+const Tables = React.lazy(() => import('./views/tables/tables/Tables'));
+//const LoadingButtons = React.lazy(() => import('./views/buttons/loading-buttons'));
 
 const Breadcrumbs = React.lazy(() => import('./views/base/breadcrumbs/Breadcrumbs'));
 const Cards = React.lazy(() => import('./views/base/cards/Cards'));
 const Carousels = React.lazy(() => import('./views/base/carousels/Carousels'));
 const Collapses = React.lazy(() => import('./views/base/collapses/Collapses'));
-const BasicForms = React.lazy(() => import('./views/base/forms/BasicForms'));
 
 const Jumbotrons = React.lazy(() => import('./views/base/jumbotrons/Jumbotrons'));
 const ListGroups = React.lazy(() => import('./views/base/list-groups/ListGroups'));
@@ -58,7 +70,6 @@ const routes = [
   { path: '/base/cards', name: 'Cards', component: Cards },
   { path: '/base/carousels', name: 'Carousel', component: Carousels },
   { path: '/base/collapses', name: 'Collapse', component: Collapses },
-  { path: '/base/forms', name: 'Forms', component: BasicForms },
   { path: '/base/jumbotrons', name: 'Jumbotrons', component: Jumbotrons },
   { path: '/base/list-groups', name: 'List Groups', component: ListGroups },
   { path: '/base/navbars', name: 'Navbars', component: Navbars },
@@ -67,7 +78,6 @@ const routes = [
   { path: '/base/popovers', name: 'Popovers', component: Popovers },
   { path: '/base/progress-bar', name: 'Progress Bar', component: ProgressBar },
   { path: '/base/switches', name: 'Switches', component: Switches },
-  { path: '/base/tables', name: 'Tables', component: Tables },
   { path: '/base/tabs', name: 'Tabs', component: Tabs },
   { path: '/base/tooltips', name: 'Tooltips', component: Tooltips },
   { path: '/buttons', name: 'Buttons', component: Buttons, exact: true },
@@ -76,6 +86,14 @@ const routes = [
   { path: '/buttons/button-groups', name: 'Button Groups', component: ButtonGroups },
   { path: '/buttons/brand-buttons', name: 'Brand Buttons', component: BrandButtons },
   { path: '/charts', name: 'Charts', component: Charts },
+  { path: '/editors', name: 'Editors', component: CodeEditors, exact: true },
+  { path: '/editors/code-editors', name: 'Code Editors', component: CodeEditors },
+  { path: '/editors/text-editors', name: 'Text Editors', component: TextEditors },
+  { path: '/forms', name: 'Forms', component: BasicForms, exact: true },
+  { path: '/forms/advanced-forms', name: 'Advanced Forms', component: AdvancedForms },
+  { path: '/forms/basic-forms', name: 'Basic Forms', component: BasicForms },
+  { path: '/forms/validation-forms', name: 'Form Validation', component: ValidationForms },
+  { path: '/google-maps', name: 'Google Maps', component: GoogleMaps },
   { path: '/icons', exact: true, name: 'Icons', component: CoreUIIcons },
   { path: '/icons/coreui-icons', name: 'CoreUI Icons', component: CoreUIIcons },
   { path: '/icons/flags', name: 'Flags', component: Flags },
@@ -85,9 +103,22 @@ const routes = [
   { path: '/notifications/badges', name: 'Badges', component: Badges },
   { path: '/notifications/modals', name: 'Modals', component: Modals },
   { path: '/notifications/toaster', name: 'Toaster', component: Toaster },
+  { path: '/plugins', name: 'Plugins', component: Calendar, exact: true },
+  { path: '/plugins/calendar', name: 'Calendar', component: Calendar },
+  { path: '/plugins/draggable', name: 'Draggable Cards', component: Draggable },
+  { path: '/plugins/spinners', name: 'Spinners', component: Spinners },
+  { path: '/tables', name: 'Tables', component: Tables, exact: true },
+  { path: '/tables/advanced-tables', name: 'Advanced Tables', component: AdvancedTables },
+  { path: '/tables/tables', name: 'Tables', component: Tables },
   { path: '/widgets', name: 'Widgets', component: Widgets },
+  { path: '/apps', name: 'Apps', component: Invoice, exact: true },
+  { path: '/apps/invoicing', name: 'Invoice', component: Invoice, exact: true },
+  { path: '/apps/invoicing/invoice', name: 'Invoice', component: Invoice },
   { path: '/users', exact: true,  name: 'Users', component: UsersEx },
-  { path: '/users/:id', exact: true, name: 'User Details', component: UserEx }
-];
+  { path: '/users/:id', exact: true, name: 'User Details', component: UserEx },
+  { path: '/apps/email/inbox', exact: true, name: 'Inbox' },
+  { path: '/apps/email/compose', exact: true, name: 'Compose' },
+  { path: '/apps/email/message', exact: true, name: 'Message' }
+]
 
 export default routes;

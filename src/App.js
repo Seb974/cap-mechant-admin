@@ -6,6 +6,7 @@ import AuthActions from './services/AuthActions';
 import MercureHub from './components/Mercure/MercureHub';
 import AdminRoute from './components/route/AdminRoute';
 import PrivateRoute from './components/route/PrivateRoute';
+import './i18n';
 
 const loading = (
   <div className="pt-3 text-center">
@@ -15,6 +16,9 @@ const loading = (
 
 // Containers
 const TheLayout = React.lazy(() => import('./containers/TheLayout'));
+
+// Email App
+const TheEmailApp = React.lazy(() => import('./views/apps/email/TheEmailApp'));
 
 // Pages
 const Login = React.lazy(() => import('./views/pages/login/Login'));
@@ -29,12 +33,12 @@ const App = () => {
     const [eventSource, setEventSource] = useState({});
 
     useEffect(() => {
-      AuthActions.setErrorHandler(setCurrentUser, setIsAuthenticated);
-  }, []);
+        AuthActions.setErrorHandler(setCurrentUser, setIsAuthenticated);
+    }, []);
 
-  useEffect(() => {
-      setCurrentUser(AuthActions.getCurrentUser());
-  }, [isAuthenticated]);
+    useEffect(() => {
+        setCurrentUser(AuthActions.getCurrentUser());
+    }, [isAuthenticated]);
 
     return (
       <AuthContext.Provider value={ {isAuthenticated, setIsAuthenticated, currentUser, setCurrentUser, eventSource, setEventSource} }>
@@ -44,9 +48,10 @@ const App = () => {
                       <Switch>
                           <Route exact path="/login" name="Login Page" component={ Login } />
                           <Route exact path="/register" name="Register Page" component={ Register } />
-                          <Route exact path="/404" name="Page 404" component={ Page404 } />
+                          <Route exact path="/404" name="Page 404" rcomponent={  Page404 } />
                           <Route exact path="/500" name="Page 500" component={ Page500 } />
-                          <PrivateRoute path="/" name="Home" component={ TheLayout } />     {/*  render={props => <TheLayout {...props}/>} */}
+                          <Route path="/apps/email" name="Email App" component={ TheEmailApp } />
+                          <PrivateRoute path="/" name="Home" component={ TheLayout } />
                       </Switch>
                   </React.Suspense>
               </HashRouter>

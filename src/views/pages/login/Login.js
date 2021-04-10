@@ -1,15 +1,17 @@
 import React, { useContext, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { CButton, CCard, CCardBody, CCardGroup, CCol, CContainer, CForm, CInputGroup, CRow } from '@coreui/react'
+import { CButton, CCard, CCardBody, CCardGroup, CCol, CContainer, CForm, CInput, CInputGroup, CInputGroupPrepend, CInputGroupText, CInvalidFeedback, CRow, CFormGroup } from '@coreui/react'
+import CIcon from '@coreui/icons-react'
 import AuthContext from 'src/contexts/AuthContext'
-import Field from 'src/components/forms/Field'
 import AuthActions from 'src/services/AuthActions'
+import { useTranslation } from 'react-i18next'
 
 const Login = ({ history }) => {
 
   const { setIsAuthenticated } = useContext(AuthContext);
-    const [credentials, setCredentials] = useState({username: '', password: ''});
-    const [error, setError] = useState("");
+  const [credentials, setCredentials] = useState({username: '', password: ''});
+  const [error, setError] = useState("");
+  const { t, i18n } = useTranslation()
 
   const handleChange = ({currentTarget}) => {
       setCredentials({...credentials, [currentTarget.name]: currentTarget.value});
@@ -27,7 +29,7 @@ const Login = ({ history }) => {
                    console.log(error);
                    setError("Paramètres de connexion invalides")
                 });
-}
+  }
 
   return (
     <div className="c-app c-default-layout flex-row align-items-center">
@@ -38,33 +40,55 @@ const Login = ({ history }) => {
               <CCard className="p-4">
                 <CCardBody>
                   <CForm onSubmit={ handleSubmit }>
-                    <h1>Login</h1>
-                    <p className="text-muted">Sign In to your account</p>
-                    <CInputGroup className="mb-3">
-                      <Field
-                          name="username"
-                          label=" "
-                          value={ credentials.username }
-                          onChange={ handleChange }
-                          placeholder="Adresse email de connexion"
-                          type="email"
-                          error={error}
-                      />
-                    </CInputGroup>
-                    <CInputGroup className="mb-4">
-                      <Field
-                          name="password"
-                          label=" "
-                          value={ credentials.password }
-                          onChange={ handleChange }
-                          type="password"
-                          placeholder="Mot de passe"
-                      />
-                    </CInputGroup>
+                    <h1>{ t("login.title.label") }</h1>
+                    <p className="text-muted">{ t("login.text-muted.label") }</p>
+                    <CFormGroup>
+                      <CInputGroup className="mb-3">
+                        <CInputGroupPrepend>
+                          <CInputGroupText>@
+                            {/* <CIcon name="cil-user" /> */}
+                          </CInputGroupText>
+                        </CInputGroupPrepend>
+                        <CInput 
+                            type="email" 
+                            id="username"
+                            name="username"
+                            placeholder={ t("login.username.label") }
+                            value={ credentials.username }
+                            invalid={ error.length > 0 }
+                            onChange={ handleChange }
+                            autoComplete="username"
+                            required
+                        />
+                      </CInputGroup>
+                      <CInvalidFeedback>{ error }</CInvalidFeedback>
+                    </CFormGroup>
+                    <CFormGroup>
+                      <CInputGroup className="mb-4">
+                        <CInputGroupPrepend>
+                          <CInputGroupText>
+                            <CIcon name="cil-lock-locked" />
+                          </CInputGroupText>
+                        </CInputGroupPrepend>
+                        <CInput type="password" placeholder="Password"
+                            type="password" 
+                            id="password"
+                            name="password"
+                            placeholder={ t("login.password.label") }
+                            value={ credentials.password }
+                            onChange={ handleChange }
+                            autoComplete="current-password"
+                            required
+                        />
+                      </CInputGroup>
+                    </CFormGroup>
                     <CRow>
-                        <CCol xs="6">
-                          <CButton type="submit" color="primary" className="px-4">Se connecter</CButton>
-                        </CCol>
+                      <CCol xs="6">
+                        <CButton type="submit" color="primary" className="px-4">{ t("login.button.label") }</CButton>
+                      </CCol>
+                      <CCol xs="6" className="text-right">
+                        <CButton color="link" className="px-0">{ t("login.forgot-pwd.label") }</CButton>
+                      </CCol>
                     </CRow>
                   </CForm>
                 </CCardBody>

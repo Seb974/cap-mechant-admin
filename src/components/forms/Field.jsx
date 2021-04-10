@@ -1,7 +1,7 @@
 import React from 'react';
 import { CFormGroup, CInput, CInvalidFeedback, CLabel, CValidFeedback } from '@coreui/react';
 
-const Field = ({ name, label, value, onChange, placeholder = "", type = "text", error = "", id = "", autocomplete="", disabled=false, required=false, valid=false }) => {
+const Field = ({ name, value, onChange, label = "", placeholder = "", type = "text", error = "", id = "", autocomplete="", disabled=false, required=false, valid=false }) => {
     return (
         <CFormGroup>
             <CLabel htmlFor={ name }>{ label }</CLabel>

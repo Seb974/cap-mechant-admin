@@ -636,12 +636,12 @@ const BasicForms = () => {
             <CCardBody>
               <CFormGroup>
                 <CLabel htmlFor="inputIsValid">Input is valid</CLabel>
-                <CInput valid={ true } id="inputIsValid" />
+                <CInput valid id="inputIsValid" />
                 <CValidFeedback>Cool! Input is valid</CValidFeedback>
               </CFormGroup>
               <CFormGroup>
                 <CLabel htmlFor="inputIsInvalid">Input is invalid</CLabel>
-                <CInput invalid={ true } id="inputIsInvalid" />
+                <CInput invalid id="inputIsInvalid" />
                 <CInvalidFeedback>Houston, we have a problem...</CInvalidFeedback>
               </CFormGroup>
             </CCardBody>

@@ -1,7 +1,9 @@
 import axios from 'axios';
 
-const API_DOMAIN = "https://clikeat.fr";
-const MERCURE_DOMAIN = "https://clikeat.fr:3001";
+// const API_DOMAIN = "https://api.clikeat.fr";
+// const MERCURE_DOMAIN = "https://api.clikeat.fr:3001";
+const API_DOMAIN = "http://localhost:8000";
+const MERCURE_DOMAIN = "http://localhost:3000";
 
 function get(route) {
     return axios.get(API_DOMAIN + route);

@@ -9,12 +9,8 @@ const Map = ({ informations, initialPosition, updatePosition }) => {
 
     const apInput = useRef(null);
 
-    useEffect(() => { 
-        const node =  ReactDOM.findDOMNode(apInput.current);
-        if (node instanceof HTMLElement) {
-            const input = node.querySelector("input");
-            input.value = informations.address;
-        }
+    useEffect(() => {
+        apInput.current.autocompleteElem.value = informations.address;
     }, [informations.address]);
     
     return (
