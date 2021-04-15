@@ -2,7 +2,7 @@ function getRoles() {
     return [
         {value: "ROLE_SUPER_ADMIN",  label: "Super administrateur",      isFixed: true},
         {value: "ROLE_ADMIN",        label: "Administrateur",            isFixed: true},
-        {value: "ROLE_TEAM",         label: "Utilisateur interne",       isFixed: false},
+        {value: "ROLE_TEAM",         label: "Equipe",                    isFixed: true},
         {value: "ROLE_VIP",          label: "Professionnel VIP",         isFixed: false},
         {value: "ROLE_GC",           label: "Grand compte",              isFixed: false},
         {value: "ROLE_CHR",          label: "Café-Hotel-Restaurant",     isFixed: false},
@@ -12,6 +12,11 @@ function getRoles() {
         {value: "ROLE_USER_EXT",     label: "Particulier extérieur",     isFixed: false},
         {value: "ROLE_USER",         label: "Particulier",               isFixed: false},
     ];
+}
+
+function getSelectedRoles(selection) {
+    const $roles = getRoles();
+    return $roles.filter(role => selection.includes(role.value))
 }
 
 function filterRoles(roles) {
@@ -59,5 +64,6 @@ export default {
     hasPrivileges,
     hasAdminPrivileges,
     hasAllPrivileges,
-    getRoleLabel
+    getRoleLabel,
+    getSelectedRoles
 }

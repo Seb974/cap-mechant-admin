@@ -1,11 +1,7 @@
 import './scss/style.scss';
-// import React, { useEffect, useState }  from 'react';
 import React from 'react';
 import { HashRouter, Route, Switch } from 'react-router-dom';
 import DataProvider from './data/dataProvider/dataProvider';
-// import AuthContext from './contexts/AuthContext';
-// import AuthActions from './services/AuthActions';
-// import MercureHub from './components/Mercure/MercureHub';
 import AdminRoute from './components/route/AdminRoute';
 import PrivateRoute from './components/route/PrivateRoute';
 import './i18n';
@@ -30,21 +26,7 @@ const Page500 = React.lazy(() => import('./views/pages/page500/Page500'));
 
 const App = () => {
 
-    // const [isAuthenticated, setIsAuthenticated] = useState(AuthActions.isAuthenticated());
-    // const [currentUser, setCurrentUser] = useState(AuthActions.getCurrentUser());
-    // const [eventSource, setEventSource] = useState({});
-
-    // useEffect(() => {
-    //     AuthActions.setErrorHandler(setCurrentUser, setIsAuthenticated);
-    // }, []);
-
-    // useEffect(() => {
-    //     setCurrentUser(AuthActions.getCurrentUser());
-    // }, [isAuthenticated]);
-
     return (
-    //   <AuthContext.Provider value={ {isAuthenticated, setIsAuthenticated, currentUser, setCurrentUser, eventSource, setEventSource} }>
-    //       <MercureHub>
         <DataProvider>
             <HashRouter>
                 <React.Suspense fallback={loading}>
@@ -59,8 +41,6 @@ const App = () => {
                 </React.Suspense>
             </HashRouter>
         </DataProvider>
-    //       </MercureHub>
-    //   </AuthContext.Provider>
     );
 }
 

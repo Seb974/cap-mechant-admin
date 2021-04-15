@@ -33,6 +33,9 @@ const Categories = (props) => {
           <CCard>
             <CCardHeader>
                 Liste des catégories
+                <CCol col="6" sm="4" md="2" className="ml-auto">
+                    <Link role="button" to="/components/categories/new" block variant="outline" color="success">CRÉER</Link>
+                </CCol>
             </CCardHeader>
             <CCardBody>
             <CDataTable
@@ -43,7 +46,7 @@ const Categories = (props) => {
               pagination
               scopedSlots = {{
                 'name':
-                  item => <td><Link to="/">{ item.name }</Link></td>
+                  item => <td><Link to={ "/components/categories/" + item.id }>{ item.name }</Link></td>
                 ,
                 ' ':
                   item => <td><CButton block color="danger" onClick={ () => handleDelete(item.id) }>Supprimer</CButton></td>
