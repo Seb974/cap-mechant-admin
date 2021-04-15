@@ -14,7 +14,7 @@
       "url": "https://github.com/orgs/coreui/people"
     }
   ],
-  "homepage": ".",
+  "homepage": "https://admin.clikeat.fr/",
   "copyright": "Copyright 2017-2020 creativeLabs Łukasz Holeczek",
   "license": "https://coreui.io/pro/license/",
   "private": true,
@@ -45,6 +45,7 @@
     "i18next-xhr-backend": "^3.2.2",
     "jwt-decode": "^3.1.2",
     "leaflet": "^1.7.1",
+    "lodash": "^4.17.21",
     "node-sass": "^4.14.1",
     "popper.js": "^1.16.1",
     "prop-types": "^15.7.2",

@@ -112,36 +112,34 @@ const UserPage = ({ history, match }) => {
     };
 
     return (
-        // <div className="container">
-            <CRow>
-                <CCol xs="12" sm="12">
-                    <CCard>
-                        <CCardHeader>
-                            <h3>{!editing ? "Créer un utilisateur" : "Modifier l'utilisateur " + user.name }</h3>
-                        </CCardHeader>
-                        <CCardBody>
-                            <CForm onSubmit={ handleSubmit }>
-                                <ContactPanel user={ user } phone={ informations.phone } onUserChange={ onUserInputChange } onPhoneChange={ onPhoneChange } errors={ errors }/>
-                                { Roles.hasAllPrivileges(currentUser) && 
-                                    <AdminSection user={ user } onUserChange={ onUserInputChange } errors={ errors } />
-                                }
-                                <hr/>
-                                <CRow>
-                                    <h4>Adresse</h4>
-                                </CRow>
-                                <AddressPanel informations={ informations } onInformationsChange={ onInformationsChange } onPositionChange={ onUpdatePosition } errors={ errors }/>
-                                <CRow>
-                                    <CButton type="submit" size="sm" color="success"><CIcon name="cil-save"/> Enregistrer</CButton>
-                                </CRow>
-                            </CForm>
-                        </CCardBody>
-                        <CCardFooter>
-                            <Link to="/components/users" className="btn btn-link">Retour à la liste</Link>
-                        </CCardFooter>
-                    </CCard>
-                </CCol>
-            </CRow>
-        // </div>
+        <CRow>
+            <CCol xs="12" sm="12">
+                <CCard>
+                    <CCardHeader>
+                        <h3>{!editing ? "Créer un utilisateur" : "Modifier l'utilisateur " + user.name }</h3>
+                    </CCardHeader>
+                    <CCardBody>
+                        <CForm onSubmit={ handleSubmit }>
+                            <ContactPanel user={ user } phone={ informations.phone } onUserChange={ onUserInputChange } onPhoneChange={ onPhoneChange } errors={ errors }/>
+                            { Roles.hasAllPrivileges(currentUser) && 
+                                <AdminSection user={ user } onUserChange={ onUserInputChange } errors={ errors } />
+                            }
+                            <hr/>
+                            <CRow>
+                                <h4>Adresse</h4>
+                            </CRow>
+                            <AddressPanel informations={ informations } onInformationsChange={ onInformationsChange } onPositionChange={ onUpdatePosition } errors={ errors }/>
+                            <CRow>
+                                <CButton type="submit" size="sm" color="success"><CIcon name="cil-save"/> Enregistrer</CButton>
+                            </CRow>
+                        </CForm>
+                    </CCardBody>
+                    <CCardFooter>
+                        <Link to="/components/users" className="btn btn-link">Retour à la liste</Link>
+                    </CCardFooter>
+                </CCard>
+            </CCol>
+        </CRow>
     );
 }
 

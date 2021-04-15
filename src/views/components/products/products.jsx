@@ -38,7 +38,11 @@ const Products = (props) => {
         <CCol xs="12" lg="12">
           <CCard>
             <CCardHeader>
-              Liste des produits
+                Liste des produits
+                <CCol col="6" sm="4" md="2" className="ml-auto">
+                    <Link role="button" to="/components/products/new" block variant="outline" color="success">CRÉER</Link>
+                    {/* <CButton block variant="outline" color="success">CRÉER</CButton> */}
+                </CCol>
             </CCardHeader>
             <CCardBody>
             <CDataTable
@@ -49,7 +53,7 @@ const Products = (props) => {
               pagination
               scopedSlots = {{
                 'name':
-                  item => <td><Link to="/">{ item.name }</Link></td>
+                  item => <td><Link to={ "/components/products/" + item.id }>{ item.name }</Link></td>
                 ,
                 ' ':
                   item => (

@@ -2,6 +2,7 @@ import React, { useEffect, useContext } from 'react';
 import { EventSourcePolyfill } from 'event-source-polyfill';
 import AuthContext from 'src/contexts/AuthContext';
 import api from 'src/config/api';
+import eventHandler from '../../data/dataProvider/eventHandlers/eventHandler';
 
 // import ProductsContext from '../../contexts/ProductsContext';
 // import ProductActions from '../../services/ProductActions';
@@ -26,8 +27,13 @@ const MercureHub = ({ children }) => {
         }
     };
 
-    eventSource.onmessage = event => {
-        const data = JSON.parse(event.data);
+    eventSource.onmessage = event => eventHandler.dispatch(event);
+    // {
+
+        // const data = JSON.parse(event.data);
+        // if (data['@id'].includes('products')) {
+        //     console.log(data);
+        // }
         // if (data['@id'].includes('products')) {
         //     const newProducts = data['@type'] === 'Product' ?
         //         ProductActions.updateFromMercure(products, data) :
@@ -35,20 +41,13 @@ const MercureHub = ({ children }) => {
         //     setProducts(newProducts);
         // }
 
-        if (data['@id'].includes('users') || data['@id'].includes('metas')) {
-            console.log(data);
-        }
-    };
-
-    // eventSource.onopen = event => {
-    //     console.log(event);
+        // if (data['@id'].includes('users') || data['@id'].includes('metas')) {
+        //     console.log(data);
+        // }
     // };
 
-    // eventSource.onerror = event => {
-    //     console.log(event);
-    //     if (event.error.message.toUpperCase().includes("NO ACTIVITY"))
-    //         console.log("Coupure de Mercure");
-    // };
+    // eventSource.onerror = event => console.log(event);
+    // eventSource.onopen = event => console.log(event);
 
     return <>{ children }</>
 }

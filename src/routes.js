@@ -1,6 +1,7 @@
 import React from 'react';
 
 const Products = React.lazy(() => import('./views/components/products/products'));
+const Product = React.lazy(() => import('./views/components/products/product'));
 const Categories = React.lazy(() => import('./views/components/categories/categories'));
 const Users = React.lazy(() => import('./views/components/users/users'));
 const User = React.lazy(() => import('./views/components/users/user'));
@@ -57,6 +58,7 @@ const UserEx = React.lazy(() => import('./views/users/User'));
 
 const routes = [
   { path: '/', exact: true, name: 'Home' },
+  { path: '/components/products/:id', name: 'Product', component: Product },
   { path: '/components/products', name: 'Products', component: Products },
   { path: '/components/categories', name: 'Categories', component: Categories },
   { path: '/components/users/:id', exact: true, name: 'User Details', component: User },
