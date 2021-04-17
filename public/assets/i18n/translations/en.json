@@ -11,5 +11,6 @@
     "login.username.label": "Email",
     "login.password.label": "Password",
     "login.button.label": "Login",
-    "login.forgot-pwd.label": "Forgot password?"
+    "login.forgot-pwd.label": "Forgot password?",
+    "taxes.label": "Taxes"
 }

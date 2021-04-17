@@ -16,6 +16,7 @@ const MercureHub = ({ children }) => {
     useEffect(() => {
         closeIfExists();
         url.searchParams.append('topic', api.API_DOMAIN + '/api/products/{id}');
+        url.searchParams.append('topic', api.API_DOMAIN + '/api/categories/{id}');
         url.searchParams.append('topic', api.API_DOMAIN + '/api/users/{id}');
         url.searchParams.append('topic', api.API_DOMAIN + '/api/users/{id}/metas');
         setEventSource(new EventSourcePolyfill(url, { withCredentials: true }));

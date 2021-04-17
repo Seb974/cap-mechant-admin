@@ -47,12 +47,20 @@ function deleteFromMercure(products, id) {
     return products.filter(item => parseInt(item.id) !== parseInt(id));
 }
 
+function createImage(image) {
+    let formData = new FormData();
+    formData.append('file', image);
+    return api.post('/api/pictures', formData, {headers: {'Content-type': 'multipart/form-data'}})
+              .then(response => response.data['@id']);
+}
+
 export default { 
     findAll,
     delete: deleteProduct,
     find, 
     update, 
     create,
+    createImage,
     updateFromMercure,
     deleteFromMercure,
 }

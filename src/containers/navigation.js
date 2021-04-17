@@ -55,6 +55,12 @@ function getNav(translation) {
       icon: <CIcon name="cil-people" customClasses="c-sidebar-nav-icon"/>,
     },
     {
+      _tag: 'CSidebarNavItem',
+      name: translation("taxes.label"),
+      to: '/components/taxes',
+      icon: <CIcon name="cil-institution" customClasses="c-sidebar-nav-icon"/>,
+    },
+    {
       _tag: 'CSidebarNavDropdown',
       name: translation("ui.components.label"),
       icon: 'cil-puzzle',

@@ -15,8 +15,8 @@ function getRoles() {
 }
 
 function getSelectedRoles(selection) {
-    const $roles = getRoles();
-    return $roles.filter(role => selection.includes(role.value))
+    const roles = getRoles();
+    return roles.filter(role => selection.includes(role.value))
 }
 
 function filterRoles(roles) {

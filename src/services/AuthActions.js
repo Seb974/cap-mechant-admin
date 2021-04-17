@@ -71,6 +71,8 @@ function setErrorHandler(setCurrentUser, setIsAuthenticated) {
                     return ;
                 })
             }
+        } else {
+            console.log(error);
         }
         return Promise.reject(error);
     });

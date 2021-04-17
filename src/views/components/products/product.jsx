@@ -5,198 +5,139 @@ import { CButton, CCard, CCardBody, CCardFooter, CCardHeader, CCol, CForm, CForm
 import CIcon from '@coreui/icons-react';
 import SelectMultiple from 'src/components/forms/SelectMultiple';
 import Roles from 'src/config/Roles';
-// import Select from '../../components/forms/Select';
-// import UnitActions from '../../services/UnitActions';
-// import ProductActions from '../../services/ProductActions';
-// import CategoryActions from '../../services/CategoryActions';
-// import SupplierActions from '../../services/SupplierActions';
-// import SupplierInput from '../../components/SupplierInput';
-// import RoleActions from '../../services/RoleActions';
-// import SelectMultiple from '../../components/forms/SelectMultiple';
+import CategoryActions from 'src/services/CategoryActions';
+import TaxActions from 'src/services/TaxActions';
 
 const ProductPage = ({ match, history }) => {
 
     const { id = "new" } = match.params;
     const userRoles = Roles.getRoles();
-    // const defauxltSupplier = {id: -1, name: ""};
-    // const userRoles = RoleActions.getRoles();
+    const [taxes, setTaxes] = useState([]);
     const [editing, setEditing] = useState(false);
-    const [product, setProduct] = useState({name: "", userGroups: userRoles, image: "", unit: "Kg", productGroup: "J + 1", fullDescription: "", stock: {alert: "", security:""}, stockManaged: true, tax: "0", uniquePrice: true, prices: { BASE: "", USER_VIP: "", PRO_CHR:"", PRO_GC: "", PRO_VIP: ""}, available: true, requireLegalAge: false, new: true});
-    const [errors, setErrors] = useState({name: "", userGroups: "", image: "", unit: "", productGroup: "", fullDescription: "", stock: {alert: "", security:""}, stockManaged: "", tax: "", uniquePrice: "", prices: { BASE: "", USER_VIP: "", PRO_CHR:"", PRO_GC: "", PRO_VIP: ""}, available: "", requireLegalAge: "", new: ""});
-    // const [product, setProduct] = useState({name: "", code:"", description: "", category: "", picture: "", suppliers: "", unit: "", mainSupplierId: 1, userCategories: userRoles});
-    // const [errors, setErrors] = useState({name: "", code:"", description: "", category: "", picture: "", suppliers: "", unit: "", userCategories: ""});
-    // const [units, setUnits] = useState([]);
-    // const [categories, setCategories] = useState([]);
-    // const [suppliers, setSuppliers] = useState([]);
-    // const [supplierOptions, setSupplierOptions] = useState([defaultSupplier]);
-    // const [mainSupplier, setMainSupplier] = useState(0);
+    const [categories, setCategories] = useState([]);
+    const [product, setProduct] = useState({name: "", userGroups: userRoles, image: null, unit: "Kg", productGroup: "J + 1", fullDescription: "", stock: {quantity: 0, alert: "", security:""}, stockManaged: true, tax: "-1", uniquePrice: true, prices: [{name: 'BASE', price:""}, {name: 'USER_VIP', price:""}, {name: 'PRO_CHR', price:""}, {name: 'PRO_GC', price:""}, {name: 'PRO_VIP', price:""}], available: true, requireLegalAge: false, new: true, categories: []});
+    const [errors, setErrors] = useState({name: "", userGroups: "", image: "", unit: "", productGroup: "", fullDescription: "", stock: {alert: "", security:""}, stockManaged: "", tax: "", uniquePrice: "", prices: [{name: 'BASE', price:""}, {name: 'USER_VIP', price:""}, {name: 'PRO_CHR', price:""}, {name: 'PRO_GC', price:""}, {name: 'PRO_VIP', price:""}], available: "", requireLegalAge: "", new: "", categories: ""});
+    
+    useEffect(() => {
+        fetchCategories();
+        fetchTaxes();
+        fetchProduct(id);
+    }, []);
+    
+    useEffect(() => fetchProduct(id), [id]);
 
-    useEffect(() => fetchDatas(id), []);
-    useEffect(() => fetchDatas(id), [id]);
-
+    useEffect(() => {
+        if (product.tax === "-1" && taxes.length > 0)
+            setProduct({...product, tax: taxes[0]});
+    }, [product, taxes]);
+    
+    const handleImageChange = ({ currentTarget }) => setProduct({...product, image: currentTarget.files[0]});
     const handleUsersChange = userGroups => setProduct(product => ({...product, userGroups}));
+    const handleCategoriesChange = categories => setProduct(product => ({...product, categories}));
     const handleChange = ({ currentTarget }) => setProduct({...product, [currentTarget.name]: currentTarget.value});
-    const handleCheckBoxes = ({ currentTarget }) => setProduct({...product, [currentTarget.name]: !product[currentTarget.name]})
-
-    // useEffect(() => {
-    //     if (suppliers !== null && suppliers !== undefined && suppliers.length > 0) {
-    //         let newSupplierOptions = [...supplierOptions];
-    //         let defaultOption = supplierOptions.findIndex(option => option.id === -1);
-    //         if (defaultOption !== -1) {
-    //             newSupplierOptions[defaultOption] = {id: suppliers[0].id, name: suppliers[0].name};
-    //             setSupplierOptions(newSupplierOptions);
-    //             setMainSupplier(suppliers[0].id);
-    //             setProduct(product => {
-    //                 return {...product, mainSupplierId: suppliers[0].id};
-    //             });
-    //         }
-    //     }
-    // }, [suppliers, product]);
-
-    const fetchDatas = async id => {
-        // let backEndCategories = categories.length === 0 ? await fetchCategories() : categories;
-        // let backEndUnits = units.length === 0 ? await fetchUnits() : units;
-        // let backEndSuppliers = suppliers.length === 0 ? await fetchSuppliers() : suppliers;
-        if (id !== "new") {
-            setEditing(true);
-            await fetchProduct(id);
-        } else {
+    const handleStockChange = ({currentTarget}) => setProduct({...product, stock: {...product.stock, [currentTarget.name]: currentTarget.value}});
+    const handleCheckBoxes = ({ currentTarget }) => setProduct({...product, [currentTarget.name]: !product[currentTarget.name]});
+    
+    const handleUniquePrice = ({ currentTarget }) => {
+        if (product[currentTarget.name])
+            setProduct({...product, [currentTarget.name]: !product[currentTarget.name]});
+        else {
+            const uniqueValue = product.prices.find(price => price.name === 'BASE').price;
             setProduct({
                 ...product, 
-                // category: backEndCategories[0].id,
-                // unit: backEndUnits[0].id,
-                // suppliers: []
+                [currentTarget.name]: !product[currentTarget.name], 
+                prices: product[currentTarget.name] ? product.prices : product.prices.map(price => ({...price, price: uniqueValue}))
             });
         }
-    }
+    };
 
-    const fetchProduct = async id => {
-        try {
-            const backEndProduct = await ProductActions.find(id);
-            // const backEndSuppliers = backEndProduct.suppliers === null || backEndProduct.suppliers === undefined || backEndProduct.suppliers.length === 0 ? supplierOptions : backEndProduct.suppliers.map(supplier => { return {id: supplier.id, name: supplier.name}});
-            // const backEndUserCategories = backEndProduct.userCategories === null || backEndProduct.userCategories === undefined ? userRoles : userRoles.filter(role => backEndProduct.userCategories.includes(role.value));
-            // setProduct({ ...backEndProduct, userCategories: backEndUserCategories, category: backEndProduct.category.id, unit: backEndProduct.unit.id });
-            // setSupplierOptions(backEndSuppliers);
-            setProduct(backEndProduct);
-            // if (backEndProduct.mainSupplierId !== null && backEndProduct.mainSupplierId !== undefined)
-            //     setMainSupplier(backEndProduct.mainSupplierId);
-        } catch (error) {
-            console.log(error);
-            // TODO : Notification flash d'une erreur
-            history.replace("/components/products");
-        }
-    }
+    const handlePriceChange = ({ currentTarget }) => { 
+        let updatedPrice = product.prices.find(price => price.name === currentTarget.name);
+        const filteredPrices = product.prices.filter(price => price.name !== updatedPrice.name);
+        !product.uniquePrice ?
+            setProduct({...product, prices: [...filteredPrices, {...updatedPrice, price: currentTarget.value}]}) :
+            setProduct({...product, prices: product.prices.map(price => ({...price, price: currentTarget.value}))});
+    };
 
-    // const fetchCategories = async () => {
-    //     let response = [];
-    //     try {
-    //         const data = await CategoryActions.findAll();
-    //         setCategories(data);
-    //         if (!product.category) {
-    //             setProduct({...product, category: data[0].id});
-    //         }
-    //         response = data;
-    //     } catch(error) {
-    //         console.log(error.response);
-    //         // TODO : Notification flash d'une erreur
-    //         history.replace("/products");
-    //     }
-    //     return response;
-    // }
+    const fetchProduct = id => {
+        if (id !== "new") {
+            setEditing(true);
+            let request = ProductActions.find(id);
+            request
+                .then(response => {
+                    const basePrice = response.prices.find(price => price.name === 'BASE').price;
+                    setProduct({...response, 
+                        userGroups: Roles.getSelectedRoles(response.userGroups), 
+                        categories: response.categories.map(category => ({value: category.id, label: category.name, isFixed: false})),
+                        uniquePrice: response.prices.every(price => price.price === basePrice)
+                    });
+                })
+                .catch(error => {
+                    // TODO : Notification flash d'une erreur
+                    history.replace("/components/products");
+                });
+        } else
+            setEditing(false);
+    };
 
-    // const fetchSuppliers = async () => {
-    //     let response = [];
-    //     try {
-    //         const data = await SupplierActions.findAll();
-    //         setSuppliers(data);
-    //         if (!product.suppliers) {
-    //             setProduct({...product, suppliers: data});
-    //         }
-    //         response = data;
-    //     } catch(error) {
-    //         console.log(error.response);
-    //         // TODO : Notification flash d'une erreur
-    //         history.replace("/products");
-    //     }
-    //     return response;
-    // }
+    const fetchCategories = () => {
+        let request = CategoryActions.findAll()
+        request
+            .then(response => setCategories(response))
+            .catch(error => {
+                // TODO : Notification flash d'une erreur
+                history.replace("/components/products");
+            });
+    };
 
-    // const fetchUnits = async () => {
-    //     let response = [];
-    //     try {
-    //         const data = await UnitActions.findAll();
-    //         setUnits(data);
-    //         if (!product.unit) {
-    //             setProduct({...product, unit: data[0].id});
-    //         }
-    //         response = data;
-    //     } catch(error) {
-    //         console.log(error.response);
-    //         // TODO : Notification flash d'une erreur
-    //         history.replace("/products");
-    //     }
-    //     return response;
-    // }
-
-    // const handleSupplierAdd = e => {
-    //     e.preventDefault();
-    //     if (supplierOptions.length < suppliers.length) {
-    //         let next = suppliers.findIndex(supplier => supplierOptions.find(selection => selection.id === supplier.id) === undefined);
-    //         setSupplierOptions(supplierOptions => {
-    //             return [...supplierOptions, {id: suppliers[next].id, name: suppliers[next].name}];
-    //         });
-    //     }
-    // }
-
-    // const handleSupplierChange = ({ currentTarget }) => {
-    //     let newSupplierOptions = [...supplierOptions];
-    //     let index = parseInt(currentTarget.name);
-    //     let newSupplier = suppliers.find(supplier => supplier.id === parseInt(currentTarget.value));
-    //     newSupplierOptions[index] = {id: newSupplier.id, name: newSupplier.name};
-    //     setSupplierOptions(newSupplierOptions);
-    // }
-
-    // const handleMainChange = (e, selectedMain) => {
-    //     let newMain = parseInt(selectedMain) !== parseInt(mainSupplier) ? selectedMain : 0;
-    //     setMainSupplier(newMain);
-    //     setProduct(product => {
-    //         return {...product, mainSupplierId: newMain};
-    //     });
-    // }
-
-    // const handleDeleteOption = ({ currentTarget }) => {
-    //     setSupplierOptions(supplierOptions => {
-    //         return supplierOptions.filter(option => option.id !== parseInt(currentTarget.name));
-    //     });
-    // }
-
-    // const handleUsersChange = (userCategories) => {
-    //     setProduct(product => {
-    //         return {...product, userCategories};
-    //     });
-    // }
+    const fetchTaxes = () => {
+        let request = TaxActions.findAll();
+        request
+            .then(response => setTaxes(response))
+            .catch(error => {
+                // TODO : Notification flash d'une erreur
+                history.replace("/components/products");
+            });
+    };
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        // const request = !editing ? ProductActions.create(product, supplierOptions) : ProductActions.update(id, product, supplierOptions);
-        const request = !editing ? ProductActions.create(product) : ProductActions.update(id, product);
-        request.then(response => {
-                    setErrors({name: ""});
-                    //TODO : Flash notification de succès
-                    history.replace("/components/products");
-                })
-               .catch( ({ response }) => {
-                    const { violations } = response.data;
-                    if (violations) {
-                        const apiErrors = {};
-                        violations.forEach(({propertyPath, message}) => {
-                            apiErrors[propertyPath] = message;
-                        });
-                        setErrors(apiErrors);
-                    }
-                    //TODO : Flash notification d'erreur
-               });
-    }
+        let productToWrite = {
+            ...product, 
+            userGroups: product.userGroups.map(group => group.value), 
+            tax: product.tax['@id'],
+            categories: product.categories.map(category => categories.find(element => element.id === category.value)['@id']),
+            prices: Object.keys(product.prices).map((key, index) => ({name: key, price: Object.values(product.prices)[index]}))
+        };
+        console.log(productToWrite);
+        if (product.image !== null && product.image !== undefined) {
+            ProductActions.createImage(product.image)
+                          .then(image => writeProduct({...productToWrite, image}));
+        } else {
+            writeProduct(productToWrite);
+        }
+    };
+
+    const writeProduct = productToWrite => {
+        const request = !editing ? ProductActions.create(productToWrite) : ProductActions.update(id, productToWrite);
+        request
+            .then(response => {
+                setErrors({name: ""});
+                //TODO : Flash notification de succès
+                history.replace("/components/products");
+            })
+            .catch( ({ response }) => {
+                const { violations } = response.data;
+                if (violations) {
+                    const apiErrors = {};
+                    violations.forEach(({propertyPath, message}) => {
+                        apiErrors[propertyPath] = message;
+                    });
+                    setErrors(apiErrors);
+                }
+                //TODO : Flash notification d'erreur
+            });
+    };
 
     return (
         <CRow>
@@ -242,10 +183,15 @@ const ProductPage = ({ match, history }) => {
                             <CFormGroup row className="ml-1 mr-1 mt-0 mb-3">
                                 <CCol xs="12" md="12">
                                     <CLabel>Image</CLabel>
-                                    <CInputFile name="image" custom id="custom-file-input" value={ product.image } onChange={ handleChange }/>
-                                    <CLabel htmlFor="custom-file-input" variant="custom-file">{product.image === "" ? "Choose file..." : product.image.substring(product.image.lastIndexOf('\\') +1 ) }</CLabel>
+                                    <CInputFile name="image" custom id="custom-file-input" onChange={ handleImageChange }/>
+                                    <CLabel htmlFor="custom-file-input" variant="custom-file">{product.image === null || product.image === undefined ? "Choose file..." : product.image.name }</CLabel>
                                 </CCol>
                             </CFormGroup >
+                            <CRow className="mb-3">
+                                <CCol xs="12" sm="12">
+                                    <SelectMultiple name="categories" label="Catégories" value={ product.categories } error={ errors.categories } onChange={ handleCategoriesChange } data={ categories.map(category => ({value: category.id, label: category.name, isFixed: false})) }/>
+                                </CCol>
+                            </CRow>
                             <CRow className="mb-3">
                                 <CCol xs="12" sm="12">
                                     <SelectMultiple name="userGroups" label="Pour les utilisateurs" value={ product.userGroups } error={ errors.userGroups } onChange={ handleUsersChange } data={ userRoles }/>
@@ -254,9 +200,7 @@ const ProductPage = ({ match, history }) => {
                             <CFormGroup row className="mb-4">
                                 <CCol xs="12" md="12">
                                     <CLabel htmlFor="textarea-input">Description</CLabel>
-                                    <CTextarea name="textarea-input" id="textarea-input" rows="9" placeholder="Content..." onChange={ handleChange }>
-                                        { product.fullDescription }
-                                    </CTextarea>
+                                    <CTextarea name="fullDescription" id="fullDescription" rows="9" placeholder="Content..." onChange={ handleChange } value={ product.fullDescription }/>
                                 </CCol>
                             </CFormGroup>
                             <hr className="mt-5 mb-5"/>
@@ -264,8 +208,7 @@ const ProductPage = ({ match, history }) => {
                                 <CCol xs="12" md="4">
                                     <CLabel htmlFor="select">TVA</CLabel>
                                     <CSelect custom name="tax" id="tax" value={ product.tax } onChange={ handleChange }>
-                                        <option value="0">TVA Réduite - 2,1%</option>
-                                        <option value="1">TVA Normale - 8,5%</option>
+                                        { taxes.map(tax => <option key={ tax.id } value={ tax.id }>{ tax.name }</option>)}
                                     </CSelect>
                                 </CCol>
                                 <CCol xs="12" md="4">
@@ -274,14 +217,14 @@ const ProductPage = ({ match, history }) => {
                                         type="number"
                                         name="BASE" 
                                         id="BASE" 
-                                        value={ product.prices['BASE'] } 
-                                        onChange={ handleChange } 
+                                        value={ product.prices.find(price => price.name === "BASE").price }
+                                        onChange={ handlePriceChange } 
                                         placeholder={ product.uniquePrice ? "Prix HT" : "Prix de base HT"}
                                     />
                                 </CCol>
                                 <CFormGroup row className="mt-4 mb-0 ml-1 d-flex align-items-end">
                                     <CCol xs="3" sm="3">
-                                        <CSwitch name="uniquePrice" className="mr-1" color="dark" shape="pill" variant="opposite" checked={ product.uniquePrice } onChange={ handleCheckBoxes }/>
+                                        <CSwitch name="uniquePrice" className="mr-1" color="dark" shape="pill" variant="opposite" checked={ product.uniquePrice } onChange={ handleUniquePrice }/>
                                     </CCol>
                                     <CCol tag="label" xs="9" sm="9" className="col-form-label">
                                         Prix unique
@@ -296,8 +239,8 @@ const ProductPage = ({ match, history }) => {
                                             type="number"
                                             name="PRO_CHR" 
                                             id="PRO_CHR" 
-                                            value={ product.prices['PRO_CHR'] } 
-                                            onChange={ handleChange } 
+                                            value={ product.prices.find(price => price.name === "PRO_CHR").price } 
+                                            onChange={ handlePriceChange } 
                                             placeholder="Prix de base HT"
                                         />
                                     </CCol>
@@ -307,8 +250,8 @@ const ProductPage = ({ match, history }) => {
                                             type="number"
                                             name="PRO_GC" 
                                             id="PRO_GC" 
-                                            value={ product.prices['PRO_GC'] } 
-                                            onChange={ handleChange } 
+                                            value={ product.prices.find(price => price.name === "PRO_GC").price }      // product.prices['PRO_GC']
+                                            onChange={ handlePriceChange } 
                                             placeholder="Prix de base HT"
                                         />
                                     </CCol>
@@ -318,8 +261,8 @@ const ProductPage = ({ match, history }) => {
                                             type="number"
                                             name="PRO_VIP" 
                                             id="PRO_VIP" 
-                                            value={ product.prices['PRO_VIP'] } 
-                                            onChange={ handleChange } 
+                                            value={ product.prices.find(price => price.name === "PRO_VIP").price }     // product.prices['PRO_VIP']
+                                            onChange={ handlePriceChange } 
                                             placeholder="Prix de base HT"
                                         />
                                     </CCol>
@@ -365,7 +308,7 @@ const ProductPage = ({ match, history }) => {
                                             name="alert"
                                             id="alert" 
                                             value={ product.stock.alert } 
-                                            onChange={ handleChange } 
+                                            onChange={ handleStockChange } 
                                             placeholder="Stock d'alerte"
                                         />
                                         <CInputGroupAppend>
@@ -381,7 +324,7 @@ const ProductPage = ({ match, history }) => {
                                             name="security"
                                             id="security" 
                                             value={ product.stock.security } 
-                                            onChange={ handleChange } 
+                                            onChange={ handleStockChange } 
                                             placeholder="Stock de sécurité"
                                         />
                                         <CInputGroupAppend>
