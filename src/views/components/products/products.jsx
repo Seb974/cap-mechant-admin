@@ -9,12 +9,15 @@ const Products = (props) => {
 
     const itemsPerPage = 15;
     const fields = ['name', ' '];
-    const { products } = useContext(ProductsContext);
+    const { products, setProducts } = useContext(ProductsContext);
     const [displayedProducts, setDisplayedProducts] = useState([]);
 
     useEffect(() => {
         ProductActions.findAll()
-                .then(response => setDisplayedProducts(response))
+                .then(response => {
+                    setDisplayedProducts(response);
+                    setProducts(response);
+                })
                 .catch(error => console.log(error.response));
     }, []);
 

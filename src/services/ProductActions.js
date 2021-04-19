@@ -54,13 +54,37 @@ function createImage(image) {
               .then(response => response.data['@id']);
 }
 
+function createVariation(variation) {
+    return api.post('/api/variations', variation)
+              .then(response => response.data['@id']);
+}
+
+function updateVariation(id, variation) {
+    return api.put('/api/variations/' + id, variation)
+              .then(response => response.data['@id']);
+}
+
+function createComponent(component) {
+    return api.post('/api/components', component)
+              .then(response => response.data['@id']);
+}
+
+function updateComponent(id, component) {
+    return api.put('/api/components/' + id, component)
+              .then(response => response.data['@id']);
+}
+
 export default { 
     findAll,
     delete: deleteProduct,
-    find, 
-    update, 
+    find,
+    update,
     create,
     createImage,
+    createVariation,
+    updateVariation,
+    createComponent,
+    updateComponent,
     updateFromMercure,
     deleteFromMercure,
 }
