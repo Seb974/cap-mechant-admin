@@ -3,10 +3,15 @@ import { CButton, CCol, CFormGroup, CInput, CInputGroup, CInputGroupAppend, CInp
 import CIcon from '@coreui/icons-react';
 import ProductsContext from 'src/contexts/ProductsContext';
 
-const Component = ({ component, handleChange, handleDelete, total, index }) => {
+const Component = ({ product, component, handleChange, handleDelete, total, index }) => {
 
     const { products } = useContext(ProductsContext);
     const [variants, setVariants] = useState([]);
+
+    useEffect(() => {
+        if (product.variations !== null && product.variations !== undefined)
+            setVariants(component.product.variations);
+    }, []);
 
     const onChange = ({ currentTarget }) => {
         handleChange({...component, [currentTarget.id]: currentTarget.value});

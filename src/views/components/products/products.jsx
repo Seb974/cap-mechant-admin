@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import ProductsContext from '../../../contexts/ProductsContext'
 import ProductActions from '../../../services/ProductActions'
-import { CBadge, CCard, CCardBody, CCardHeader, CCol, CDataTable, CRow, CButton } from '@coreui/react';
+import { CCard, CCardBody, CCardHeader, CCol, CDataTable, CRow, CButton } from '@coreui/react';
 import { DocsLink } from 'src/reusable'
 import { Link } from 'react-router-dom';
 
@@ -28,12 +28,11 @@ const Products = (props) => {
     const handleDelete = (id) => {
         const originalProducts = [...displayedProducts];
         setDisplayedProducts(displayedProducts.filter(product => product.id !== id));
-        console.log("Supprimé");
-        // ProductActions.delete(id)
-        //               .catch(error => {
-        //                    setDisplayedProducts(originalProducts);
-        //                    console.log(error.response);
-        //               });
+        ProductActions.delete(id)
+                      .catch(error => {
+                           setDisplayedProducts(originalProducts);
+                           console.log(error.response);
+                      });
     }
 
     return (

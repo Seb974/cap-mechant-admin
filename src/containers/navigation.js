@@ -20,21 +20,18 @@ function getNav(translation) {
     {
       _tag: 'CSidebarNavItem',
       name: translation("colors.label"),
-      // name: 'Colors',
       to: '/theme/colors',
       icon: 'cil-drop',
     },
     {
       _tag: 'CSidebarNavItem',
       name: translation("typography.label"),
-      // name: 'Typography',
       to: '/theme/typography',
       icon: 'cil-pencil',
     },
     {
       _tag: 'CSidebarNavTitle',
       _children: [translation("component.label")]
-      // _children: ['Components']
     },
     {
       _tag: 'CSidebarNavItem',
@@ -55,10 +52,29 @@ function getNav(translation) {
       icon: <CIcon name="cil-people" customClasses="c-sidebar-nav-icon"/>,
     },
     {
-      _tag: 'CSidebarNavItem',
-      name: translation("taxes.label"),
-      to: '/components/taxes',
-      icon: <CIcon name="cil-institution" customClasses="c-sidebar-nav-icon"/>,
+      _tag: 'CSidebarNavDropdown',
+      name: translation("parameters.label"),
+      icon: 'cil-equalizer',
+      _children: [
+        {
+          _tag: 'CSidebarNavItem',
+          name: translation("groups.label"),
+          to: '/components/groups',
+          icon: <CIcon name="cil-people" customClasses="c-sidebar-nav-icon"/>,
+        },
+        {
+          _tag: 'CSidebarNavItem',
+          name: translation("price.groups.label"),
+          to: '/components/price_groups',
+          icon: <CIcon name="cil-euro" customClasses="c-sidebar-nav-icon"/>,
+        },
+        {
+          _tag: 'CSidebarNavItem',
+          name: translation("taxes.label"),
+          to: '/components/taxes',
+          icon: <CIcon name="cil-institution" customClasses="c-sidebar-nav-icon"/>,
+        },
+      ]
     },
     {
       _tag: 'CSidebarNavDropdown',

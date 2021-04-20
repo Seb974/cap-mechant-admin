@@ -4,6 +4,10 @@ const Products = React.lazy(() => import('./views/components/products/products')
 const Product = React.lazy(() => import('./views/components/products/product'));
 const Categories = React.lazy(() => import('./views/components/categories/categories'));
 const Category = React.lazy(() => import('./views/components/categories/category'));
+const Groups = React.lazy(() => import('./views/components/groups/groups'));
+const Group = React.lazy(() => import('./views/components/groups/group'));
+const PriceGroups = React.lazy(() => import('./views/components/price_groups/priceGroups'));
+const PriceGroup = React.lazy(() => import('./views/components/price_groups/priceGroup'));
 const Users = React.lazy(() => import('./views/components/users/users'));
 const User = React.lazy(() => import('./views/components/users/user'));
 const Taxes = React.lazy(() => import('./views/components/taxes/taxes'));
@@ -65,6 +69,10 @@ const routes = [
   { path: '/components/products', name: 'Products', component: Products },
   { path: '/components/categories/:id', name: 'Category', component: Category },
   { path: '/components/categories', name: 'Categories', component: Categories },
+  { path: '/components/groups/:id', name: 'Group', component: Group },
+  { path: '/components/groups', name: 'Groups', component: Groups },
+  { path: '/components/price_groups/:id', name: 'PriceGroup', component: PriceGroup },
+  { path: '/components/price_groups', name: 'PriceGroups', component: PriceGroups },
   { path: '/components/users/:id', exact: true, name: 'User Details', component: User },
   { path: '/components/users', name: 'Users', component: Users },
   { path: '/components/taxes/:id', name: 'Tax', component: Tax },

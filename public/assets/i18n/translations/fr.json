@@ -12,5 +12,8 @@
     "login.password.label": "Mot de passe",
     "login.button.label": "Se connecter",
     "login.forgot-pwd.label": "Mot de passe oublié ?",
-    "taxes.label": "Taxes"
+    "taxes.label": "Taxes",
+    "parameters.label": "Paramètres",
+    "groups.label": "Groupes d'utilisateurs",
+    "price.groups.label": "Groupes de prix"
 }
