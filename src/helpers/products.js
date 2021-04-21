@@ -24,10 +24,17 @@ export const getFormattedComponents = (components, defaultComponent) => {
 export const createDescription = (product, components) => {
     let description = '"' + product.name + '" est composé de : ';
     components.map((component, index) => {
+        const { product, quantity } = component;
         let separator = index < components.length - 1 ? (index === components.length - 2 ? ' et ' : ', ') : '.';
-        description += component.product.name + ' (' + (component.product.unit === 'Kg' ? '~ ' : '') + component.quantity + ' ' + component.product.unit + ')' + separator;
+        description += product.name + getVariationDetails(component) + ' (' + (product.unit === 'Kg' ? '~ ' : '') + quantity + ' ' + product.unit + ')' + separator;
     });
     return description + ' Composition d\'environ ' + getTotalWeight(components) + ' Kg.';
+};
+
+const getVariationDetails = ({ variation, size }) => {
+    const sizeDetails = !isDefined(size) ? "" : ": " + size.name + " ";
+    return !isDefined(variation) ? "" :
+    ' - ' + variation.color + " " + sizeDetails;
 };
 
 export const getTotalWeight = (components) => {
@@ -39,22 +46,25 @@ export const getTotalWeight = (components) => {
     return totalWeight;
 };
 
-export const getProductToWrite = (product, type, categories, variations, components) => {
+export const getProductToWrite = (product, type, categories, variations, adaptedComponents, components) => {
     const {image, stock,...noImgProduct} = product;
     return {
         ...noImgProduct,
-        // stock: variations === null ? stock : null,
         stock: type === "simple" ? stock : null,
-        userGroups: type === "mixed" ? null : product.userGroups.map(group => group.value), 
+        userGroups: null,
+        productGroup: type === "mixed" ? null : product.productGroup,
         tax: product.tax['@id'],
         categories: product.categories.map(category => categories.find(element => element.id === category.value)['@id']),
         stockManaged: type === "mixed" ? null : noImgProduct.stockManaged,
         unit: type === "mixed" ? "U" : noImgProduct.unit,
         fullDescription: type === "mixed" ? createDescription(product, components) : noImgProduct.fullDescription,
-        weight: type === "mixed" ? getTotalWeight(components) : noImgProduct.weight.length <= 0 ? noImgProduct.weight : 1,
-        prices: product.prices.map(price => ({...price, amount: parseFloat(price.amount), priceGroup: price.priceGroup['@id']})),
-        variations,
-        components
+        weight: type === "mixed" ? getTotalWeight(components) : product.unit === "Kg" ? 1 : noImgProduct.weight.length <= 0 ? noImgProduct.weight : 1,
+        prices: product.prices.map(price => {
+            console.log(price);
+            return ({...price, amount: parseFloat(price.amount), priceGroup: price.priceGroup['@id']})
+        }),
+        components: adaptedComponents,
+        variations
     };
 };
 
@@ -95,18 +105,15 @@ export const formatProduct = (product, defaultStock) => {
     const basePrice = prices !== null && prices !== undefined && prices.length > 0 ? prices[0].amount : "";
     const formattedProduct = {
         ...product, 
-        userGroups: product.userGroups.map(group => ({value: group})),
+        userGroups: isDefinedAndNotVoid(product.userGroups) ? isDefined(product.userGroups[0].label) ? product.userGroups : product.userGroups.map(group => ({value: group})) : [],
         categories: categories.map(category => ({value: category.id, label: category.name, isFixed: false})),
-        uniquePrice: prices !== null && prices !== undefined && prices.length > 0 ? prices.every(price => price.amount === basePrice) : true,
-        stock: stock !== null && stock !== undefined ? stock : 
-                variations && variations.length > 0 ? variations[0].sizes[0].stock : defaultStock
+        uniquePrice: isDefinedAndNotVoid(prices) ? prices.every(price => price.amount === basePrice) : true,
+        stock: isDefined(stock) ? stock : isDefinedAndNotVoid(variations) ? variations[0].sizes[0].stock : defaultStock
     };
+    console.log(product);
+    console.log(formattedProduct);
     return formattedProduct;
 };
 
-// export {
-//     getFormattedVariations,
-//     getFormattedComponents,
-//     createDescription,
-//     getTotalWeight
-// }
+const isDefined = variable => variable !== undefined && variable !== null;
+const isDefinedAndNotVoid = variable => Array.isArray(variable) ? isDefined(variable) && variable.length > 0 : isDefined(variable);

@@ -76,16 +76,17 @@ const ProductPage = ({ match, history }) => {
         if (type === "with-variations" && JSON.stringify(variations) !== JSON.stringify([defaultVariation])) {
             const writingVariations = await writeVariations();
             adaptProduct(writingVariations);
-        } else if(type === "mixed" && JSON.stringify(components) !== JSON.stringify([defaultComponent])) {
+        } else if (type === "mixed" && JSON.stringify(components) !== JSON.stringify([defaultComponent])) {
             const adaptedComponents = getComponentsToWrite(components);
             adaptProduct([], adaptedComponents);
         } else
             adaptProduct();
     };
 
-    const adaptProduct = (variations = [], components = []) => {
+    const adaptProduct = (variations = [], adaptedComponents = []) => {
         const { image } = product;
-        const productToWrite = getProductToWrite(product, type, categories, variations, components);
+        const productToWrite = getProductToWrite(product, type, categories, variations, adaptedComponents, components);
+        console.log(productToWrite);
         if (image && !image.filePath) {
             ProductActions.createImage(product.image)
                           .then(image => writeProduct({...productToWrite, image}));

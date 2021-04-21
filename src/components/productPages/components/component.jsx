@@ -19,11 +19,11 @@ const Component = ({ product, component, handleChange, handleDelete, total, inde
 
     const onProductChange = ({ currentTarget }) => {
         const selection = products.find(product => parseInt(product.id) === parseInt(currentTarget.value));
-        const newVariants = selection.variations !== null && selection.variations !== undefined ? selection.variations : null;
-        const selectedVariant = newVariants !== null && newVariants.length > 0 ? newVariants[0] : null;
-        const selectedSize = selectedVariant !== null && selectedVariant.sizes !== null && selectedVariant.sizes !== undefined && selectedVariant.sizes.length > 0 ? selectedVariant.sizes[0] : null;
+        const newVariants = isDefined(selection.variations) ? selection.variations : null;
+        const selectedVariant = isDefinedAndNotVoid(newVariants) ? newVariants[0] : null;
+        const selectedSize = isDefined(selectedVariant) && isDefinedAndNotVoid(selectedVariant.sizes) ? selectedVariant.sizes[0] : null;
         handleChange({...component, product: selection, variation: selectedVariant, size: selectedSize});
-        setVariants(selection.variations !== null && selection.variations !== undefined ? selection.variations : null);
+        setVariants(isDefined(selection.variations) ? selection.variations : null);
     };
 
     const onVariantChange = ({ currentTarget }) => {
@@ -32,6 +32,9 @@ const Component = ({ product, component, handleChange, handleDelete, total, inde
         const selectedSize = selectedVariant.sizes.find(size => size.id === parseInt(ids[1]));
         handleChange({...component, variation: selectedVariant, size: selectedSize});
     };
+
+    const isDefined = variable => variable !== undefined && variable !== null;
+    const isDefinedAndNotVoid = variable => Array.isArray(variable) ? isDefined(variable) && variable.length > 0 : isDefined(variable);
 
     return (
         <CRow>
@@ -48,8 +51,8 @@ const Component = ({ product, component, handleChange, handleDelete, total, inde
                 <CFormGroup>
                     <CLabel htmlFor="name">{"Variante " + (total > 1 ? index + 1 : "")}
                     </CLabel>
-                    <CSelect custom name="variant" id="variant" disabled={ !variants || variants.length <= 0 } onChange={ onVariantChange }>
-                        { variants === null || variants === undefined || variants.length <= 0 ? <option key="0" value="0">-</option> : 
+                    <CSelect custom name="variant" id="variant" disabled={ !variants || variants.length <= 0 } onChange={ onVariantChange } value={ isDefined(component.variation) && isDefined(component.size) ? component.variation.id + "-" + component.size.id : "0"}>
+                        { !isDefinedAndNotVoid(variants) ? <option key="0" value="0">-</option> : 
                           variants.map((variant, index) => {
                                 return variant.sizes.map((size, i) => <option key={ (index + "" + i) } value={variant.id + "-" + size.id}>{variant.color + " - " + size.name}</option>);
                             })

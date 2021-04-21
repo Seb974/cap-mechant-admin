@@ -50,7 +50,7 @@ const Price = ({product, setProduct, history }) => {
         const filteredPrices = product.prices.filter(({priceGroup}) => priceGroup.name !== updatedPrice.priceGroup.name);
         const newPrices = !product.uniquePrice ? [...filteredPrices, {...updatedPrice, amount: value}] :
                                                  product.prices.map(price => ({...price, amount: value}));
-        setProduct({...product, prices: newPrices.sort((a, b) => (a.priceGroup.name > b.priceGroup.name) ? 1 : -1)});
+        setProduct(product => ({...product, prices: newPrices.sort((a, b) => (a.priceGroup.name > b.priceGroup.name) ? 1 : -1)}));
     };
 
     const handleUniquePrice = ({ currentTarget }) => {
