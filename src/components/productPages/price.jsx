@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { CCol, CFormGroup, CInput, CLabel,CSelect, CSwitch } from '@coreui/react';
 import TaxActions from '../../services/TaxActions';
 import PriceGroupActions from '../../services/PriceGroupActions';
+import { isDefinedAndNotVoid } from 'src/helpers/utils';
 
 const Price = ({product, setProduct, history }) => {
 
@@ -80,9 +81,9 @@ const Price = ({product, setProduct, history }) => {
                     <CLabel htmlFor="select">{ product.uniquePrice ? "Prix" : "Prix de base"}</CLabel>
                     <CInput
                         type="number"
-                        name={ product.prices.length <=0 ? "price" : product.prices[0].priceGroup.name }
-                        id={ product.prices.length <=0 ? "price" : product.prices[0].priceGroup.name }
-                        value={ product.prices.length <=0 ? "" : product.prices[0].amount }
+                        name={ !isDefinedAndNotVoid(product.prices) ? "price" : product.prices[0].priceGroup.name }
+                        id={ !isDefinedAndNotVoid(product.prices) ? "price" : product.prices[0].priceGroup.name }
+                        value={ !isDefinedAndNotVoid(product.prices) ? "" : product.prices[0].amount }
                         onChange={ handlePriceChange } 
                         placeholder={ product.uniquePrice ? "Prix HT" : "Prix de base HT"}
                     />

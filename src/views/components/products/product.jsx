@@ -46,6 +46,7 @@ const ProductPage = ({ match, history }) => {
             let request = ProductActions.find(id);
             request
                 .then(response => {
+                    console.log(response);
                     const formattedProduct = formatProduct(response, defaultStock);
                     setProduct(formattedProduct)
                     setType(defineType(response));
@@ -86,7 +87,6 @@ const ProductPage = ({ match, history }) => {
     const adaptProduct = (variations = [], adaptedComponents = []) => {
         const { image } = product;
         const productToWrite = getProductToWrite(product, type, categories, variations, adaptedComponents, components);
-        console.log(productToWrite);
         if (image && !image.filePath) {
             ProductActions.createImage(product.image)
                           .then(image => writeProduct({...productToWrite, image}));
