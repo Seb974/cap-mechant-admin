@@ -1,7 +1,5 @@
-import { isDefined, isDefinedAndNotVoid } from 'src/helpers/utils';
-
 export const getFormattedVariations = (variations, defaultVariation) => {
-    if ( isDefinedAndNotVoid(variations) ) {
+    if (variations && variations.length > 0) {
         return variations.map((variation, index) => {
             return {
                 ...variation,
@@ -17,7 +15,7 @@ export const getFormattedVariations = (variations, defaultVariation) => {
 };
 
 export const getFormattedComponents = (components, defaultComponent) => {
-    if ( isDefinedAndNotVoid(components) ) {
+    if (components && components.length > 0) {
         return components.map((component, index) => ({...component, count: index}))
     }
     return [defaultComponent];
@@ -34,15 +32,15 @@ export const createDescription = (product, components) => {
 };
 
 const getVariationDetails = ({ variation, size }) => {
-    const sizeDetails = !isDefined(size) ? "" : " " + size.name;
+    const sizeDetails = !isDefined(size) ? "" : ": " + size.name + " ";
     return !isDefined(variation) ? "" :
-    ' ' + variation.color + sizeDetails;
+    ' - ' + variation.color + " " + sizeDetails;
 };
 
 export const getTotalWeight = (components) => {
     let totalWeight = 0;
     components.map((component) => {
-        let unitWeight = !isDefined(component.product.weight) ? 1 : component.product.weight;
+        let unitWeight = component.product.weight === null || component.product.weight === undefined ? 1 : component.product.weight;
         totalWeight += unitWeight * component.quantity;
     });
     return totalWeight;
@@ -61,7 +59,10 @@ export const getProductToWrite = (product, type, categories, variations, adapted
         unit: type === "mixed" ? "U" : noImgProduct.unit,
         fullDescription: type === "mixed" ? createDescription(product, components) : noImgProduct.fullDescription,
         weight: type === "mixed" ? getTotalWeight(components) : product.unit === "Kg" ? 1 : noImgProduct.weight.length <= 0 ? noImgProduct.weight : 1,
-        prices: product.prices.map(price => ({...price, amount: parseFloat(price.amount), priceGroup: price.priceGroup['@id']})),
+        prices: product.prices.map(price => {
+            console.log(price);
+            return ({...price, amount: parseFloat(price.amount), priceGroup: price.priceGroup['@id']})
+        }),
         components: adaptedComponents,
         variations
     };
@@ -71,7 +72,7 @@ export const getComponentsToWrite = (components) => {
     return components.map(component => {
         const { count, variation, size, ...mainVarComponent} = component;
         const minComponent = {...mainVarComponent, product: mainVarComponent.product['@id'], quantity: parseFloat(mainVarComponent.quantity) };
-        return !isDefined(variation) ? minComponent : {...minComponent, variation: variation['@id'], size: size['@id']};
+        return variation === null || variation === undefined ? minComponent : {...minComponent, variation: variation['@id'], size: size['@id']};
     });
 };
 
@@ -86,7 +87,7 @@ export const getVariationToWrite = (variation, product) => {
                 name: size.name,
                 stock: {
                     ...size.stock,
-                    quantity: isDefined(size.stock) && isDefined(size.stock.quantity) ? size.stock.quantity : 0,
+                    quantity: size.stock !== undefined && size.stock !== null && size.stock.quantity ? size.stock.quantity : 0,
                     alert: parseFloat(product.stock.alert), 
                     security: parseFloat(product.stock.security)
                 }
@@ -96,12 +97,12 @@ export const getVariationToWrite = (variation, product) => {
 };
 
 export const defineType = (product) => {
-    return product.isMixed ? "mixed" : isDefinedAndNotVoid(product.variations) ? "with-variations" : "simple";
+    return product.isMixed ? "mixed" : product.variations && product.variations.length > 0 ? "with-variations" : "simple";
 };
 
 export const formatProduct = (product, defaultStock) => {
     const {prices, categories, stock, variations} = product;
-    const basePrice = isDefinedAndNotVoid(prices) ? prices[0].amount : "";
+    const basePrice = prices !== null && prices !== undefined && prices.length > 0 ? prices[0].amount : "";
     const formattedProduct = {
         ...product, 
         userGroups: isDefinedAndNotVoid(product.userGroups) ? isDefined(product.userGroups[0].label) ? product.userGroups : product.userGroups.map(group => ({value: group})) : [],
@@ -109,5 +110,10 @@ export const formatProduct = (product, defaultStock) => {
         uniquePrice: isDefinedAndNotVoid(prices) ? prices.every(price => price.amount === basePrice) : true,
         stock: isDefined(stock) ? stock : isDefinedAndNotVoid(variations) ? variations[0].sizes[0].stock : defaultStock
     };
+    console.log(product);
+    console.log(formattedProduct);
     return formattedProduct;
 };
+
+const isDefined = variable => variable !== undefined && variable !== null;
+const isDefinedAndNotVoid = variable => Array.isArray(variable) ? isDefined(variable) && variable.length > 0 : isDefined(variable);
