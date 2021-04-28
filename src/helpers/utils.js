@@ -1,0 +1,2 @@
+const isDefined = variable => variable !== undefined && variable !== null;
+const isDefinedAndNotVoid = variable => Array.isArray(variable) ? isDefined(variable) && variable.length > 0 : isDefined(variable);
