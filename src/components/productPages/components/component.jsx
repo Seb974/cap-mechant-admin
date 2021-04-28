@@ -2,7 +2,6 @@ import React, { useContext, useEffect, useState } from 'react';
 import { CButton, CCol, CFormGroup, CInput, CInputGroup, CInputGroupAppend, CInputGroupText, CLabel, CRow, CSelect } from '@coreui/react';
 import CIcon from '@coreui/icons-react';
 import ProductsContext from 'src/contexts/ProductsContext';
-import { isDefined, isDefinedAndNotVoid } from 'src/helpers/utils';
 
 const Component = ({ product, component, handleChange, handleDelete, total, index }) => {
 
@@ -10,7 +9,7 @@ const Component = ({ product, component, handleChange, handleDelete, total, inde
     const [variants, setVariants] = useState([]);
 
     useEffect(() => {
-        if ( isDefined(product.variations) )
+        if (product.variations !== null && product.variations !== undefined)
             setVariants(component.product.variations);
     }, []);
 
@@ -34,6 +33,9 @@ const Component = ({ product, component, handleChange, handleDelete, total, inde
         handleChange({...component, variation: selectedVariant, size: selectedSize});
     };
 
+    const isDefined = variable => variable !== undefined && variable !== null;
+    const isDefinedAndNotVoid = variable => Array.isArray(variable) ? isDefined(variable) && variable.length > 0 : isDefined(variable);
+
     return (
         <CRow>
             <CCol xs="12" sm="4">
@@ -52,7 +54,7 @@ const Component = ({ product, component, handleChange, handleDelete, total, inde
                     <CSelect custom name="variant" id="variant" disabled={ !variants || variants.length <= 0 } onChange={ onVariantChange } value={ isDefined(component.variation) && isDefined(component.size) ? component.variation.id + "-" + component.size.id : "0"}>
                         { !isDefinedAndNotVoid(variants) ? <option key="0" value="0">-</option> : 
                           variants.map((variant, index) => {
-                                return variant.sizes.map((size, i) => <option key={ (index + "" + i) } value={variant.id + "-" + size.id}>{variant.color + " " + size.name}</option>);
+                                return variant.sizes.map((size, i) => <option key={ (index + "" + i) } value={variant.id + "-" + size.id}>{variant.color + " - " + size.name}</option>);
                             })
                         }
                     </CSelect>
