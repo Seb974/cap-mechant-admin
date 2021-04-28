@@ -19,7 +19,8 @@ const ProductPage = ({ match, history }) => {
     const [editing, setEditing] = useState(false);
     const [categories, setCategories] = useState([]);
     const { products } = useContext(ProductsContext);
-    const defaultVariant = products[0].variations && products[0].variations.length > 0 ? products.variations[0] : null;
+    // const defaultVariant = products[0].variations && products[0].variations.length > 0 ? products.variations[0] : null;
+    const defaultVariant = null;
     const defaultVariantSize = defaultVariant !== null && products[0].variations[0].sizes && products[0].variations[0].sizes.length > 0 ? products[0].variations[0].sizes[0] : null;
     const defaultProduct = {product: products[0], variation: defaultVariant, size: defaultVariantSize};
     const defaultComponent = {...defaultProduct, count: 0, quantity: ""};
@@ -32,8 +33,8 @@ const ProductPage = ({ match, history }) => {
     const [type, setType] = useState("simple");
     
     useEffect(() => {
-        if (products === undefined || products === null || products.length <= 0)
-            history.replace("/components/products")
+        // if (products === undefined || products === null || products.length <= 0)
+        //     history.replace("/components/products")
         fetchCategories();
         fetchProduct(id);
     }, []);
