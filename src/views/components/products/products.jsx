@@ -15,6 +15,7 @@ const Products = (props) => {
     useEffect(() => {
         ProductActions.findAll()
                 .then(response => {
+                    console.log(response);
                     setDisplayedProducts(response);
                     setProducts(response);
                 })
