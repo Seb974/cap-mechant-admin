@@ -1,30 +1,27 @@
 import React, { useEffect, useState } from 'react';
-import CategoryActions from '../../../services/CategoryActions'
+import DayOffActions from '../../../services/DayOffActions'
 import { CBadge, CCard, CCardBody, CCardHeader, CCol, CDataTable, CRow, CButton } from '@coreui/react';
 import { DocsLink } from 'src/reusable'
 import { Link } from 'react-router-dom';
 
-const Categories = (props) => {
+const DaysOff = (props) => {
 
     const itemsPerPage = 15;
-    const fields = ['name', ' '];
-    const [categories, setCategories] = useState([]);
+    const fields = ['name', 'date', ' '];
+    const [daysOff, setDaysOff] = useState([]);
 
     useEffect(() => {
-        CategoryActions.findAll()
-            .then(response => {
-              console.log(response);
-              setCategories(response);
-            })
+        DayOffActions.findAll()
+            .then(response => setDaysOff(response))
             .catch(error => console.log(error.response));
     }, []);
 
     const handleDelete = (id) => {
-        const originalCategories = [...categories];
-        setCategories(categories.filter(category => category.id !== id));
-        CategoryActions.delete(id)
+        const originalDaysOff = [...daysOff];
+        setDaysOff(daysOff.filter(day => day.id !== id));
+        DayOffActions.delete(id)
                        .catch(error => {
-                            setCategories(originalCategories);
+                            setDaysOff(originalDaysOff);
                             console.log(error.response);
                        });
     }
@@ -34,24 +31,27 @@ const Categories = (props) => {
         <CCol xs="12" lg="12">
           <CCard>
             <CCardHeader>
-                Liste des catégories
+                Liste des jours à activité réduite
                 <CCol col="6" sm="4" md="2" className="ml-auto">
-                    <Link role="button" to="/components/categories/new" block variant="outline" color="success">CRÉER</Link>
+                    <Link role="button" to="/components/days_off/new" block variant="outline" color="success">CRÉER</Link>
                 </CCol>
             </CCardHeader>
             <CCardBody>
             <CDataTable
-              items={ categories }
+              items={ daysOff }
               fields={ fields }
               bordered
               itemsPerPage={ itemsPerPage }
               pagination
               scopedSlots = {{
                 'name':
-                  item => <td><Link to={ "/components/categories/" + item.id }>{ item.name }</Link></td>
+                  item => <td><Link to={ "/components/days_off/" + item.id }>{ item.name }</Link></td>
+                ,
+                'date':
+                  item => <td>{ (new Date(item.date)).toLocaleDateString("fr-FR", {year:'numeric', month: 'numeric', day: 'numeric'}) }</td>
                 ,
                 ' ':
-                  item => <td><CButton block color="danger" onClick={ () => handleDelete(item.id) }>Supprimer</CButton></td>
+                  item =><td><CButton block color="danger" onClick={ () => handleDelete(item.id) }>Supprimer</CButton></td>
               }}
             />
             </CCardBody>
@@ -62,4 +62,4 @@ const Categories = (props) => {
     );
 }
  
-export default Categories;
+export default DaysOff;

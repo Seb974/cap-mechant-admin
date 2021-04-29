@@ -12,7 +12,10 @@ const Groups = (props) => {
 
     useEffect(() => {
         GroupActions.findAll()
-            .then(response => setGroups(response))
+            .then(response => {
+              console.log(response);
+              setGroups(response);
+            })
             .catch(error => console.log(error.response));
     }, []);
 
@@ -46,7 +49,7 @@ const Groups = (props) => {
               pagination
               scopedSlots = {{
                 'label':
-                  item => item.isFixed ? <td>{ item.label }</td> : <td><Link to={ "/components/groups/" + item.id }>{ item.label }</Link></td>
+                  item => <td><Link to={ "/components/groups/" + item.id }>{ item.label }</Link></td>
                 ,
                 ' ':
                   item =><td><CButton block color="danger" disabled={ item.isFixed  } onClick={ () => handleDelete(item.id) }>Supprimer</CButton></td>

@@ -1,16 +1,20 @@
+import 'flatpickr/dist/themes/material_blue.css';
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import GroupActions from 'src/services/GroupActions';
 import { CButton, CCard, CCardBody, CCardFooter, CCardHeader, CCol, CForm, CFormGroup, CInput,  CInvalidFeedback, CLabel, CRow, CSwitch } from '@coreui/react';
 import CIcon from '@coreui/icons-react';
 import { isDefined } from 'src/helpers/utils';
+import { French } from "flatpickr/dist/l10n/fr.js";
+import Flatpickr from 'react-flatpickr';
 
 const Group = ({ match, history }) => {
 
+    const today = new Date();
     const { id = "new" } = match.params;
     const [editing, setEditing] = useState(false);
-    const [group, setGroup] = useState({ label: "", subjectToTaxes: true});
-    const [errors, setErrors] = useState({label: "", subjectToTaxes: ""});
+    const [group, setGroup] = useState({ label: "", subjectToTaxes: true, dayInterval: 0, onlinePayment: true, hourLimit: new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 0)});
+    const [errors, setErrors] = useState({label: "", subjectToTaxes: "", onlinePayment: "", dayInterval: "", hourLimit: ""});
 
     useEffect(() => fetchGroup(id), []);
     useEffect(() => fetchGroup(id), [id]);
@@ -23,8 +27,15 @@ const Group = ({ match, history }) => {
             setEditing(true);
             GroupActions.find(id)
                 .then( response => {
-                    const newGroup = isDefined(response.subjectToTaxes) ?
-                        response : {...response, subjectToTaxes: group.subjectToTaxes};
+                    console.log(response);
+                    const newGroup = {
+                        ...response,
+                        subjectToTaxes: isDefined(response.subjectToTaxes) ? response.subjectToTaxes : group.subjectToTaxes,
+                        onlinePayment: isDefined(response.onlinePayment) ? response.onlinePayment : group.onlinePayment,
+                        dayInterval: isDefined(response.dayInterval) ? response.dayInterval : group.dayInterval,
+                        hourLimit: isDefined(response.hourLimit) ? new Date(response.hourLimit) : group.hourLimit
+                    };
+                    console.log(newGroup);
                     setGroup(newGroup);
                 })
                 .catch(error => {
@@ -35,9 +46,21 @@ const Group = ({ match, history }) => {
         }
     }
 
+    const onDateChange = dateTime => {
+        setGroup({...group, hourLimit: dateTime[0]});
+    };
+
+    const getFormattedTime = dateTime => {
+        const date = new Date(dateTime);
+        return date.getHours() + ':' + date.getMinutes() + ':' + 0;
+    }
+
     const handleSubmit = (e) => {
         e.preventDefault();
-        const groupToWrite = !isDefined(group.priceGroup) ? group : {...group, priceGroup: group.priceGroup['@id']};
+        const groupToWrite = !isDefined(group.priceGroup) ? 
+            {...group, hourLimit: getFormattedTime(group.hourLimit), dayInterval: parseInt(group.dayInterval)} : 
+            {...group, priceGroup: group.priceGroup['@id'], hourLimit: getFormattedTime(group.hourLimit), dayInterval: parseInt(group.dayInterval)};
+        console.log(groupToWrite);
         const request = !editing ? GroupActions.create(groupToWrite) : GroupActions.update(id, groupToWrite);
         request.then(response => {
                     setErrors({label: ""});
@@ -64,7 +87,7 @@ const Group = ({ match, history }) => {
             <CCol xs="12" sm="12">
                 <CCard>
                     <CCardHeader>
-                        <h3>{!editing ? "Créer un groupe d'utilisateur" : "Modifier le groupe" + group.label }</h3>
+                        <h3>{!editing ? "Créer un groupe d'utilisateur" : "Modifier le groupe " + group.label }</h3>
                     </CCardHeader>
                     <CCardBody>
                         <CForm onSubmit={ handleSubmit }>
@@ -83,18 +106,59 @@ const Group = ({ match, history }) => {
                                         <CInvalidFeedback>{ errors.label }</CInvalidFeedback>
                                     </CFormGroup>
                                 </CCol>
-                                <CCol xs="12" sm="12" md="6">
+                                <CCol xs="12" sm="12" md="3">
                                     <CFormGroup row className="mb-0 ml-1 mt-4 d-flex align-items-center">
                                         <CCol xs="3" sm="2" md="3">
-                                            <CSwitch name="subjectToTaxes" className="mr-1" color="dark" shape="pill" variant="opposite" checked={ group.subjectToTaxes } onChange={ handleCheckBoxes }/>
+                                            <CSwitch name="subjectToTaxes" color="dark" shape="pill" variant="opposite" checked={ group.subjectToTaxes } onChange={ handleCheckBoxes }/>
                                         </CCol>
                                         <CCol tag="label" xs="9" sm="10" md="9" className="col-form-label">
                                             Soumis à la TVA
                                         </CCol>
                                     </CFormGroup>
                                 </CCol>
+                                <CCol xs="12" sm="12" md="3">
+                                    <CFormGroup row className="mb-0 ml-1 mt-4 d-flex align-items-center">
+                                        <CCol xs="3" sm="2" md="3">
+                                            <CSwitch name="onlinePayment" color="dark" shape="pill" variant="opposite" checked={ group.onlinePayment } onChange={ handleCheckBoxes }/>
+                                        </CCol>
+                                        <CCol tag="label" xs="9" sm="10" md="9" className="col-form-label">
+                                            Paiement sur site
+                                        </CCol>
+                                    </CFormGroup>
+                                </CCol>
                             </CRow>
-                            <CRow className="mt-4 d-flex justify-content-center">
+                            <CRow className="mt-4">
+                                <CCol xs="12" sm="12" md="6">
+                                    <CFormGroup>
+                                        <CLabel htmlFor="label">Décalage de la livraison (J)</CLabel>
+                                        <CInput
+                                            type="number"
+                                            min="0"
+                                            max="31"
+                                            name="dayInterval"
+                                            value={ group.dayInterval }
+                                            onChange={ handleChange }
+                                        />
+                                    </CFormGroup>
+                                </CCol>
+                                <CCol xs="12" sm="12" md="6">
+                                    <label htmlFor="hourLimit" className="date-label">Heure limite de commande</label>
+                                    <Flatpickr
+                                        name="hourLimit"
+                                        value={ group.hourLimit }
+                                        onChange={ onDateChange }
+                                        className="form-control"
+                                        options={{
+                                            enableTime: true,
+                                            noCalendar: true,
+                                            dateFormat: "H:i",
+                                            time_24hr: true,
+                                            locale: French,
+                                        }}
+                                    />
+                                </CCol>
+                            </CRow>
+                            <CRow className="mt-5 d-flex justify-content-center">
                                 <CButton type="submit" size="sm" color="success"><CIcon name="cil-save"/> Enregistrer</CButton>
                             </CRow>
                         </CForm>

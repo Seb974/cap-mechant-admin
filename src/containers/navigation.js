@@ -74,6 +74,12 @@ function getNav(translation) {
           to: '/components/taxes',
           icon: <CIcon name="cil-institution" customClasses="c-sidebar-nav-icon"/>,
         },
+        {
+          _tag: 'CSidebarNavItem',
+          name: translation("days.off.label"),
+          to: '/components/days_off',
+          icon: <CIcon name="cil-calendar" customClasses="c-sidebar-nav-icon"/>,
+        },
       ]
     },
     {

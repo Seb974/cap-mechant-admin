@@ -47,11 +47,11 @@ export const getTotalWeight = (components) => {
 };
 
 export const getProductToWrite = (product, type, categories, variations, adaptedComponents, components) => {
-    const {image, stock,...noImgProduct} = product;
+    const {image, stock, userGroups, ...noImgProduct} = product;
     return {
         ...noImgProduct,
         stock: type === "simple" ? stock : null,
-        userGroups: null,
+        userGroups: userGroups.map(userGroup => userGroup['@id']),
         productGroup: type === "mixed" ? null : product.productGroup,
         tax: product.tax['@id'],
         categories: product.categories.map(category => categories.find(element => element.id === category.value)['@id']),

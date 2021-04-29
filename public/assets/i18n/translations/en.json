@@ -15,5 +15,6 @@
     "taxes.label": "Taxes",
     "parameters.label": "Settings",
     "groups.label": "User groups",
-    "price.groups.label": "Price groups"
+    "price.groups.label": "Price groups",
+    "days.off.label": "Days off"
 }
