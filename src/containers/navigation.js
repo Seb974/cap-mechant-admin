@@ -80,6 +80,12 @@ function getNav(translation) {
           to: '/components/days_off',
           icon: <CIcon name="cil-calendar" customClasses="c-sidebar-nav-icon"/>,
         },
+        {
+          _tag: 'CSidebarNavItem',
+          name: translation("cities.label"),
+          to: '/components/cities',
+          icon: <CIcon name="cil-location-pin" customClasses="c-sidebar-nav-icon"/>,
+        },
       ]
     },
     {

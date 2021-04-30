@@ -16,5 +16,6 @@
     "parameters.label": "Settings",
     "groups.label": "User groups",
     "price.groups.label": "Price groups",
-    "days.off.label": "Days off"
+    "days.off.label": "Days off",
+    "cities.label": "Delivered Cities"
 }

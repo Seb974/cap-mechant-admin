@@ -10,6 +10,8 @@ const PriceGroups = React.lazy(() => import('./views/components/price_groups/pri
 const PriceGroup = React.lazy(() => import('./views/components/price_groups/priceGroup'));
 const DaysOff = React.lazy(() => import('./views/components/days_off/daysOff'));
 const DayOff = React.lazy(() => import('./views/components/days_off/dayOff'));
+const Cities = React.lazy(() => import('./views/components/cities/cities'));
+const City = React.lazy(() => import('./views/components/cities/city'));
 const Users = React.lazy(() => import('./views/components/users/users'));
 const User = React.lazy(() => import('./views/components/users/user'));
 const Taxes = React.lazy(() => import('./views/components/taxes/taxes'));
@@ -77,6 +79,8 @@ const routes = [
   { path: '/components/price_groups', name: 'PriceGroups', component: PriceGroups },
   { path: '/components/days_off/:id', name: 'DayOff', component: DayOff },
   { path: '/components/days_off', name: 'DaysOff', component: DaysOff },
+  { path: '/components/cities/:id', name: 'City', component: City },
+  { path: '/components/cities', name: 'Cities', component: Cities },
   { path: '/components/users/:id', exact: true, name: 'User Details', component: User },
   { path: '/components/users', name: 'Users', component: Users },
   { path: '/components/taxes/:id', name: 'Tax', component: Tax },

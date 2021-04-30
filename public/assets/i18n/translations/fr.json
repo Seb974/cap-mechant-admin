@@ -16,5 +16,6 @@
     "parameters.label": "Paramètres",
     "groups.label": "Groupes d'utilisateurs",
     "price.groups.label": "Groupes de prix",
-    "days.off.label": "Jours de fermeture"
+    "days.off.label": "Jours de fermeture",
+    "cities.label": "Villes désservies"
 }

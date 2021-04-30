@@ -50,10 +50,6 @@ const DayOff = ({ match, history }) => {
             DayOffActions.find(id)
                 .then( response => {
                     setDayOff({...response, date: new Date(response.date)});
-                    // console.log(response);
-                    // const openedFor = response.openedFor === null || response.openedFor === undefined ? [] :
-                    //                   response.openedFor.map(group => ({...group, isFixed: false}));
-                    // setDayOff({...response, openedFor});
                 })
                 .catch(error => {
                     console.log(error);
@@ -165,9 +161,7 @@ const DayOff = ({ match, history }) => {
                                                 mode: dayRange ? "range" : "single",
                                                 dateFormat: "d/m/Y",
                                                 minDate: 'today',
-                                                // minDate: today.getDay() !== 0 ? today : tomorrow,
                                                 locale: French,
-                                                // disable: [(date) => date.getDay() === 0],
                                             }}
                                         />
                                         <CInvalidFeedback>{ errors.name }</CInvalidFeedback>

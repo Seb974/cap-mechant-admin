@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { CCol, CFormGroup, CInput, CLabel,CSelect, CSwitch } from '@coreui/react';
+import { CCol, CFormGroup, CInput, CLabel, CSelect, CSwitch } from '@coreui/react';
 import TaxActions from '../../services/TaxActions';
 import PriceGroupActions from '../../services/PriceGroupActions';
 
