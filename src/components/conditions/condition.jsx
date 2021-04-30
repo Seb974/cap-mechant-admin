@@ -12,6 +12,7 @@ const Condition = ({ city, condition, groups, taxes, setCity, handleDeleteRule, 
     }, [taxes, condition]);
 
     const handleUsersChange = groups => setNewCondition({...condition, userGroups: groups});
+    const handleDaysChange = days => setNewCondition({...condition, days});
     const handleChange = ({ currentTarget }) => setNewCondition({...condition, [currentTarget.name]: currentTarget.value});
 
     const setNewCondition = condition => {
@@ -44,7 +45,7 @@ const Condition = ({ city, condition, groups, taxes, setCity, handleDeleteRule, 
                     <SelectMultiple name="userGroups" label="Applicable pour les utilisateurs" value={ condition.userGroups } error={ errors.conditions } onChange={ handleUsersChange } data={ groups }/>
                 </CCol>
                 <CCol xs="12" sm="6" className="mx-0">
-                    <SelectMultiple name="openedFor" label="Jours désservis" value={ condition.days } error={ errors.conditions } onChange={ handleUsersChange } data={ getWeekDays() }/>
+                    <SelectMultiple name="openedFor" label="Jours désservis" value={ condition.days } error={ errors.conditions } onChange={ handleDaysChange } data={ getWeekDays() }/>
                 </CCol>
             </CRow>
             <CRow className="mt-4">
