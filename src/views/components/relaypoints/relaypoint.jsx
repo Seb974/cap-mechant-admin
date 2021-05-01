@@ -6,7 +6,7 @@ import GroupActions from 'src/services/GroupActions';
 import RelaypointActions from 'src/services/RelaypointActions';
 import { CButton, CCard, CCardBody, CCardFooter, CCardHeader, CCol, CForm, CFormGroup, CInput, CInvalidFeedback, CLabel, CRow, CTextarea, CSwitch, CInputGroup, CInputGroupAppend, CInputGroupText } from '@coreui/react';
 import CIcon from '@coreui/icons-react';
-import { getDateFrom, isDefined } from 'src/helpers/utils';
+import { getDateFrom, isDefined, getNumericOrNull } from 'src/helpers/utils';
 import Condition from 'src/components/conditions/condition';
 import { getWeekDays } from 'src/helpers/days';
 import TaxActions from 'src/services/TaxActions';
@@ -22,8 +22,9 @@ const Relaypoint = ({ match, history }) => {
     const  defaultDays = getWeekDays().filter(day => day.value !== 0);
     const [informations, setInformations] = useState(initialInformations);
     const defaultCondition = {userGroups: [], days: defaultDays, price: "", tax: {}, minForFree: "", count: 0};
+    const defaultErrors = {name:"", phone: "", address: "", address2: "", zipcode: "", city: "", position: "", informations: "", available: "", private: "", accessCode: "", discount: "" };
     const [relaypoint, setRelaypoint] = useState({ name: "", informations: "", conditions: [defaultCondition], available: true, private: false, accessCode: "", discount: "" });
-    const [errors, setErrors] = useState({name:"", phone: "", address: "", address2: "", zipcode: "", city: "", position: "", informations: "", available: "", private: "", accessCode: "", discount: "" });
+    const [errors, setErrors] = useState(defaultErrors);
 
     useEffect(() => {
         fetchGroups();
@@ -55,10 +56,9 @@ const Relaypoint = ({ match, history }) => {
             setEditing(true);
             RelaypointActions.find(id)
                 .then( response => {
-                    setRelaypoint({
-                        ...response, 
-                        conditions : !isDefined(response.conditions) ? [] :
-                                     response.conditions.map((condition, i) => ({...condition, count: i})) })
+                    const {metas, ...dbRelaypoint} = response;
+                    setRelaypoint({...dbRelaypoint, conditions : !isDefined(response.conditions) ? [] : response.conditions.map((condition, i) => ({...condition, count: i})) });
+                    setInformations(metas);
                 })
                 .catch(error => {
                     console.log(error);
@@ -89,14 +89,17 @@ const Relaypoint = ({ match, history }) => {
     };
 
     const getFormattedRelaypoint = () => {
+        const discountValue = getNumericOrNull(relaypoint.discount);
         return {
             ...relaypoint,
-            discount: relaypoint.discount.length > 0 ? parseFloat((parseFloat(relaypoint.discount) / 100).toFixed(3)) : null,
-            accessCode: relaypoint.accessCode.length > 0 ? relaypoint.accessCode : null,
+            discount: isDefined(discountValue) ? parseFloat((discountValue / 100).toFixed(3)) : null,
+            accessCode: isDefined(relaypoint.accessCode) && relaypoint.accessCode.length > 0 ? relaypoint.accessCode : null,
             metas: informations,
             conditions: relaypoint.conditions.map(condition => {
                 return {
-                    ...condition, 
+                    ...condition,
+                    price: getNumericOrNull(condition.price),
+                    minForFree: getNumericOrNull(condition.minForFree),
                     tax : condition.tax['@id'], 
                     userGroups: condition.userGroups.map(group => group['@id'])
                 }
@@ -110,7 +113,7 @@ const Relaypoint = ({ match, history }) => {
         console.log(relaypointToWrite);
         const request = !editing ? RelaypointActions.create(relaypointToWrite) : RelaypointActions.update(id, relaypointToWrite);
         request.then(response => {
-                    setErrors({ name: "", zipCode: "", conditions: ""});
+                    setErrors(defaultErrors);
                     //TODO : Flash notification de succès
                     history.replace("/components/relaypoints");
                 })

@@ -6,7 +6,7 @@ import GroupActions from 'src/services/GroupActions';
 import CityActions from 'src/services/CityActions';
 import { CButton, CCard, CCardBody, CCardFooter, CCardHeader, CCol, CForm, CFormGroup, CInput, CInvalidFeedback, CLabel, CRow } from '@coreui/react';
 import CIcon from '@coreui/icons-react';
-import { getDateFrom, isDefined } from 'src/helpers/utils';
+import { getDateFrom, getNumericOrNull, isDefined } from 'src/helpers/utils';
 import Condition from 'src/components/conditions/condition';
 import { getWeekDays } from 'src/helpers/days';
 import TaxActions from 'src/services/TaxActions';
@@ -80,12 +80,13 @@ const City = ({ match, history }) => {
         console.log(city);
         const cityToWrite = {...city, conditions: city.conditions.map(condition => {
             return {
-                ...condition, 
+                ...condition,
+                price: getNumericOrNull(condition.price),
+                minForFree: getNumericOrNull(condition.minForFree),
                 tax : condition.tax['@id'], 
                 userGroups: condition.userGroups.map(group => group['@id'])
             }
         })};
-        console.log(cityToWrite);
         const request = !editing ? CityActions.create(cityToWrite) : CityActions.update(id, cityToWrite);
         request.then(response => {
                     setErrors({ name: "", zipCode: "", conditions: ""});
