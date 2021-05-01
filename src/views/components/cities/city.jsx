@@ -149,11 +149,11 @@ const City = ({ match, history }) => {
                             { city.conditions.map((condition, index) => {
                                 return <Condition
                                             key={ index }
-                                            city={ city }
+                                            entity={ city }
                                             condition={ condition } 
                                             groups={ groups }
                                             taxes={ taxes }
-                                            setCity={ setCity }
+                                            setEntity={ setCity }
                                             handleDeleteRule={ handleDeleteRule }
                                             errors={ errors }
                                             total={ city.conditions.length }

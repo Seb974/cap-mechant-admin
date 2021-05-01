@@ -4,7 +4,7 @@ import { CButton, CCol, CFormGroup, CInput, CInvalidFeedback, CLabel, CRow, CSel
 import CIcon from '@coreui/icons-react';
 import { getWeekDays } from 'src/helpers/days';
 
-const Condition = ({ city, condition, groups, taxes, setCity, handleDeleteRule, errors, total, index }) => {
+const Condition = ({ entity, condition, groups, taxes, setEntity, handleDeleteRule, errors, total, index }) => {
 
     useEffect(() => {
         if (Object.keys(condition.tax).length === 0 && taxes.length > 0)
@@ -16,8 +16,8 @@ const Condition = ({ city, condition, groups, taxes, setCity, handleDeleteRule, 
     const handleChange = ({ currentTarget }) => setNewCondition({...condition, [currentTarget.name]: currentTarget.value});
 
     const setNewCondition = condition => {
-        const newConditions = [...city.conditions.filter(option => option.count !== condition.count)];
-        setCity({...city, conditions: [...newConditions, condition].sort((a, b) => (a.count > b.count) ? 1 : -1)});
+        const newConditions = [...entity.conditions.filter(option => option.count !== condition.count)];
+        setEntity({...entity, conditions: [...newConditions, condition].sort((a, b) => (a.count > b.count) ? 1 : -1)});
     };
 
     return (

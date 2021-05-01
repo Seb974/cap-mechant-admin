@@ -17,5 +17,6 @@
     "groups.label": "Groupes d'utilisateurs",
     "price.groups.label": "Groupes de prix",
     "days.off.label": "Jours de fermeture",
-    "cities.label": "Villes désservies"
+    "cities.label": "Villes désservies",
+    "relaypoints.label": "Points relais"
 }

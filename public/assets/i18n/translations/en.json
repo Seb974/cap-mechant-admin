@@ -17,5 +17,6 @@
     "groups.label": "User groups",
     "price.groups.label": "Price groups",
     "days.off.label": "Days off",
-    "cities.label": "Delivered Cities"
+    "cities.label": "Delivered Cities",
+    "relaypoints.label": "Relay points"
 }
