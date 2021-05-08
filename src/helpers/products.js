@@ -58,7 +58,7 @@ export const getProductToWrite = (product, type, categories, variations, adapted
         stockManaged: type === "mixed" ? null : noImgProduct.stockManaged,
         unit: type === "mixed" ? "U" : noImgProduct.unit,
         fullDescription: type === "mixed" ? createDescription(product, components) : noImgProduct.fullDescription,
-        weight: type === "mixed" ? getTotalWeight(components) : product.unit === "Kg" ? 1 : noImgProduct.weight.length <= 0 ? noImgProduct.weight : 1,
+        weight: type === "mixed" ? getTotalWeight(components) : product.unit === "Kg" ? 1 : noImgProduct.weight.length <= 0 ? 1 : parseFloat(noImgProduct.weight),
         prices: product.prices.map(price => {
             console.log(price);
             return ({...price, amount: parseFloat(price.amount), priceGroup: price.priceGroup['@id']})
@@ -110,8 +110,6 @@ export const formatProduct = (product, defaultStock) => {
         uniquePrice: isDefinedAndNotVoid(prices) ? prices.every(price => price.amount === basePrice) : true,
         stock: isDefined(stock) ? stock : isDefinedAndNotVoid(variations) ? variations[0].sizes[0].stock : defaultStock
     };
-    console.log(product);
-    console.log(formattedProduct);
     return formattedProduct;
 };
 

@@ -6,6 +6,10 @@ const Categories = React.lazy(() => import('./views/components/categories/catego
 const Category = React.lazy(() => import('./views/components/categories/category'));
 const Groups = React.lazy(() => import('./views/components/groups/groups'));
 const Group = React.lazy(() => import('./views/components/groups/group'));
+const Containers = React.lazy(() => import('./views/components/containers/containers'));
+const Container = React.lazy(() => import('./views/components/containers/container'));
+const Catalogs = React.lazy(() => import('./views/components/catalogs/catalogs'));
+const Catalog = React.lazy(() => import('./views/components/catalogs/catalog'));
 const PriceGroups = React.lazy(() => import('./views/components/price_groups/priceGroups'));
 const PriceGroup = React.lazy(() => import('./views/components/price_groups/priceGroup'));
 const DaysOff = React.lazy(() => import('./views/components/days_off/daysOff'));
@@ -77,6 +81,10 @@ const routes = [
   { path: '/components/categories', name: 'Categories', component: Categories },
   { path: '/components/groups/:id', name: 'Group', component: Group },
   { path: '/components/groups', name: 'Groups', component: Groups },
+  { path: '/components/containers/:id', name: 'Container', component: Container },
+  { path: '/components/containers', name: 'Containers', component: Containers },
+  { path: '/components/catalogs/:id', name: 'Catalog', component: Catalog },
+  { path: '/components/catalogs', name: 'Catalogs', component: Catalogs },
   { path: '/components/price_groups/:id', name: 'PriceGroup', component: PriceGroup },
   { path: '/components/price_groups', name: 'PriceGroups', component: PriceGroups },
   { path: '/components/days_off/:id', name: 'DayOff', component: DayOff },

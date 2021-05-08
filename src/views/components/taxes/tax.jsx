@@ -5,43 +5,52 @@ import { CButton, CCard, CCardBody, CCardFooter, CCardHeader, CCol, CForm, CForm
 import CIcon from '@coreui/icons-react';
 import Roles from 'src/config/Roles';
 import StateInput from 'src/components/taxPages/stateInput';
+import CatalogActions from 'src/services/CatalogActions';
+import Select from 'src/components/forms/Select';
+import { isDefinedAndNotVoid, getFloat } from 'src/helpers/utils';
+import CatalogTax from 'src/components/taxPages/catalogTax';
 
 const TaxPage = ({ match, history }) => {
 
     const { id = "new" } = match.params;
-    const defaultRate = {count: 0, id: 0, name: "", rate: 0};
+    const defaultCatalog = {id: -1, name: "", percent: 0};
     const [editing, setEditing] = useState(false);
     const [tax, setTax] = useState({ name: "" });
     const [errors, setErrors] = useState({ name: "" });
-    const [rates, setRates] = useState([defaultRate]);
+    const [catalogs, setCatalogs] = useState([]);
+    const [catalogOptions, setCatalogOptions] = useState([defaultCatalog]);
 
-    useEffect(() => fetchTax(id), []);
+    useEffect(() => {
+        fetchCatalogs();
+        fetchTax(id);
+    }, []);
+
     useEffect(() => fetchTax(id), [id]);
 
-    const handleChange = ({ currentTarget }) => setTax({...tax, [currentTarget.name]: currentTarget.value});
-    const handleRateChange = ({ currentTarget }) => {
-        let updatedRate = rates.find(rate => parseInt(rate.count) === parseInt(currentTarget.id));
-        let filteredRates = rates.filter(rate => parseInt(rate.count) !== parseInt(updatedRate.count));
-        setRates([...filteredRates, {...updatedRate, [currentTarget.name]: currentTarget.value}]);
-    };
+    useEffect(() => {
+        if (isDefinedAndNotVoid(catalogs)) {
+            let newCatalogOptions = [...catalogOptions];
+            let defaultOption = catalogOptions.findIndex(option => option.id === -1);
+            if (defaultOption !== -1) {
+                newCatalogOptions[defaultOption] = {...catalogs[0], percent: newCatalogOptions[defaultOption].percent };
+                setCatalogOptions(newCatalogOptions);
+            }
+        }
+    }, [catalogs, tax]);
+
 
     const fetchTax = id => {
         if (id !== "new") {
             setEditing(true);
             TaxActions.find(id)
                 .then( response => {
-                    if (response.rates) {
-                        let backendRates = response.rates.map( (rate, index) => {
-                            return { 
-                                count: (index + 1), 
-                                id: 0, 
-                                name: rate.name, 
-                                rate: (parseFloat(rate.value) * 100).toFixed(2)
-                            };
-                        });
-                        setRates(backendRates.length > 0 ? backendRates : rates);
+                    const { catalogTaxes, ...tax } = response; 
+                    setTax(tax);
+                    if (catalogTaxes.length > 0) {
+                        setCatalogOptions(catalogTaxes.map(catalog => {
+                            return {...catalog.catalog, percent: (catalog.percent * 100).toFixed(3)}; 
+                        }));
                     }
-                    setTax(response);
                 })
                 .catch(error => {
                     console.log(error);
@@ -49,18 +58,30 @@ const TaxPage = ({ match, history }) => {
                     history.replace("/components/taxes");
                 });
         }
-    }
+    };
 
-    const handleRateAdd = () => setRates([...rates, {...defaultRate, count: rates[rates.length -1].count + 1}]);
-    const handleRateDelete = ({ currentTarget }) => setRates(rates.filter(rate => parseInt(rate.count) !== parseInt(currentTarget.name)));
+    const fetchCatalogs = () => {
+        CatalogActions.findAll()
+            .then(response => setCatalogs(response));
+    };
+
+    const handleChange = ({ currentTarget }) => setTax({...tax, [currentTarget.name]: currentTarget.value});
+
+    const handleAdd = e => {
+        e.preventDefault();
+        if (catalogOptions.length < catalogs.length) {
+            let next = catalogs.findIndex(catalog => catalogOptions.find(selection => selection.id === catalog.id) === undefined);
+            setCatalogOptions(catalogOptions => {
+                return [...catalogOptions, {...catalogs[next], percent: 0}];
+            });
+        }
+    };
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        console.log({...tax, rates: rates.map(rate => ({name: rate.name, value: (parseFloat(rate.rate) / 100).toFixed(3) }))});
-        const request = !editing ? 
-            TaxActions.create({...tax, rates: rates.map(rate => ({name: rate.name, value: (parseFloat(rate.rate) / 100).toFixed(3) }))}) : 
-            TaxActions.update(id, {...tax, rates: rates.map(rate => ({name: rate.name, value: (parseFloat(rate.rate) / 100).toFixed(3) }))});
-
+        const taxToWrite = {...tax, catalogTaxes: catalogOptions.map(catalog => ({catalog: catalog['@id'], percent: (getFloat(catalog.percent) / 100) }))};
+        console.log(taxToWrite);
+        const request = !editing ? TaxActions.create(taxToWrite) : TaxActions.update(id, taxToWrite);
         request.then(response => {
                     setErrors({name: ""});
                     //TODO : Flash notification de succès
@@ -77,7 +98,7 @@ const TaxPage = ({ match, history }) => {
                     }
                     //TODO : Flash notification d'erreur
                });
-    }
+    };
 
     return (
         <CRow>
@@ -105,10 +126,20 @@ const TaxPage = ({ match, history }) => {
                                 </CCol>
                             </CRow>
                             <hr className="mt-5"/>
-                            <CLabel htmlFor="name" className="mb-4">Taux</CLabel>
-                            { rates.map( rate => <StateInput key={ rate.count } rate={ rate } handleChange={ handleRateChange } handleDelete={ handleRateDelete }/> ) }
+                            <CLabel htmlFor="name" className="mb-1">Taux</CLabel>
+                            { catalogOptions.map((catalog, index) => {
+                                return <CatalogTax 
+                                            key={ catalog.id } 
+                                            index={ index }
+                                            details={ catalog } 
+                                            options={ catalogOptions } 
+                                            catalogs={ catalogs }
+                                            setCatalogOptions={ setCatalogOptions }
+                                        />
+                                })
+                            }
                             <CRow className="mt-4 mr-1 d-flex justify-content-start ml-1">
-                                <CButton size="sm" color="warning" onClick={ handleRateAdd }><CIcon name="cil-plus"/> Ajouter un taux</CButton>
+                                <CButton size="sm" color="warning" onClick={ handleAdd }><CIcon name="cil-plus"/> Ajouter un taux</CButton>
                             </CRow>
                             <CRow className="mt-4 d-flex justify-content-center">
                                 <CButton type="submit" size="sm" color="success"><CIcon name="cil-save"/> Enregistrer</CButton>

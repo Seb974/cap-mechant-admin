@@ -18,5 +18,7 @@
     "price.groups.label": "Groupes de prix",
     "days.off.label": "Jours de fermeture",
     "cities.label": "Villes désservies",
-    "relaypoints.label": "Points relais"
+    "relaypoints.label": "Points relais",
+    "containers.label": "Colis",
+    "catalogs.label": "Catalogues"
 }

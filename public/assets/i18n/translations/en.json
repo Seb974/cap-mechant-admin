@@ -18,5 +18,7 @@
     "price.groups.label": "Price groups",
     "days.off.label": "Days off",
     "cities.label": "Delivered Cities",
-    "relaypoints.label": "Relay points"
+    "relaypoints.label": "Relay points",
+    "containers.label": "Parcels",
+    "catalogs.label": "Catalogs"
 }

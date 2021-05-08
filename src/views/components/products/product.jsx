@@ -87,7 +87,6 @@ const ProductPage = ({ match, history }) => {
     const adaptProduct = (variations = [], adaptedComponents = []) => {
         const { image } = product;
         const productToWrite = getProductToWrite(product, type, categories, variations, adaptedComponents, components);
-        console.log(productToWrite);
         if (image && !image.filePath) {
             ProductActions.createImage(product.image)
                           .then(image => writeProduct({...productToWrite, image}));

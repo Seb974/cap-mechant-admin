@@ -1,30 +1,30 @@
 import React, { useEffect, useState } from 'react';
-import GroupActions from '../../../services/GroupActions'
+import CatalogActions from '../../../services/CatalogActions'
 import { CBadge, CCard, CCardBody, CCardHeader, CCol, CDataTable, CRow, CButton } from '@coreui/react';
 import { DocsLink } from 'src/reusable'
 import { Link } from 'react-router-dom';
 
-const Groups = (props) => {
+const Catalogs = (props) => {
 
     const itemsPerPage = 15;
-    const fields = ['label', ' '];
-    const [groups, setGroups] = useState([]);
+    const fields = ['name', 'code', ' '];
+    const [catalogs, setCatalogs] = useState([]);
 
     useEffect(() => {
-        GroupActions.findAll()
+        CatalogActions.findAll()
             .then(response => {
               console.log(response);
-              setGroups(response);
+              setCatalogs(response);
             })
             .catch(error => console.log(error.response));
     }, []);
 
     const handleDelete = (id) => {
-        const originalGroups = [...groups];
-        setGroups(groups.filter(group => group.id !== id));
-        GroupActions.delete(id)
+        const originalCatalogs = [...catalogs];
+        setCatalogs(catalogs.filter(catalog => catalog.id !== id));
+        CatalogActions.delete(id)
                        .catch(error => {
-                            setGroups(originalGroups);
+                            setCatalogs(originalCatalogs);
                             console.log(error.response);
                        });
     }
@@ -34,24 +34,27 @@ const Groups = (props) => {
         <CCol xs="12" lg="12">
           <CCard>
             <CCardHeader>
-                Liste des groupes d'utilisateurs
+                Liste des catalogues
                 <CCol col="6" sm="4" md="2" className="ml-auto">
-                    <Link role="button" to="/components/groups/new" block variant="outline" color="success">CRÉER</Link>
+                    <Link role="button" to="/components/catalogs/new" block variant="outline" color="success">CRÉER</Link>
                 </CCol>
             </CCardHeader>
             <CCardBody>
             <CDataTable
-              items={ groups }
+              items={ catalogs }
               fields={ fields }
               bordered
               itemsPerPage={ itemsPerPage }
               pagination
               scopedSlots = {{
-                'label':
-                  item => <td><Link to={ "/components/groups/" + item.id }>{ item.label }</Link></td>
+                'name':
+                  item => <td><Link to={ "/components/catalogs/" + item.id }>{ item.name }</Link></td>
+                ,
+                'code':
+                  item => <td><Link to={ "/components/catalogs/" + item.id }>{ item.code }</Link></td>
                 ,
                 ' ':
-                  item =><td><CButton block color="danger" disabled={ item.isFixed  } onClick={ () => handleDelete(item.id) }>Supprimer</CButton></td>
+                  item =><td><CButton block color="danger" onClick={ () => handleDelete(item.id) }>Supprimer</CButton></td>
               }}
             />
             </CCardBody>
@@ -62,4 +65,4 @@ const Groups = (props) => {
     );
 }
  
-export default Groups;
+export default Catalogs;

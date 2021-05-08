@@ -82,6 +82,12 @@ function getNav(translation) {
         },
         {
           _tag: 'CSidebarNavItem',
+          name: translation("containers.label"),
+          to: '/components/containers',
+          icon: <CIcon name="cil-basket" customClasses="c-sidebar-nav-icon"/>,
+        },
+        {
+          _tag: 'CSidebarNavItem',
           name: translation("days.off.label"),
           to: '/components/days_off',
           icon: <CIcon name="cil-calendar" customClasses="c-sidebar-nav-icon"/>,
@@ -91,6 +97,12 @@ function getNav(translation) {
           name: translation("cities.label"),
           to: '/components/cities',
           icon: <CIcon name="cil-location-pin" customClasses="c-sidebar-nav-icon"/>,
+        },
+        {
+          _tag: 'CSidebarNavItem',
+          name: translation("catalogs.label"),
+          to: '/components/catalogs',
+          icon: <CIcon name="cil-compass" customClasses="c-sidebar-nav-icon"/>,
         },
       ]
     },
