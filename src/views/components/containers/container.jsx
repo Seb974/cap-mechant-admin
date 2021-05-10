@@ -4,19 +4,25 @@ import ContainerActions from 'src/services/ContainerActions';
 import { CButton, CCard, CCardBody, CCardFooter, CCardHeader, CCol, CForm, CFormGroup, CInput, CInvalidFeedback, CLabel, CRow, CInputGroupText, CInputGroupAppend, CInputGroup, CSwitch, CSelect } from '@coreui/react';
 import CIcon from '@coreui/icons-react';
 import TaxActions from 'src/services/TaxActions';
-import { getFloat } from 'src/helpers/utils';
+import { getFloat, isDefinedAndNotVoid } from 'src/helpers/utils';
+import CatalogPrice from 'src/components/containerPages/catalogPrice';
+import CatalogActions from 'src/services/CatalogActions';
 
 const Container = ({ match, history }) => {
 
     const { id = "new" } = match.params;
+    const defaultCatalog = {id: -1, name: "", amount: 0};
     const [editing, setEditing] = useState(false);
     const [taxes, setTaxes] = useState([]);
-    const defaultErrors = {name: "", available: "", max: "", tare: "", price: "", tax: "", length: "", width: "", height: ""};
+    const [catalogs, setCatalogs] = useState([]);
+    const [catalogOptions, setCatalogOptions] = useState([defaultCatalog]);
+    const defaultErrors = {name: "", available: "", max: "", tare: "", tax: "", length: "", width: "", height: ""};
     const defaultStock = {quantity: 0, alert: 0, security: 0};
-    const [container, setContainer] = useState({ name: "", max: "", tare: "", available: true, price: "", tax: "", length: "", width: "", height: "", stock: defaultStock });
+    const [container, setContainer] = useState({ name: "", max: "", tare: "", available: true, tax: "", length: "", width: "", height: "", stock: defaultStock });
     const [errors, setErrors] = useState(defaultErrors);
 
     useEffect(() => {
+        fetchCatalogs();
         fetchTaxes();
         fetchContainer(id);
     }, []);
@@ -28,6 +34,17 @@ const Container = ({ match, history }) => {
             setContainer({...container, tax: taxes[0]});
     }, [taxes, container]);
 
+    useEffect(() => {
+        if (isDefinedAndNotVoid(catalogs)) {
+            let newCatalogOptions = [...catalogOptions];
+            let defaultOption = catalogOptions.findIndex(option => option.id === -1);
+            if (defaultOption !== -1) {
+                newCatalogOptions[defaultOption] = {...catalogs[0], amount: newCatalogOptions[defaultOption].amount };
+                setCatalogOptions(newCatalogOptions);
+            }
+        }
+    }, [catalogs, container]);
+
     const handleChange = ({ currentTarget }) => setContainer({...container, [currentTarget.name]: currentTarget.value});
     const handleCheckBoxes = ({ currentTarget }) => setContainer({...container, [currentTarget.name]: !container[currentTarget.name]});
     const handleStockChange = ({ currentTarget }) => setContainer({...container, stock: {...container.stock, [currentTarget.name]: currentTarget.value}})
@@ -36,13 +53,24 @@ const Container = ({ match, history }) => {
         if (id !== "new") {
             setEditing(true);
             ContainerActions.find(id)
-                .then( response => setContainer(response) )
+                .then( response => {
+                    const { catalogPrices, ...container } = response; 
+                    setContainer(container);
+                    if (catalogPrices.length > 0) {
+                        setCatalogOptions(catalogPrices.map(catalog => ({...catalog.catalog, amount: catalog.amount})));
+                    }
+                })
                 .catch(error => {
                     console.log(error);
                     // TODO : Notification flash d'une erreur
                     history.replace("/components/containers");
                 });
         }
+    };
+
+    const fetchCatalogs = () => {
+        CatalogActions.findAll()
+            .then(response => setCatalogs(response));       // .filter(catalog => catalog.needsParcel)
     };
 
     const fetchTaxes = () => {
@@ -55,9 +83,20 @@ const Container = ({ match, history }) => {
             });
     };
 
+    const handleAdd = e => {
+        e.preventDefault();
+        if (catalogOptions.length < catalogs.length) {
+            let next = catalogs.findIndex(catalog => catalogOptions.find(selection => selection.id === catalog.id) === undefined);
+            setCatalogOptions(catalogOptions => {
+                return [...catalogOptions, {...catalogs[next], amount: 0}];
+            });
+        }
+    };
+
     const handleSubmit = (e) => {
         e.preventDefault();
         const containerToWrite = getContainerToWrite();
+        console.log(containerToWrite);
         const request = !editing ? ContainerActions.create(containerToWrite) : ContainerActions.update(id, containerToWrite);
         request.then(response => {
                     setErrors(defaultErrors);
@@ -88,13 +127,13 @@ const Container = ({ match, history }) => {
             length: getFloat(container.length),
             width: getFloat(container.width),
             height: getFloat(container.height),
-            price: getFloat(container.price),
             stock: {
                 ...container.stock, 
                 quantity: getFloat(container.stock.quantity),
                 alert: getFloat(container.stock.alert),
                 security: getFloat(container.stock.security),
-            }
+            },
+            catalogPrices: catalogOptions.map(catalog => ({catalog: catalog['@id'], amount: getFloat(catalog.amount) }))
         };
     }
 
@@ -132,29 +171,13 @@ const Container = ({ match, history }) => {
                                 </CCol>
                             </CRow>
                             <CRow>
-                                <CCol xs="12" sm="12" md="6">
-                                    <CFormGroup>
-                                        <CLabel htmlFor="name">Prix</CLabel>
-                                        <CInput
-                                            id="price"
-                                            name="price"
-                                            value={ container.price }
-                                            onChange={ handleChange }
-                                            placeholder="Prix HT"
-                                            invalid={ errors.price.length > 0 } 
-                                        />
-                                        <CInvalidFeedback>{ errors.price }</CInvalidFeedback>
-                                    </CFormGroup>
-                                </CCol>
-                                <CCol xs="12" sm="12" md="6">
+                                <CCol xs="12" sm="12" md="4">
                                     <CLabel htmlFor="select">TVA</CLabel>
                                     <CSelect custom name="tax" id="tax" value={ container.tax['@id'] } onChange={ handleChange }>
                                         { taxes.map(tax => <option key={ tax.id } value={ tax['@id'] }>{ tax.name }</option>)}
                                     </CSelect>
                                 </CCol>
-                            </CRow>
-                            <CRow>
-                                <CCol xs="12" sm="12" md="6">
+                                <CCol xs="12" sm="12" md="4">
                                     <CFormGroup>
                                         <CLabel htmlFor="name">Poids maximal</CLabel>
                                         <CInput
@@ -168,7 +191,7 @@ const Container = ({ match, history }) => {
                                         <CInvalidFeedback>{ errors.max }</CInvalidFeedback>
                                     </CFormGroup>
                                 </CCol>
-                                <CCol xs="12" sm="12" md="6">
+                                <CCol xs="12" sm="12" md="4">
                                     <CFormGroup>
                                         <CLabel htmlFor="name">Tare</CLabel>
                                         <CInput
@@ -277,7 +300,22 @@ const Container = ({ match, history }) => {
                                     </CInputGroup>
                                 </CCol>
                             </CRow>
-                            {/* <hr className="mt-5"/> */}
+                            <hr className="mt-5"/>
+                            <CLabel htmlFor="name" className="mb-1">Prix</CLabel>
+                            { catalogOptions.map((catalog, index) => {
+                                return <CatalogPrice 
+                                            key={ catalog.id } 
+                                            index={ index }
+                                            details={ catalog } 
+                                            options={ catalogOptions } 
+                                            catalogs={ catalogs }
+                                            setCatalogOptions={ setCatalogOptions }
+                                        />
+                                })
+                            }
+                            <CRow className="mt-4 mr-1 d-flex justify-content-start ml-1">
+                                <CButton size="sm" color="warning" onClick={ handleAdd }><CIcon name="cil-plus"/> Ajouter un prix</CButton>
+                            </CRow>
                             <CRow className="mt-4 d-flex justify-content-center">
                                 <CButton type="submit" size="sm" color="success"><CIcon name="cil-save"/> Enregistrer</CButton>
                             </CRow>

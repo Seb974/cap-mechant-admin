@@ -9,8 +9,8 @@ const Catalog = ({ match, history }) => {
 
     const { id = "new" } = match.params;
     const [editing, setEditing] = useState(false);
-    const defaultErrors = { name: "", code: "", latitude: "", longitude: "", needsParcel: "", isDefault: "", minLat: "", maxLat: "", minLng: "", maxLng: "" };
-    const [catalog, setCatalog] = useState({ name: "", code: "", latitude: "", longitude: "", needsParcel: true, isDefault: false, minLat: "", maxLat: "", minLng: "", maxLng: "" });
+    const defaultErrors = { name: "", code: "", latitude: "", longitude: "", needsParcel: "", isDefault: "", minLat: "", maxLat: "", minLng: "", maxLng: "", zoom: "" };
+    const [catalog, setCatalog] = useState({ name: "", code: "", latitude: "", longitude: "", needsParcel: true, isDefault: false, minLat: "", maxLat: "", minLng: "", maxLng: "", zoom: "" });
     const [errors, setErrors] = useState(defaultErrors);
     const [enabled, setEnabled] = useState(false);
 
@@ -76,6 +76,7 @@ const Catalog = ({ match, history }) => {
             maxLat: getFloat(catalog.maxLat),
             minLng: getFloat(catalog.minLng),
             maxLng: getFloat(catalog.maxLng),
+            zoom: Math.round(getFloat(catalog.zoom))
         };
     }
 
@@ -119,7 +120,7 @@ const Catalog = ({ match, history }) => {
                                 </CCol>
                             </CRow>
                             <CRow>
-                                <CCol xs="12" sm="12" md="6">
+                                <CCol xs="12" sm="12" md="4">
                                     <CFormGroup>
                                         <CLabel htmlFor="name">Latitude du centre</CLabel>
                                         <CInput
@@ -133,7 +134,7 @@ const Catalog = ({ match, history }) => {
                                         <CInvalidFeedback>{ errors.latitude }</CInvalidFeedback>
                                     </CFormGroup>
                                 </CCol>
-                                <CCol xs="12" sm="12" md="6">
+                                <CCol xs="12" sm="12" md="4">
                                     <CFormGroup>
                                         <CLabel htmlFor="name">Longitude du centre</CLabel>
                                         <CInput
@@ -145,6 +146,20 @@ const Catalog = ({ match, history }) => {
                                             invalid={ errors.longitude.length > 0 } 
                                         />
                                         <CInvalidFeedback>{ errors.longitude }</CInvalidFeedback>
+                                    </CFormGroup>
+                                </CCol>
+                                <CCol xs="12" sm="12" md="4">
+                                    <CFormGroup>
+                                        <CLabel htmlFor="name">Zoom</CLabel>
+                                        <CInput
+                                            id="zoom"
+                                            name="zoom"
+                                            value={ catalog.zoom }
+                                            onChange={ handleChange }
+                                            placeholder="Niveau de zoom"
+                                            invalid={ errors.zoom.length > 0 } 
+                                        />
+                                        <CInvalidFeedback>{ errors.zoom }</CInvalidFeedback>
                                     </CFormGroup>
                                 </CCol>
                             </CRow>

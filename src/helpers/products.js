@@ -47,11 +47,12 @@ export const getTotalWeight = (components) => {
 };
 
 export const getProductToWrite = (product, type, categories, variations, adaptedComponents, components) => {
-    const {image, stock, userGroups, ...noImgProduct} = product;
+    const {image, stock, userGroups, catalogs, ...noImgProduct} = product;
     return {
         ...noImgProduct,
         stock: type === "simple" ? stock : null,
         userGroups: userGroups.map(userGroup => userGroup['@id']),
+        catalogs: catalogs.map(catalog => catalog['@id']),
         productGroup: type === "mixed" ? null : product.productGroup,
         tax: product.tax['@id'],
         categories: product.categories.map(category => categories.find(element => element.id === category.value)['@id']),
@@ -60,7 +61,6 @@ export const getProductToWrite = (product, type, categories, variations, adapted
         fullDescription: type === "mixed" ? createDescription(product, components) : noImgProduct.fullDescription,
         weight: type === "mixed" ? getTotalWeight(components) : product.unit === "Kg" ? 1 : noImgProduct.weight.length <= 0 ? 1 : parseFloat(noImgProduct.weight),
         prices: product.prices.map(price => {
-            console.log(price);
             return ({...price, amount: parseFloat(price.amount), priceGroup: price.priceGroup['@id']})
         }),
         components: adaptedComponents,
@@ -106,6 +106,7 @@ export const formatProduct = (product, defaultStock) => {
     const formattedProduct = {
         ...product, 
         userGroups: isDefinedAndNotVoid(product.userGroups) ? isDefined(product.userGroups[0].label) ? product.userGroups : product.userGroups.map(group => ({value: group})) : [],
+        catalogs: isDefinedAndNotVoid(product.catalogs) ? isDefined(product.catalogs[0].label) ? product.catalogs : product.catalogs.map(catalog => ({...catalog, value: catalog.id, label: catalog.name, isFixed: false})) : [],
         categories: categories.map(category => ({value: category.id, label: category.name, isFixed: false})),
         uniquePrice: isDefinedAndNotVoid(prices) ? prices.every(price => price.amount === basePrice) : true,
         stock: isDefined(stock) ? stock : isDefinedAndNotVoid(variations) ? variations[0].sizes[0].stock : defaultStock

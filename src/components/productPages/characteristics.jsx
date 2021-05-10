@@ -3,12 +3,18 @@ import { CCol, CFormGroup, CInput, CInvalidFeedback, CLabel, CRow, CTextarea } f
 import SelectMultiple from 'src/components/forms/SelectMultiple';
 import Image from './image';
 import GroupActions from 'src/services/GroupActions';
+import CatalogActions from 'src/services/CatalogActions';
+import { isDefinedAndNotVoid } from 'src/helpers/utils';
 
 const Characteristics = ({ product, categories, type, setProduct, errors, history}) => {
 
     const [groups, setGroups] = useState([]);
+    const [catalogs, setCatalogs] = useState([]);
 
-    useEffect(() => fetchGroups(), []);
+    useEffect(() => {
+        fetchGroups();
+        fetchCatalogs();
+    }, []);
 
     useEffect(() => {
         if (product.userGroups.length === 0 && groups.length > 0)
@@ -17,7 +23,13 @@ const Characteristics = ({ product, categories, type, setProduct, errors, histor
             setProduct({...product, userGroups: product.userGroups.map(userGroup => groups.find(group => group.value === userGroup.value))});
     }, [product, groups]);
 
+    useEffect(() => {
+        if (!isDefinedAndNotVoid(product.catalogs) && catalogs.length > 0)
+            setProduct({...product, catalogs: catalogs});
+    }, [product, catalogs]);
+
     const handleUsersChange = userGroups => setProduct(product => ({...product, userGroups}));
+    const handleCatalogsChange = catalogs => setProduct(product => ({...product, catalogs}));
     const handleCategoriesChange = categories => setProduct(product => ({...product, categories}));
     const handleChange = ({ currentTarget }) => setProduct({...product, [currentTarget.name]: currentTarget.value});
 
@@ -28,6 +40,21 @@ const Characteristics = ({ product, categories, type, setProduct, errors, histor
                         // TODO : Notification flash d'une erreur
                         history.replace("/components/products");
                     });
+    };
+
+    const fetchCatalogs = () => {
+        CatalogActions
+            .findAll()
+            .then(response => {
+                const suitedCatalogs = response.map(catalog => {
+                    return {...catalog, value: catalog.id, label: catalog.name, isFixed: false};
+                });
+                setCatalogs(suitedCatalogs);
+            })
+            .catch(error => {
+            // TODO : Notification flash d'une erreur
+            history.replace("/components/products");
+        });
     };
 
     return (
@@ -70,6 +97,11 @@ const Characteristics = ({ product, categories, type, setProduct, errors, histor
             <CRow className="mb-3">
                 <CCol xs="12" sm="12">
                     <SelectMultiple name="userGroups" label="Pour les utilisateurs" value={ product.userGroups } error={ errors.userGroups } onChange={ handleUsersChange } data={ groups }/>
+                </CCol>
+            </CRow>
+            <CRow className="mb-3">
+                <CCol xs="12" sm="12">
+                    <SelectMultiple name="catalogs" label="Sur les catalogues" value={ product.catalogs } error={ errors.catalogs } onChange={ handleCatalogsChange } data={ catalogs }/>
                 </CCol>
             </CRow>
             <CFormGroup row className="mb-4">
