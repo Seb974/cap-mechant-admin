@@ -20,5 +20,6 @@
     "cities.label": "Villes désservies",
     "relaypoints.label": "Points relais",
     "containers.label": "Colis",
-    "catalogs.label": "Catalogues"
+    "catalogs.label": "Catalogues",
+    "promotions.label": "Coupons de réduction"
 }

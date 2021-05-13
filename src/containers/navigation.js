@@ -47,6 +47,12 @@ function getNav(translation) {
     },
     {
       _tag: 'CSidebarNavItem',
+      name: translation("promotions.label"),
+      to: '/components/promotions',
+      icon: <CIcon name="cil-gift" customClasses="c-sidebar-nav-icon"/>,
+    },
+    {
+      _tag: 'CSidebarNavItem',
       name: translation("relaypoints.label"),
       to: '/components/relaypoints',
       icon: <CIcon name="cil-home" customClasses="c-sidebar-nav-icon"/>,

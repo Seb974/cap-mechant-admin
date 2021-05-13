@@ -20,5 +20,6 @@
     "cities.label": "Delivered Cities",
     "relaypoints.label": "Relay points",
     "containers.label": "Parcels",
-    "catalogs.label": "Catalogs"
+    "catalogs.label": "Catalogs",
+    "promotions.label": "Discount coupons"
 }
