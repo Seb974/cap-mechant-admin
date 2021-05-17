@@ -57,7 +57,11 @@ const Relaypoint = ({ match, history }) => {
             RelaypointActions.find(id)
                 .then( response => {
                     const {metas, ...dbRelaypoint} = response;
-                    setRelaypoint({...dbRelaypoint, conditions : !isDefined(response.conditions) ? [] : response.conditions.map((condition, i) => ({...condition, count: i})) });
+                    setRelaypoint({
+                        ...dbRelaypoint,
+                        discount: isDefined(dbRelaypoint.promotion) ? dbRelaypoint.promotion.discount * 100 : "",
+                        conditions : !isDefined(response.conditions) ? [] : response.conditions.map((condition, i) => ({...condition, count: i})) 
+                    });
                     setInformations(metas);
                 })
                 .catch(error => {
@@ -104,13 +108,25 @@ const Relaypoint = ({ match, history }) => {
                     userGroups: condition.userGroups.map(group => group['@id'])
                 }
             }),
+            promotion: isDefined(discountValue) ? getPromotionToWrite(discountValue) : null,
         };
+    };
+
+    const getPromotionToWrite = (discountValue) => {
+        return {
+            ...relaypoint.promotion,
+            code: "relaypoint",
+            percentage: true,
+            discount: parseFloat((discountValue / 100).toFixed(3)),
+            maxUsage: null,
+            used: null,
+            endsAt: null
+        }
     };
 
     const handleSubmit = (e) => {
         e.preventDefault();
         const relaypointToWrite = getFormattedRelaypoint();
-        console.log(relaypointToWrite);
         const request = !editing ? RelaypointActions.create(relaypointToWrite) : RelaypointActions.update(id, relaypointToWrite);
         request.then(response => {
                     setErrors(defaultErrors);

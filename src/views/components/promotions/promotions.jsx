@@ -15,7 +15,7 @@ const Promotions = (props) => {
         PromotionActions.findAll()
             .then(response => {
                 console.log(response);
-                setPromotions(response);
+                setPromotions(response.filter(promotion => promotion.code !== "relaypoint"));
             })
             .catch(error => console.log(error));
     }, []);
