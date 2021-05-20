@@ -21,5 +21,6 @@
     "relaypoints.label": "Points relais",
     "containers.label": "Colis",
     "catalogs.label": "Catalogues",
-    "promotions.label": "Coupons de réduction"
+    "promotions.label": "Coupons de réduction",
+    "sellers.label": "Vendeurs"
 }

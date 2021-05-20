@@ -19,22 +19,19 @@ const ProductPage = ({ match, history }) => {
     const [editing, setEditing] = useState(false);
     const [categories, setCategories] = useState([]);
     const { products } = useContext(ProductsContext);
-    // const defaultVariant = products[0].variations && products[0].variations.length > 0 ? products.variations[0] : null;
     const defaultVariant = null;
     const defaultVariantSize = defaultVariant !== null && products[0].variations[0].sizes && products[0].variations[0].sizes.length > 0 ? products[0].variations[0].sizes[0] : null;
     const defaultProduct = {product: products[0], variation: defaultVariant, size: defaultVariantSize};
     const defaultComponent = {...defaultProduct, count: 0, quantity: ""};
     const defaultStock = {quantity: 0, alert: "", security:""};
     const defaultVariation = {count: 0, name: "", image: null, sizes: [defaultSize]};
-    const [product, setProduct] = useState({name: "", weight:"", userGroups: [], catalogs: [], image: null, unit: "Kg", productGroup: "J + 1", fullDescription: "", stock: defaultStock, stockManaged: true, tax: "-1", uniquePrice: true, prices: [], available: true, requireLegalAge: false, new: true, isMixed: false, categories: []});        // [{name: 'BASE', price:""}, {name: 'USER_VIP', price:""}, {name: 'PRO_CHR', price:""}, {name: 'PRO_GC', price:""}, {name: 'PRO_VIP', price:""}]
-    const [errors, setErrors] = useState({name: "", weight: "", userGroups: "", catalogs: [], image: "", unit: "", productGroup: "", fullDescription: "", stock: {alert: "", security:""}, stockManaged: "", tax: "", uniquePrice: "", prices: [{name: 'BASE', price:""}, {name: 'USER_VIP', price:""}, {name: 'PRO_CHR', price:""}, {name: 'PRO_GC', price:""}, {name: 'PRO_VIP', price:""}], available: "", requireLegalAge: "", new: "", isMixed: "", categories: ""});
+    const [product, setProduct] = useState({name: "", weight:"", seller: {id: -1, name: ""}, userGroups: [], catalogs: [], image: null, unit: "Kg", productGroup: "J + 1", fullDescription: "", stock: defaultStock, stockManaged: true, tax: "-1", uniquePrice: true, prices: [], available: true, requireLegalAge: false, new: true, isMixed: false, categories: []});        // [{name: 'BASE', price:""}, {name: 'USER_VIP', price:""}, {name: 'PRO_CHR', price:""}, {name: 'PRO_GC', price:""}, {name: 'PRO_VIP', price:""}]
+    const [errors, setErrors] = useState({name: "", weight: "", seller: "", userGroups: "", catalogs: [], image: "", unit: "", productGroup: "", fullDescription: "", stock: {alert: "", security:""}, stockManaged: "", tax: "", uniquePrice: "", prices: [{name: 'BASE', price:""}, {name: 'USER_VIP', price:""}, {name: 'PRO_CHR', price:""}, {name: 'PRO_GC', price:""}, {name: 'PRO_VIP', price:""}], available: "", requireLegalAge: "", new: "", isMixed: "", categories: ""});
     const [variations, setVariations] = useState([defaultVariation]);
     const [components, setComponents] = useState([defaultComponent]);
     const [type, setType] = useState("simple");
     
     useEffect(() => {
-        // if (products === undefined || products === null || products.length <= 0)
-        //     history.replace("/components/products")
         fetchCategories();
         fetchProduct(id);
     }, []);

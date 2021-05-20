@@ -21,5 +21,6 @@
     "relaypoints.label": "Relay points",
     "containers.label": "Parcels",
     "catalogs.label": "Catalogs",
-    "promotions.label": "Discount coupons"
+    "promotions.label": "Discount coupons",
+    "sellers.label": "Sellers"
 }

@@ -8,7 +8,6 @@ const Select = ({ name, id, value, error = "", label, onChange, children, requir
             <CSelect custom name={ name } id={ id || name } value={ value } onChange={ onChange } invalid={ error.length > 0 } valid={ valid } required={ required } disabled={ disabled } multiple={ multiple } >
                 { children }
             </CSelect>
-            <CValidFeedback>Cool! Input is valid</CValidFeedback>
             <CInvalidFeedback>{ error }</CInvalidFeedback>
         </CFormGroup>
     );
