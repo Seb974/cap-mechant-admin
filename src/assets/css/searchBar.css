@@ -13,16 +13,14 @@
   margin-left: 15px;
   position: absolute;
   width: 90%;
-  top: 87%;
-  /* top: 110%; fallback */
-  /* top: calc(90% + 0px); */
+  top: 36px;
   z-index: 1000;
   overflow: hidden;
   font-size: 15px;
 }
 
 .no-suggestion {
-    top: 87%!important;
+    top: 36px!important;
 }
 
 .mapboxgl-ctrl-bottom-left .suggestions,
@@ -62,12 +60,12 @@
   .mapboxgl-ctrl-geocoder .suggestions {
     font-size: 13px;
     width: 87%;
-    margin-left: 10px;
-    top: 57%;
+    margin-left: 15px;
+    top: 38px!important;
   }
 
   .no-suggestion {
-      top: 57%!important;
+      top: 38px!important;
   }
 
 }

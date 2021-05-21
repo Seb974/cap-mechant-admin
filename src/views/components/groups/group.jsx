@@ -27,7 +27,6 @@ const Group = ({ match, history }) => {
             setEditing(true);
             GroupActions.find(id)
                 .then( response => {
-                    console.log(response);
                     const newGroup = {
                         ...response,
                         subjectToTaxes: isDefined(response.subjectToTaxes) ? response.subjectToTaxes : group.subjectToTaxes,
@@ -35,7 +34,6 @@ const Group = ({ match, history }) => {
                         dayInterval: isDefined(response.dayInterval) ? response.dayInterval : group.dayInterval,
                         hourLimit: isDefined(response.hourLimit) ? new Date(response.hourLimit) : group.hourLimit
                     };
-                    console.log(newGroup);
                     setGroup(newGroup);
                 })
                 .catch(error => {
@@ -60,7 +58,6 @@ const Group = ({ match, history }) => {
         const groupToWrite = !isDefined(group.priceGroup) ? 
             {...group, hourLimit: getFormattedTime(group.hourLimit), dayInterval: parseInt(group.dayInterval)} : 
             {...group, priceGroup: group.priceGroup['@id'], hourLimit: getFormattedTime(group.hourLimit), dayInterval: parseInt(group.dayInterval)};
-        console.log(groupToWrite);
         const request = !editing ? GroupActions.create(groupToWrite) : GroupActions.update(id, groupToWrite);
         request.then(response => {
                     setErrors({label: ""});

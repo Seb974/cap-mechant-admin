@@ -6,5 +6,7 @@ export default React.createContext({
     currentUser: {},
     setCurrentUser: (value) => {},
     eventSource: {},
-    setEventSource: (value) => {}
+    setEventSource: (value) => {},
+    settings: {},
+    setSettings: (value) => {}
 });

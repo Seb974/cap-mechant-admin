@@ -5,41 +5,38 @@ import { CCol, CLabel, CRow } from '@coreui/react';
 import CIcon from '@coreui/icons-react';
 import UserSearch from 'src/components/forms/UserSearch';
 import '../../assets/css/searchBar.css';
+import { isDefined } from 'src/helpers/utils';
 
-const UserSearchMultiple = ({ users, setUsers }) => {
+const UserSearchSimple = ({ user, setUser }) => {
 
     const handleDelete = e => {
         e.preventDefault();
-        setUsers(users.filter(user => user.id !== parseInt(e.currentTarget.id)));
+        setUser(null);
     };
 
     return (
         <>
             <hr className="mx-2 my-4"/>
             <CRow className="ml-2">
-                <CLabel htmlFor="name">Utilisateurs associés</CLabel>
+                <CLabel htmlFor="name">Utilisateur associé</CLabel>
             </CRow>
             <CRow className="mt-4">
                 <CCol xs="12" sm="12" md="6">
-                    <UserSearch value={ users } setValue={ setUsers }/>
+                    <UserSearch value={ user } setValue={ setUser }/>
                 </CCol>
                 <CCol xs="12" sm="12" md="6">
                     <Card >
-                        <Card.Header className="text-center"><strong>Utilisateurs associés</strong></Card.Header>
+                        {/* <Card.Header className="text-center"><strong>Utilisateur associés</strong></Card.Header> */}
                         <ListGroup variant="flush">
-                            { users.length <= 0 ? 
-
+                            { !isDefined(user) ?
                                 <ListGroup.Item className="text-center">
                                     <small><i>Aucun utilisateur associé</i></small>
                                 </ListGroup.Item>
-
-                              : users.map(user => {
-                                return (
-                                    <ListGroup.Item key={ user.id } className="d-flex justify-content-between">
-                                        <div>{ user.name } <small> - { user.email }</small></div>
-                                        <div><a href="#" id={ user.id } onClick={ handleDelete }><CIcon name="cil-trash"/></a></div>
-                                    </ListGroup.Item>
-                                )})
+                             :
+                                <ListGroup.Item className="d-flex justify-content-between">
+                                    <div>{ user.name } <small> - { user.email }</small></div>
+                                    <div><a href="#" id={ user.id } onClick={ handleDelete }><CIcon name="cil-trash"/></a></div>
+                                </ListGroup.Item>
                             }
                         </ListGroup>
                     </Card>
@@ -49,4 +46,4 @@ const UserSearchMultiple = ({ users, setUsers }) => {
     );
 }
  
-export default UserSearchMultiple;
+export default UserSearchSimple;

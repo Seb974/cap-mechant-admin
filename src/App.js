@@ -36,7 +36,7 @@ const App = () => {
                         <Route exact path="/404" name="Page 404" rcomponent={  Page404 } />
                         <Route exact path="/500" name="Page 500" component={ Page500 } />
                         <Route path="/apps/email" name="Email App" component={ TheEmailApp } />
-                        <PrivateRoute path="/" name="Home" component={ TheLayout } />
+                        <AdminRoute path="/" name="Home" component={ TheLayout } />
                     </Switch>
                 </React.Suspense>
             </HashRouter>

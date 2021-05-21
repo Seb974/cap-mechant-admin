@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import CIcon from '@coreui/icons-react';
-import { CFormGroup, CInput, CLabel, CInputGroupText, CInputGroupAppend, CInputGroup } from '@coreui/react';
+import { CFormGroup, CInput, CInputGroupText, CInputGroupAppend, CInputGroup } from '@coreui/react';
 import { isDefinedAndNotVoid } from 'src/helpers/utils';
 import UserActions from 'src/services/UserActions';
 
-const UserSearch = ({ users, setUsers }) => {
+const UserSearch = ({ value, setValue }) => {
 
     const [userSearch, setUserSearch] = useState("");
     const [suggestions, setSuggestions] = useState([]);
@@ -22,7 +22,10 @@ const UserSearch = ({ users, setUsers }) => {
         UserActions
             .findUser(userSearch)
             .then(response => {
-                setSuggestions(response);
+                const filteredResponse = Array.isArray(value) ? 
+                        response.filter(suggestion => value.find(user => user.id === suggestion.id) === undefined) :
+                        response.filter(suggestion  => suggestion.id !== value.id);
+                setSuggestions(filteredResponse);
                 setHasResults(true);
             })
             .catch(error => console.log(error));
@@ -30,7 +33,9 @@ const UserSearch = ({ users, setUsers }) => {
 
     const handleSelect = ({ currentTarget }) => {
         const selectedUser = suggestions.find(user => user.id === parseInt(currentTarget.id));
-        setUsers([...users, selectedUser]);
+        Array.isArray(value) ?
+            setValue([...value, selectedUser]) : 
+            setValue(selectedUser);
         setSuggestions([]);
         setUserSearch("");
         setHasResults(false);
@@ -38,7 +43,6 @@ const UserSearch = ({ users, setUsers }) => {
 
     return (
         <CFormGroup>
-            <CLabel htmlFor="name">Utilisateurs associés</CLabel>
             <CInputGroup>
                 <CInput
                     id="userSearch"
@@ -58,7 +62,7 @@ const UserSearch = ({ users, setUsers }) => {
             <div className="mapboxgl-ctrl-geocoder">
                 <div className="suggestions-wrapper">
                     { !isDefinedAndNotVoid(suggestions) && !hasResults ? <></> :
-                      !isDefinedAndNotVoid(suggestions) ?
+                    !isDefinedAndNotVoid(suggestions) ?
                         <ul className="suggestions no-suggestion" >
                             <li>
                                 <a>
@@ -71,7 +75,7 @@ const UserSearch = ({ users, setUsers }) => {
                                 </a>
                             </li>
                         </ul>
-                      :
+                    :
                         <ul className="suggestions" >
                             { suggestions.map(suggestion => {
                                 return (

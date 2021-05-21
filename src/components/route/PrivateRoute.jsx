@@ -3,7 +3,8 @@ import { Route, Redirect } from "react-router-dom";
 import AuthContext from 'src/contexts/AuthContext';
 
 const PrivateRoute = ({ path, component }) => {
-    const { isAuthenticated } = useContext(AuthContext);
+    const enabled = ["ROLE_ADMIN", "ROLE_SUPER_ADMIN"]
+    const { isAuthenticated, settings } = useContext(AuthContext);
     return isAuthenticated ? <Route path={ path } component={ component } /> : <Redirect to="/login" />
 }
  

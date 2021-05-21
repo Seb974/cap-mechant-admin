@@ -1,23 +1,18 @@
 import axios from 'axios';
 import jwtDecode from 'jwt-decode';
 import api from 'src/config/api';
+import { isDefined } from 'src/helpers/utils';
 import Roles from '../config/Roles';
 
 function authenticate(credentials) {
     return api.post('/api/login_check', credentials)
-                .then(response => response.data.token)
-                .then(token => {
-                    window.localStorage.setItem("authToken", token);
-                    return true;
-                })
+              .then(response => response.data.token)
+              .then(token => window.localStorage.setItem("authToken", token));
 }
 
 function logout() {
     return api.get('/logout')
-                .then(response => {
-                    window.localStorage.removeItem("authToken");
-                    return true;
-                });
+              .then(response => window.localStorage.removeItem("authToken"));
 }
 
 function setup() {
@@ -44,7 +39,9 @@ function isAuthenticated() {
 function getCurrentUser() {
     const token = window.localStorage.getItem("authToken");
     if (token) {
-        const { exp, id, name, roles, email, metas } = jwtDecode(token);
+        const { exp, id, name, roles, email, metas, isSeller, isDeliverer } = jwtDecode(token);
+        console.log(isSeller);
+        console.log(isDeliverer);
         if (exp * 1000 > new Date().getTime())
             return {id, email, name, roles: Roles.filterRoles(roles), metas} ;
     }
@@ -78,6 +75,21 @@ function setErrorHandler(setCurrentUser, setIsAuthenticated) {
     });
 }
 
+function getUserSettings() {
+    return api
+            .get('/api/groups')
+            .then(response => {
+                let data = response.data['hydra:member'];
+                if (data.length > 1) {
+                    const superAdmin = data.find(group => group.value === "ROLE_SUPER_ADMIN");
+                    const admin = data.find(group => group.value === "ROLE_ADMIN");
+                    return isDefined(superAdmin) ? superAdmin : admin;
+                } else {
+                    return data[0];
+                }
+            });
+}
+
 export default {
     authenticate,
     logout,
@@ -85,5 +97,6 @@ export default {
     isAuthenticated,
     getCurrentUser,
     isDefaultUser,
-    setErrorHandler
+    setErrorHandler,
+    getUserSettings
 }
