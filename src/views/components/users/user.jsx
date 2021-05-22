@@ -29,7 +29,6 @@ const UserPage = ({ history, match }) => {
             try {
                 const newUser = await UserActions.find(id);
                 setUser(user => {
-                    console.log(newUser);
                     return {...newUser,
                                 roles: !isDefinedAndNotVoid(newUser.roles) ? Roles.getDefaultRole() : Roles.filterRoles(newUser.roles),
                                 password: user.password,

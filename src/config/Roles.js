@@ -9,7 +9,12 @@ function filterRoles(roles) {
 }
 
 function hasPrivileges(user) {
-    return hasAdminPrivileges(user) || user.isSeller || user.isDeliverer;
+    return hasAdminPrivileges(user) || hasAdminAccess(user);
+}
+
+function hasAdminAccess(user) {
+    const adminAccessRoles = ["ROLE_SELLER", "ROLE_DELIVERER"];
+    return adminAccessRoles.includes(user.roles);
 }
 
 function hasAdminPrivileges(user) {

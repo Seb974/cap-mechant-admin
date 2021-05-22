@@ -39,9 +39,7 @@ function isAuthenticated() {
 function getCurrentUser() {
     const token = window.localStorage.getItem("authToken");
     if (token) {
-        const { exp, id, name, roles, email, metas, isSeller, isDeliverer } = jwtDecode(token);
-        console.log(isSeller);
-        console.log(isDeliverer);
+        const { exp, id, name, roles, email, metas } = jwtDecode(token);
         if (exp * 1000 > new Date().getTime())
             return {id, email, name, roles: Roles.filterRoles(roles), metas} ;
     }
