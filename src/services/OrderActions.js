@@ -22,7 +22,7 @@ function findPreparations(dates, user) {
                     return order.items.find(item => {
                         return item.product.seller.users.find(u => u.id === user.id) !== undefined}) !==undefined;
                 });
-            return data.sort((a, b) => (a.deliveryDate > b.deliveryDate) ? 1 : -1)
+            return data.sort((a, b) => (new Date(a.deliveryDate) < new Date(b.deliveryDate)) ? -1 : 1)
         });
 }
 

@@ -7,6 +7,7 @@ import AuthContext from 'src/contexts/AuthContext';
 import Roles from 'src/config/Roles';
 import RangeDatePicker from 'src/components/forms/RangeDatePicker';
 import { isDefined } from 'src/helpers/utils';
+import { isSameDate, getDateFrom } from 'src/helpers/days';
 import Spinner from 'react-bootstrap/Spinner'
 
 const Preparations = (props) => {
@@ -106,10 +107,20 @@ const Preparations = (props) => {
                     pagination
                     scopedSlots = {{
                         'name':
-                            item => <td><Link to={ "/components/preparations/" + item.id }>{ item.name }</Link></td>
+                            item => <td>
+                                        <Link to={ "/components/preparations/" + item.id }>
+                                            { item.name }<br/>
+                                            <small><i>{ item.metas.zipcode } { item.metas.city }</i></small>
+                                        </Link>
+                                    </td>
                         ,
                         'date':
-                            item => <td>{ (new Date(item.deliveryDate)).toLocaleDateString('fr-FR', { timeZone: 'UTC'}) }</td>
+                            item => <td>
+                                        { isSameDate(new Date(item.deliveryDate), new Date()) ? "Aujourd'hui" : 
+                                          isSameDate(new Date(item.deliveryDate), getDateFrom(new Date(), 1)) ? "Demain" :
+                                          (new Date(item.deliveryDate)).toLocaleDateString('fr-FR', { timeZone: 'UTC'})
+                                        }
+                                    </td>
                         ,
                         'total':
                             item => <td>{ isDefined(item.totalHT) ? item.totalHT.toFixed(2) + " €" : " "}</td>
