@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { Link } from 'react-router-dom';
 import SellerActions from 'src/services/SellerActions';
 import { CButton, CCard, CCardBody, CCardFooter, CCardHeader, CCol, CForm, CFormGroup, CInput, CInvalidFeedback, CLabel, CRow, CInputGroupText, CInputGroupAppend, CInputGroup } from '@coreui/react';
@@ -6,19 +6,29 @@ import CIcon from '@coreui/icons-react';
 import { getFloat, getInt, isDefinedAndNotVoid } from 'src/helpers/utils';
 import '../../../assets/css/searchBar.css';
 import UserSearchMultiple from 'src/components/forms/UserSearchMultiple';
+import AuthContext from 'src/contexts/AuthContext';
+import Roles from 'src/config/Roles';
 
 const Seller = ({ match, history }) => {
 
     const { id = "new" } = match.params;
+    const { currentUser } = useContext(AuthContext);
     const [editing, setEditing] = useState(false);
     const defaultSeller = {name: "", delay: "", ownerRate: ""};
     const [seller, setSeller] = useState({...defaultSeller });
     const [errors, setErrors] = useState(defaultSeller);
     const [users, setUsers] = useState([]);
+    const [isAdmin, setIsAdmin] = useState([]);
 
-    useEffect(() => fetchSeller(id), []);
+    
+    useEffect(() => {
+        fetchSeller(id);
+        setIsAdmin(Roles.hasAdminPrivileges(currentUser));
+    }, []);
+
     useEffect(() => fetchSeller(id), [id]);
-
+    useEffect(() => setIsAdmin(Roles.hasAdminPrivileges(currentUser)), [currentUser]);
+    
     const handleChange = ({ currentTarget }) => setSeller({...seller, [currentTarget.name]: currentTarget.value});
 
     const fetchSeller = id => {
@@ -98,27 +108,29 @@ const Seller = ({ match, history }) => {
                             </CRow>
 
                             <CRow className="mt-4">
-                                <CCol xs="12" sm="12" md="6">
-                                    <CFormGroup>
-                                        <CLabel htmlFor="name">Rétribution sur vente</CLabel>
-                                        <CInputGroup>
-                                            <CInput
-                                                id="ownerRate"
-                                                name="ownerRate"
-                                                type="number"
-                                                value={ seller.ownerRate }
-                                                onChange={ handleChange }
-                                                placeholder="Marge par vente"
-                                                invalid={ errors.ownerRate.length > 0 } 
-                                            />
-                                            <CInputGroupAppend>
-                                                <CInputGroupText>%</CInputGroupText>
-                                            </CInputGroupAppend>
-                                        </CInputGroup>
-                                        <CInvalidFeedback>{ errors.ownerRate }</CInvalidFeedback>
-                                    </CFormGroup>
-                                </CCol>
-                                <CCol xs="12" md="6">
+                                { isAdmin && 
+                                    <CCol xs="12" sm="12" md="6">
+                                        <CFormGroup>
+                                            <CLabel htmlFor="name">Rétribution sur vente</CLabel>
+                                            <CInputGroup>
+                                                <CInput
+                                                    id="ownerRate"
+                                                    name="ownerRate"
+                                                    type="number"
+                                                    value={ seller.ownerRate }
+                                                    onChange={ handleChange }
+                                                    placeholder="Marge par vente"
+                                                    invalid={ errors.ownerRate.length > 0 } 
+                                                />
+                                                <CInputGroupAppend>
+                                                    <CInputGroupText>%</CInputGroupText>
+                                                </CInputGroupAppend>
+                                            </CInputGroup>
+                                            <CInvalidFeedback>{ errors.ownerRate }</CInvalidFeedback>
+                                        </CFormGroup>
+                                    </CCol>
+                                }
+                                <CCol xs="12" md={isAdmin ? "6" : "12"}>
                                 <CFormGroup>
                                         <CLabel htmlFor="name">Délais entre réception et livraison</CLabel>
                                         <CInputGroup>

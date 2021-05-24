@@ -11,6 +11,8 @@ import Options from 'src/components/productPages/options';
 import Characteristics from 'src/components/productPages/characteristics';
 import ProductsContext from 'src/contexts/ProductsContext';
 import Type from 'src/components/productPages/type';
+import AuthContext from 'src/contexts/AuthContext';
+import Roles from 'src/config/Roles';
 
 const ProductPage = ({ match, history }) => {
 
@@ -18,6 +20,8 @@ const ProductPage = ({ match, history }) => {
     const defaultSize = {count: 0, name: ""};
     const [editing, setEditing] = useState(false);
     const [categories, setCategories] = useState([]);
+    const [isAdmin, setIsAdmin] = useState(false);
+    const { currentUser } = useContext(AuthContext);
     const { products } = useContext(ProductsContext);
     const defaultVariant = null;
     const defaultVariantSize = defaultVariant !== null && products[0].variations[0].sizes && products[0].variations[0].sizes.length > 0 ? products[0].variations[0].sizes[0] : null;
@@ -34,9 +38,13 @@ const ProductPage = ({ match, history }) => {
     useEffect(() => {
         fetchCategories();
         fetchProduct(id);
+        setIsAdmin(Roles.hasAdminPrivileges(currentUser));
     }, []);
 
     useEffect(() => fetchProduct(id), [id]);
+    useEffect(() => setIsAdmin(Roles.hasAdminPrivileges(currentUser)), [currentUser]);
+
+    useEffect(() => setProduct({...product, available: isAdmin }), [isAdmin]);
 
     const fetchProduct = id => {
         if (id !== "new") {

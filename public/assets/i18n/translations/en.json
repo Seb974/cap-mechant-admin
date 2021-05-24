@@ -22,5 +22,6 @@
     "containers.label": "Parcels",
     "catalogs.label": "Catalogs",
     "promotions.label": "Discount coupons",
-    "sellers.label": "Sellers"
+    "sellers.label": "Sellers",
+    "preparations.label": "Preparations"
 }

@@ -9,3 +9,11 @@ export const getWeekDays = () => {
         {value: 0, label: "DIMANCHE", isFixed: false}
     ];
 }
+
+export const getStringDate = date => {
+    return date.getFullYear() + "-" + getTwoDigits(date.getMonth() + 1) + "-" + getTwoDigits(date.getDate());
+}
+
+export const getTwoDigits = number => {
+    return number < 10 ? '0' + number : number;
+}

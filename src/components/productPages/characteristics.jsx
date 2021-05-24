@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { CCol, CFormGroup, CInput, CInvalidFeedback, CLabel, CRow, CTextarea } from '@coreui/react';
 import Select from 'src/components/forms/Select';
 import SelectMultiple from 'src/components/forms/SelectMultiple';
@@ -7,12 +7,19 @@ import GroupActions from 'src/services/GroupActions';
 import CatalogActions from 'src/services/CatalogActions';
 import { isDefined, isDefinedAndNotVoid } from 'src/helpers/utils';
 import SellerActions from 'src/services/SellerActions';
+import AuthContext from 'src/contexts/AuthContext';
+import Roles from 'src/config/Roles';
 
 const Characteristics = ({ product, categories, type, setProduct, errors, history}) => {
 
+    const { currentUser } = useContext(AuthContext);
     const [groups, setGroups] = useState([]);
     const [sellers, setSellers] = useState([]);
     const [catalogs, setCatalogs] = useState([]);
+    const [isAdmin, setIsAdmin] = useState(false);
+
+    useEffect(() => setIsAdmin(Roles.hasAdminPrivileges(currentUser)), []);
+    useEffect(() => setIsAdmin(Roles.hasAdminPrivileges(currentUser)), [currentUser]);
 
     useEffect(() => {
         fetchGroups();
@@ -120,16 +127,20 @@ const Characteristics = ({ product, categories, type, setProduct, errors, histor
                     <SelectMultiple name="categories" label="Catégories" value={ product.categories } error={ errors.categories } onChange={ handleCategoriesChange } data={ categories.map(category => ({value: category.id, label: category.name, isFixed: false})) }/>
                 </CCol>
             </CRow>
-            <CRow className="mb-3">
-                <CCol xs="12" sm="12">
-                    <SelectMultiple name="userGroups" label="Pour les utilisateurs" value={ product.userGroups } error={ errors.userGroups } onChange={ handleUsersChange } data={ groups }/>
-                </CCol>
-            </CRow>
-            <CRow className="mb-3">
-                <CCol xs="12" sm="12">
-                    <SelectMultiple name="catalogs" label="Sur les catalogues" value={ product.catalogs } error={ errors.catalogs } onChange={ handleCatalogsChange } data={ catalogs }/>
-                </CCol>
-            </CRow>
+            { isAdmin &&
+                <>
+                    <CRow className="mb-3">
+                        <CCol xs="12" sm="12">
+                            <SelectMultiple name="userGroups" label="Pour les utilisateurs" value={ product.userGroups } error={ errors.userGroups } onChange={ handleUsersChange } data={ groups }/>
+                        </CCol>
+                    </CRow>
+                    <CRow className="mb-3">
+                        <CCol xs="12" sm="12">
+                            <SelectMultiple name="catalogs" label="Sur les catalogues" value={ product.catalogs } error={ errors.catalogs } onChange={ handleCatalogsChange } data={ catalogs }/>
+                        </CCol>
+                    </CRow>
+                </>
+            }
             <CFormGroup row className="mb-4">
                 <CCol xs="12" md="12">
                     <CLabel htmlFor="textarea-input">Description</CLabel>

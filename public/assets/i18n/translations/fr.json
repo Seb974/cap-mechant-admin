@@ -22,5 +22,6 @@
     "containers.label": "Colis",
     "catalogs.label": "Catalogues",
     "promotions.label": "Coupons de réduction",
-    "sellers.label": "Vendeurs"
+    "sellers.label": "Vendeurs",
+    "preparations.label": "Preparations"
 }

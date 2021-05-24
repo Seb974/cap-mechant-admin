@@ -17,24 +17,11 @@ function find(id) {
 }
 
 function update(id, product) {
-    return api.put('/api/products/' + id,
-                    {...product,
-                        // category: `/api/categories/${ product.category }`,
-                        // suppliers: suppliers.map(supplier => `/api/suppliers/${ supplier.id }`),
-                        // unit: `/api/units/${ product.unit }`,
-                        // userCategories: product.userCategories.map(userCategory => userCategory.value)
-                    });
+    return api.put('/api/products/' + id, product);
 }
 
 function create(product) {
-    return api.post('/api/products', 
-                    {...product, 
-                        // category: `/api/categories/${ product.category }`, 
-                        // suppliers: suppliers.map(supplier => `/api/suppliers/${ supplier.id }`),
-                        // unit: `/api/units/${ product.unit }`,
-                        // userCategories: product.userCategories.map(userCategory => userCategory.value),
-                        // picture: null
-                    });
+    return api.post('/api/products', product);
 }
 
 function updateFromMercure(products, product) {

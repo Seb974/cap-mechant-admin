@@ -46,7 +46,7 @@ const PriceGroup = ({ match, history }) => {
         GroupActions
             .findAll()
             .then(response => {
-                const filteredGroups = response.filter(group => group.priceGroup === null || group.priceGroup === undefined);
+                const filteredGroups = response.filter(group => group.hasShopAccess && (group.priceGroup === null || group.priceGroup === undefined));
                 setGroups(filteredGroups.map(group => ({...group, isFixed: false})));
             });
     };

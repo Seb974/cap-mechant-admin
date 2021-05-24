@@ -1,7 +1,9 @@
 import React from 'react'
 import CIcon from '@coreui/icons-react'
 
-function getNav(translation) {
+function getNav(translation)
+{
+  
   return [
     {
       _tag: 'CSidebarNavItem',
@@ -32,6 +34,12 @@ function getNav(translation) {
     {
       _tag: 'CSidebarNavTitle',
       _children: [translation("component.label")]
+    },
+    {
+      _tag: 'CSidebarNavItem',
+      name: translation("preparations.label"),
+      to: '/components/preparations',
+      icon: <CIcon name="cil-dinner" customClasses="c-sidebar-nav-icon"/>,
     },
     {
       _tag: 'CSidebarNavItem',

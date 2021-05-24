@@ -4,13 +4,20 @@ import ProductActions from '../../../services/ProductActions'
 import { CCard, CCardBody, CCardHeader, CCol, CDataTable, CRow, CButton } from '@coreui/react';
 import { DocsLink } from 'src/reusable'
 import { Link } from 'react-router-dom';
+import AuthContext from 'src/contexts/AuthContext';
+import Roles from 'src/config/Roles';
 
 const Products = (props) => {
 
     const itemsPerPage = 15;
     const fields = ['name', ' '];
+    const { currentUser } = useContext(AuthContext);
     const { products, setProducts } = useContext(ProductsContext);
     const [displayedProducts, setDisplayedProducts] = useState([]);
+    const [isAdmin, setIsAdmin] = useState(false);
+
+    useEffect(() => setIsAdmin(Roles.hasAdminPrivileges(currentUser)), []);
+    useEffect(() => setIsAdmin(Roles.hasAdminPrivileges(currentUser)), [currentUser]);
 
     useEffect(() => {
         ProductActions.findAll()
@@ -61,7 +68,7 @@ const Products = (props) => {
                 ' ':
                   item => (
                       <td className="mb-3 mb-xl-0 text-center">
-                          <CButton block color="danger" onClick={ () => handleDelete(item.id) }>Supprimer</CButton>
+                          <CButton block color="danger" disabled={ !isAdmin && item.seller.users.find(user => user.id === currentUser.id) === undefined } onClick={ () => handleDelete(item.id) }>Supprimer</CButton>
                       </td>
                   )
               }}

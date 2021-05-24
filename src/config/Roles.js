@@ -17,6 +17,14 @@ function hasAdminAccess(user) {
     return adminAccessRoles.includes(user.roles);
 }
 
+function isSeller(user) {
+    return user.roles === "ROLE_SELLER";
+}
+
+function isDeliverer(user) {
+    return user.roles === "ROLE_DELIVERER";
+}
+
 function hasAdminPrivileges(user) {
     return user.roles.includes('ADMIN');
 }
@@ -33,7 +41,10 @@ export default {
     filterRoles,
     getDefaultRole,
     hasPrivileges,
+    hasAdminAccess,
     hasAdminPrivileges,
     hasAllPrivileges,
-    filterAuthorizationRoles
+    filterAuthorizationRoles,
+    isSeller,
+    isDeliverer
 }
