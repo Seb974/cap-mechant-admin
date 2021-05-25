@@ -11,3 +11,10 @@ export const getNumericOrNull = value => typeof value === 'string' ? (value.leng
 export const getFloat = value => typeof value === 'string' ? parseFloat(value.replace(',','.')) : value;
 
 export const getInt = value => typeof value === 'string' ? parseInt(value) : value;
+
+export const isSameAddress = (address1, address2) => {
+    return isDefined(address1) && isDefined(address2) &&
+           address1.address === address2.address &&
+           address1.zipcode === address2.zipcode &&
+           address1.address2 === address2.address2;
+};

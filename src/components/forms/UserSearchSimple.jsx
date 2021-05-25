@@ -7,7 +7,7 @@ import UserSearch from 'src/components/forms/UserSearch';
 import '../../assets/css/searchBar.css';
 import { isDefined } from 'src/helpers/utils';
 
-const UserSearchSimple = ({ user, setUser }) => {
+const UserSearchSimple = ({ user, setUser, label="Utilisateur associé" }) => {
 
     const handleDelete = e => {
         e.preventDefault();
@@ -16,9 +16,9 @@ const UserSearchSimple = ({ user, setUser }) => {
 
     return (
         <>
-            <hr className="mx-2 my-4"/>
-            <CRow className="ml-2">
-                <CLabel htmlFor="name">Utilisateur associé</CLabel>
+            {/* <hr className="mx-2 my-4"/> */}
+            <CRow className="ml-2 my-4">
+                <CLabel htmlFor="name">{ label }</CLabel>
             </CRow>
             <CRow className="mt-4">
                 <CCol xs="12" sm="12" md="6">

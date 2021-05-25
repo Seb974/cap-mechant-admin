@@ -41,7 +41,7 @@ function update(id, order) {
 }
 
 function create(order) {
-    return api.post('/api/order_entities', {...order});
+    return api.post('/api/order_entities', order);
 }
 
 function formatUTC(dates) {

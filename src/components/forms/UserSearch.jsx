@@ -22,7 +22,7 @@ const UserSearch = ({ value, setValue }) => {
         UserActions
             .findUser(userSearch)
             .then(response => {
-                const filteredResponse = Array.isArray(value) ? 
+                const filteredResponse = !isDefinedAndNotVoid(value) ? response : Array.isArray(value) ? 
                         response.filter(suggestion => value.find(user => user.id === suggestion.id) === undefined) :
                         response.filter(suggestion  => suggestion.id !== value.id);
                 setSuggestions(filteredResponse);

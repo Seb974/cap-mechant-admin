@@ -40,7 +40,6 @@ function getCurrentUser() {
     const token = window.localStorage.getItem("authToken");
     if (token) {
         const { exp, id, name, roles, email, metas } = jwtDecode(token);
-        console.log(roles);
         if (exp * 1000 > new Date().getTime())
             return {id, email, name, roles: Roles.filterRoles(roles), metas} ;
     }
@@ -74,6 +73,17 @@ function setErrorHandler(setCurrentUser, setIsAuthenticated) {
     });
 }
 
+function getGeolocation() {
+    const country = window.sessionStorage.getItem("country");
+    return isDefined(country) ? new Promise((resolve, reject) => resolve(country)) :
+        axios.get('https://freegeoip.app/json/')
+            .then(response => {
+                window.sessionStorage.setItem("country", response.data.country_code);
+                return response.data.country_code;
+            })
+            .catch(error => "RE");
+}
+
 function getUserSettings() {
     return api
             .get('/api/groups')
@@ -97,5 +107,6 @@ export default {
     getCurrentUser,
     isDefaultUser,
     setErrorHandler,
-    getUserSettings
+    getUserSettings,
+    getGeolocation
 }

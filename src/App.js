@@ -5,6 +5,7 @@ import DataProvider from './data/dataProvider/dataProvider';
 import AdminRoute from './components/route/AdminRoute';
 import PrivateRoute from './components/route/PrivateRoute';
 import './i18n';
+import 'mapbox-gl/dist/mapbox-gl.css';
 
 const loading = (
     <div className="pt-3 text-center">
