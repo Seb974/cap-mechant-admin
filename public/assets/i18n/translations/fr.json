@@ -23,5 +23,7 @@
     "catalogs.label": "Catalogues",
     "promotions.label": "Coupons de réduction",
     "sellers.label": "Vendeurs",
-    "preparations.label": "Preparations"
+    "preparations.label": "Commandes",
+    "deliveries.label": "Livraisons",
+    "orders.label": "Commandes"
 }

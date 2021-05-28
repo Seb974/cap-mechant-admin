@@ -17,6 +17,7 @@ export const getOrderToWrite = (order, user, informations, productCart, date, ob
             size: isDefined(item.size) ? item.size['@id'] : null,
             orderedQty: getFloat(item.orderedQty),
             price: getFloat(item.price),
+            unit: item.unit,
             taxRate: !settings.subjectToTaxes ? 0 : item.product.tax.catalogTaxes.find(catalogTax => catalogTax.catalog.id === selectedCatalog.id).percent,
             isAdjourned: false,
             isPrepared: false
@@ -25,6 +26,29 @@ export const getOrderToWrite = (order, user, informations, productCart, date, ob
         status: !isDefined(order.status) ? "WAITING" : order.status
     };
 };
+
+export const getPreparedOrder = order => {
+    const { user, metas, catalog, appliedCondition, promotion, items } = order;
+    return {
+        ...order,
+        user: isDefined(user) ? (typeof user === 'object' ? user['@id'] : user) : null,
+        metas: isDefined(metas) ? (typeof metas === 'object' ? metas['@id'] : metas) : null,
+        catalog: isDefined(catalog) ? (typeof catalog === 'object' ? catalog['@id'] : catalog) : null,
+        appliedCondition: isDefined(appliedCondition) ? (typeof appliedCondition === 'object' ? appliedCondition['@id'] : appliedCondition) : null,
+        promotion: isDefined(promotion) ? (typeof promotion === 'object' ? promotion['@id'] : promotion) : null,
+        items: items.map(item => ({
+            ...item, 
+            product: isDefined(item.product) ? (typeof item.product === 'object' ? item.product['@id'] : item.product) : null,
+            variation: isDefined(item.variation) ? (typeof item.variation === 'object' ? item.variation['@id'] : item.variation) : null,
+            size: isDefined(item.size) ? (typeof item.size === 'object' ? item.size['@id'] : item.size) : null,
+            preparedQty: getFloat(item.preparedQty),
+            isAdjourned: item.isAdjourned,
+            isPrepared: true
+        })),
+        isRemains: false,
+        status: "PREPARED"
+    };
+}
 
 export const validateForm = (user, informations, catalog, condition, relaypoints) => {
     let errors = {};

@@ -33,6 +33,16 @@ function getNav(translation)
     },
     {
       _tag: 'CSidebarNavTitle',
+      _children: [translation("orders.label")]
+    },
+    {
+      _tag: 'CSidebarNavItem',
+      name: translation("deliveries.label"),
+      to: '/components/deliveries',
+      icon: <CIcon name="cil-truck" customClasses="c-sidebar-nav-icon"/>,
+    },
+    {
+      _tag: 'CSidebarNavTitle',
       _children: [translation("component.label")]
     },
     {

@@ -33,7 +33,7 @@ const Order = ({ match, history }) => {
     const [errors, setErrors] = useState(defaultErrors);
     const defaultVariantSize = defaultVariant !== null && products[0].variations[0].sizes && products[0].variations[0].sizes.length > 0 ? products[0].variations[0].sizes[0] : null;
     const defaultProduct = {product: products[0], variation: defaultVariant, size: defaultVariantSize};
-    const defaultItem = {...defaultProduct, count: 0, orderedQty: "", price: defaultProduct.product.prices[0].amount};
+    const defaultItem = {...defaultProduct, count: 0, orderedQty: "", preparedQty: "", deliveredQty: "", price: defaultProduct.product.prices[0].amount, unit: defaultProduct.product.unit};
     const [objectDiscount, setObjectDiscount] = useState(null);
     const [groups, setGroups] = useState([]);
     const [items, setItems] = useState([defaultItem]);
@@ -128,9 +128,9 @@ const Order = ({ match, history }) => {
             request.then(response => {
                 setErrors(defaultErrors);
                 //TODO : Flash notification de succès
-                history.replace("/components/products");
+                history.replace("/components/preparations");
             })
-           .catch( ({ response }) => {
+            .catch( ({ response }) => {
                 const { violations } = response.data;
                 if (violations) {
                     const apiErrors = {};
@@ -155,10 +155,6 @@ const Order = ({ match, history }) => {
         }
     }
 
-    const getProductPrice = product => {
-        return product.prices.find(price => price.priceGroup.id === settings.priceGroup.id).amount;
-    };
-
     return !isDefined(order) ? <></> : (
         <CRow>
             <CCol xs="12" sm="12">
@@ -181,7 +177,7 @@ const Order = ({ match, history }) => {
                                                 options={{
                                                     mode: "single",
                                                     dateFormat: "d/m/Y",
-                                                    minDate: minDate,   // 'today'
+                                                    minDate: minDate,
                                                     locale: French,
                                                     disable: [(date) => date.getDay() === 0],
                                                 }}
@@ -193,7 +189,7 @@ const Order = ({ match, history }) => {
                                 <hr className="my-2"/>
                                 <UserSearchSimple user={ user } setUser={ setUser } label="Client"/>
                                 <hr/>
-                                <Items items={ items } setItems={ setItems } defaultItem={ defaultItem }/>
+                                <Items items={ items } setItems={ setItems } defaultItem={ defaultItem } editing={ editing }/>
                             </Tab>
                             <Tab eventKey="metas" title="Client">
                                 <ClientPart

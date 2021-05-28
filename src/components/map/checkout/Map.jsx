@@ -1,6 +1,6 @@
 import 'src/assets/css/map.css';
 import React, { useContext, useEffect, useRef, useState } from 'react';
-import ReactMapGL, { AttributionControl, NavigationControl, FlyToInterpolator } from 'react-map-gl';
+import ReactMapGL, { AttributionControl, NavigationControl, FlyToInterpolator, MapContext } from 'react-map-gl';
 import mapboxgl from "mapbox-gl";
 import RelaypointTools from './relaypoint/RelaypointTools';
 import LocationTools from './location/LocationTools';
@@ -9,6 +9,7 @@ import { checkForAlternatives, getCityCondition } from 'src/helpers/map';
 import AuthContext from 'src/contexts/AuthContext';
 import DeliveryContext from 'src/contexts/DeliveryContext';
 import { isDefined, isDefinedAndNotVoid } from 'src/helpers/utils';
+import PolylineOverlay from '../PolylineOverlay';
 // eslint-disable-next-line import/no-webpack-loader-syntax
 mapboxgl.workerClass = require("worker-loader!mapbox-gl/dist/mapbox-gl-csp-worker").default;
 
@@ -26,7 +27,8 @@ const Map = ({ informations, setInformations, displayedRelaypoints, setDiscount,
     const [relayPointPopup, setRelaypointPopup] = useState(undefined);
     const [locationTooltip, setLocationTooltip] = useState(undefined);
     const [locationPopup, setLocationPopup] = useState(undefined);
-    const mapStyle = { top: 0, left: 0, height: '520px', width: '100', mapStyle: 'mapbox://styles/mapbox/light-v8' };
+    const mapStyle = { top: 0, left: 0, height: '520px', width: '100', mapStyle: 'mapbox://styles/mapbox/streets-v11' };
+    // 'mapbox://styles/mapbox/light-v8'
 
     useEffect(() => {
         if (isDefined(selectedCatalog) && Object.keys(selectedCatalog).length > 0 && isDefinedAndNotVoid(selectedCatalog.center)) {
@@ -119,7 +121,7 @@ const Map = ({ informations, setInformations, displayedRelaypoints, setDiscount,
         return !isDefinedAndNotVoid(position) || !isDefinedAndNotVoid(selectedCatalog.center) ||
                JSON.stringify(position) === JSON.stringify(selectedCatalog.center) || 
                JSON.stringify(position) === JSON.stringify([0, 0]);
-   }
+   };
 
     return (
         <>

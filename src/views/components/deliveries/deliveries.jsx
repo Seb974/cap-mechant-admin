@@ -1,0 +1,326 @@
+import React, { useContext, useEffect, useState } from 'react';
+import OrderActions from '../../../services/OrderActions'
+import { CCard, CCardBody, CCardHeader, CCol, CDataTable, CRow, CButton, CCollapse, CFormGroup, CInputCheckbox, CLabel } from '@coreui/react';
+import { DocsLink } from 'src/reusable'
+import { Link } from 'react-router-dom';
+import AuthContext from 'src/contexts/AuthContext';
+import Roles from 'src/config/Roles';
+import RangeDatePicker from 'src/components/forms/RangeDatePicker';
+import { isDefined, isDefinedAndNotVoid } from 'src/helpers/utils';
+import { isSameDate, getDateFrom } from 'src/helpers/days';
+import Spinner from 'react-bootstrap/Spinner'
+import { Button } from 'bootstrap';
+import OrderDetails from 'src/components/preparationPages/orderDetails';
+import CIcon from '@coreui/icons-react';
+
+const Deliveries = (props) => {
+
+    const itemsPerPage = 30;
+    const fields = ['name', 'date', 'total', 'selection', ' '];
+    const { currentUser } = useContext(AuthContext);
+    const [orders, setOrders] = useState([]);
+    const [isAdmin, setIsAdmin] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [dates, setDates] = useState({start: new Date(), end: new Date() });
+    const [details, setDetails] = useState([]);
+    const [priorities, setPriorities] = useState([]);
+    const [tripLoading, setTripLoading] = useState(false);
+    const [selectAll, setSelectAll] = useState(false);
+
+    useEffect(() => {
+        setIsAdmin(Roles.hasAdminPrivileges(currentUser));
+        getOrders();
+    }, []);
+
+    useEffect(() => setIsAdmin(Roles.hasAdminPrivileges(currentUser)), [currentUser]);
+    useEffect(() => getOrders(), [dates]);
+
+    const getOrders = () => {
+        setLoading(true);
+        const UTCDates = getUTCDates(dates);
+        OrderActions.findDeliveries(UTCDates, currentUser)
+                .then(response =>{
+                    setOrders(response.map(data => ({...data, selected: false})));
+                    setLoading(false);
+                })
+                .catch(error => {
+                    console.log(error);
+                    setLoading(false);
+                });
+    }
+
+    const handleDelete = (id) => {
+        const originalOrders = [...orders];
+        setOrders(orders.filter(order => order.id !== id));
+        OrderActions.delete(id)
+                      .catch(error => {
+                           setOrders(originalOrders);
+                           console.log(error.response);
+                      });
+    }
+
+    const handleDateChange = datetime => {
+        if (isDefined(datetime[1])){
+            const newStart = new Date(datetime[0].getFullYear(), datetime[0].getMonth(), datetime[0].getDate(), 0, 0, 0);
+            const newEnd = new Date(datetime[1].getFullYear(), datetime[1].getMonth(), datetime[1].getDate(), 23, 59, 0);
+            setDates({start: newStart, end: newEnd});
+
+        }
+    };
+
+    const handleSelect = item => {
+        const newOrders = orders.map(order => (order.id === item.id ? {...order, selected: !order.selected} : order));
+        if (item.selected && priorities.includes(item.id))
+            setPriorities(priorities.filter(priority => priority !== item.id));
+        setOrders(newOrders);
+    };
+
+    const handleSelectAll = () => {
+        const newValue = !selectAll;
+        setSelectAll(newValue);
+        const newOrders = orders.map(order => {
+            if (newValue)
+                return order.status !== "WAITING" && !order.selected ? {...order, selected: true} : order;
+            else
+                return order.status !== "WAITING" && order.selected ? {...order, selected: false} : order;
+        });
+        if (!newValue)
+            setPriorities([]);
+        setOrders(newOrders);
+    };
+
+    const handlePriorities = item => {
+        const newPriorities = priorities.includes(item.id) ? priorities.filter(priority => priority !== item.id) : [...priorities, item.id];
+        setPriorities(newPriorities);
+        if ( !item.selected )
+            handleSelect(item);
+    }
+
+    const getUTCDates = () => {
+        const UTCStart = new Date(dates.start.getFullYear(), dates.start.getMonth(), dates.start.getDate(), 4, 0, 0);
+        const UTCEnd = new Date(dates.end.getFullYear(), dates.end.getMonth(), dates.end.getDate() + 1, 3, 59, 0);
+        return {start: UTCStart, end: UTCEnd};
+    }
+
+    const toggleDetails = (index, e) => {
+        e.preventDefault();
+        const position = details.indexOf(index)
+        let newDetails = details.slice()
+        if (position !== -1) {
+            newDetails.splice(position, 1)
+        } else {
+            newDetails = [...details, index]
+        }
+        setDetails(newDetails);
+    }
+
+    const handleCreateTrip = () => {
+        const shop = {
+            id: "-1",
+            name: "Dépôt",
+            coordinates: [-21.313875, 55.458254],
+            address: "21 chemin Jean Cadet, 97410, Saint-Pierre, La Réunion",
+            zipcode: "97410",
+            city: "Saint-Pierre"
+        }; 
+        const ordersTrip = getOrdersTrip();
+        const tripPriorities = getTripPriorities(ordersTrip);
+        const tripFromShop = [shop, ...ordersTrip];
+        if (ordersTrip.length > 0) {
+            setTripLoading(true);
+            OrderActions
+                .getOptimizedTrip(tripFromShop, tripPriorities)
+                .then(response => {
+                    setTripLoading(false);
+                    if (isDefined(response.waypoints)) {
+                        const waypoints = response.waypoints.map((waypoint, index) => ({...tripFromShop[index], priority: waypoint.waypoint_index}));
+                        const newTrip = waypoints.sort((a, b) => (a.priority > b.priority) ? 1 : -1);
+                        console.log(newTrip);
+                    } else {
+                        console.log(response);
+                    }
+                })
+                .catch(error => {
+                    setTripLoading(false);
+                    console.log(error);
+                })
+        }
+    }
+
+    const getTripPriorities = orders => {
+        let formattedPriorities = "";
+        if (priorities.length > 0) {
+            let priorityKeys = [];
+            priorities.map(priority => {
+                const selection = orders.find(o => o.id === priority);
+                if (isDefined(selection)) {
+                    priorityKeys = [...priorityKeys, parseInt(Object.keys(orders).find(key => orders[key].id === selection.id))];
+                }
+            });
+            if (priorityKeys.length === orders.length)
+                priorityKeys.splice(-1, 1);
+
+            const unpriorized = getFirstUnpriorized(orders, priorityKeys);
+            priorityKeys.map((key, i) => {
+                const separator = i < priorityKeys.length - 1 ? ';' : '';
+                const newKeyPair = (parseInt(key) + 1) + ',' + (i < priorityKeys.length - 2 ? (parseInt(priorityKeys[i + 1]) + 1) : (parseInt(unpriorized) + 1))
+                formattedPriorities += (newKeyPair + separator);
+            });
+        }
+        return formattedPriorities;
+    };
+
+    const getOrdersTrip = () => {
+        const selection = orders.filter(order => order.selected);
+        const trip = selection.reduce((unique, order) => {
+            return unique.find(o => isForSameClient(order, o)) !== undefined ? unique : [...unique, order];
+        }, []);
+        return trip.map(order => ({
+            id: order.id,
+            name: order.name, 
+            coordinates: order.metas.position, 
+            address: order.metas.address, 
+            zipcode: order.metas.zipcode, 
+            city: order.metas.city
+        }));
+    };
+
+    const isForSameClient = (order1, order2) => {
+        return  order1.name === order2.name &&
+                JSON.stringify(order1.metas.position) === JSON.stringify(order2.metas.position);
+    };
+
+    const getFirstUnpriorized = (orders, filteredPriorities) => {
+        const unpriorized = orders.find((order, key) => !filteredPriorities.includes(key));
+        return Object.keys(orders).find(key => orders[key].id === unpriorized.id);
+    };
+
+    return (
+        <CRow>
+        <CCol xs="12" lg="12">
+          <CCard>
+            <CCardHeader>
+                Liste des commandes à livrer
+            </CCardHeader>
+            <CCardBody>
+                <CRow>
+                    <CCol xs="12" lg="6">
+                    <RangeDatePicker
+                        minDate={ dates.start }
+                        maxDate={ dates.end }
+                        onDateChange={ handleDateChange }
+                        label="Date"
+                        className = "form-control mb-3"
+                    />
+                    </CCol>
+                    <CCol xs="12" lg="6" className="mt-4">
+                        <CFormGroup row variant="custom-checkbox" inline className="d-flex align-items-center">
+                            <input
+                                className="mx-1 my-1"
+                                type="checkbox"
+                                name="inline-checkbox"
+                                checked={ selectAll }
+                                onClick={ handleSelectAll }
+                                disabled={ orders.find(order => order.status !== "WAITING") == undefined }
+                                style={{zoom: 2.3}}
+                            />
+                            <label variant="custom-checkbox" htmlFor="inline-checkbox1" className="my-1">Tout sélectionner</label>
+                        </CFormGroup>
+                    </CCol>
+                </CRow>
+                { loading ? 
+                    <CRow>      {/* // className="mx-5"  mx-5*/}
+                        <CCol xs="12" lg="12" className="text-center">
+                            <Spinner animation="border" variant="danger"/>
+                        </CCol>
+                    </CRow> 
+                    :
+                    <CDataTable
+                        items={ orders }
+                        fields={ fields }
+                        bordered
+                        itemsPerPage={ itemsPerPage }
+                        pagination
+                        scopedSlots = {{
+                            'name':
+                                item => <td>
+                                            <Link to="#" onClick={ e => { toggleDetails(item.id, e) }} disabled={ item.status === "WAITING" }>
+                                                { item.isRemains ? 
+                                                    <i className="fas fa-sync-alt mr-2"></i> :
+                                                  isDefinedAndNotVoid(item.packages) ? 
+                                                  <i className="fas fa-plane mr-2"></i> :
+                                                    <i className="fas fa-truck mr-2"></i>
+                                                }{ item.name }<br/>
+                                                <small><i>{ item.metas.zipcode } { item.metas.city }</i></small>
+                                            </Link>
+                                        </td>
+                            ,
+                            'date':
+                                item => <td style={{color: item.status === "WAITING" ? "dimgray" : "black"}}>
+                                            { isSameDate(new Date(item.deliveryDate), new Date()) ? "Aujourd'hui" : 
+                                            isSameDate(new Date(item.deliveryDate), getDateFrom(new Date(), 1)) ? "Demain" :
+                                            (new Date(item.deliveryDate)).toLocaleDateString('fr-FR', { timeZone: 'UTC'})
+                                            }
+                                        </td>
+                            ,
+                            'total':
+                                item => <td style={{color: item.status === "WAITING" ? "dimgray" : "black"}}>
+                                            { isDefined(item.totalHT) ? item.totalHT.toFixed(2) + " €" : " "}
+                                        </td>
+                            ,
+                            'selection':
+                                item => <td className="d-flex align-items-center"style={{color: item.status === "WAITING" ? "dimgray" : "black"}}>
+                                            <input
+                                                className="mx-1 my-1"
+                                                type="checkbox"
+                                                name="inline-checkbox"
+                                                checked={ item.selected }
+                                                onClick={ () => handleSelect(item) }
+                                                disabled={ item.status === "WAITING" }
+                                                style={{zoom: 2.3}}
+                                            />
+                                            <CButton size="sm" color="danger" disabled={ item.status === "WAITING" } onClick={ () => handlePriorities(item) } className="mx-1 my-1" style={{width: '27px', height: '27px'}}>
+                                                { priorities.includes(item.id) ? parseInt(Object.keys(priorities).find(key => priorities[key] === item.id)) + 1 : <i className="fas fa-exclamation"></i> }
+                                            </CButton>
+                                        </td>
+                            ,
+                            ' ':
+                                item => (
+                                    <td className="mb-3 mb-xl-0 text-center" style={{color: item.status === "WAITING" ? "dimgray" : "black"}}>
+                                        <CButton color="warning" disabled={ !isAdmin } href={ "#/components/orders/" + item.id } className="mx-1 my-1"><i className="fas fa-pen"></i></CButton>
+                                        <CButton color="danger" disabled={ !isAdmin } onClick={ () => handleDelete(item.id) } className="mx-1 my-1"><i className="fas fa-trash"></i></CButton>
+                                    </td>
+                                )
+                            ,
+                            'details':
+                                item => <CCollapse show={details.includes(item.id)}>
+                                            <OrderDetails order={ item } />
+                                        </CCollapse>
+                        }}
+                    />
+                }
+                { orders.length > 0 &&
+                    <CRow className="mt-4 d-flex justify-content-center">
+                        <CButton size="sm" color="success" onClick={ handleCreateTrip } style={{width: '140px', height: '30px'}}>
+                            { tripLoading ?
+                                <Spinner
+                                    as="span"
+                                    animation="border"
+                                    size="sm"
+                                    role="status"
+                                    aria-hidden="true"
+                                    />
+                                : 
+                                <>Créer une tournée</>
+                            }
+                            </CButton>
+                    </CRow>
+                }
+            </CCardBody>
+          </CCard>
+        </CCol>
+      </CRow>
+    );
+}
+
+export default Deliveries;

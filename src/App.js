@@ -1,4 +1,5 @@
 import './scss/style.scss';
+import './assets/css/input-number.css';
 import React from 'react';
 import { HashRouter, Route, Switch } from 'react-router-dom';
 import DataProvider from './data/dataProvider/dataProvider';

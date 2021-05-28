@@ -23,7 +23,8 @@ const City = React.lazy(() => import('./views/components/cities/city'));
 const Relaypoints = React.lazy(() => import('./views/components/relaypoints/relaypoints'));
 const Relaypoint = React.lazy(() => import('./views/components/relaypoints/relaypoint'));
 const Preparations = React.lazy(() => import('./views/components/preparations/preparations'));
-const Preparation = React.lazy(() => import('./views/components/preparations/preparation'));
+const Deliveries = React.lazy(() => import('./views/components/deliveries/deliveries'));
+const Order = React.lazy(() => import('./views/components/orders/order'));
 const Users = React.lazy(() => import('./views/components/users/users'));
 const User = React.lazy(() => import('./views/components/users/user'));
 const Taxes = React.lazy(() => import('./views/components/taxes/taxes'));
@@ -103,8 +104,9 @@ const routes = [
   { path: '/components/cities', name: 'Cities', component: Cities },
   { path: '/components/relaypoints/:id', name: 'Relaypoint', component: Relaypoint },
   { path: '/components/relaypoints', name: 'Relaypoints', component: Relaypoints },
-  { path: '/components/preparations/:id', name: 'Preparation', component: Preparation },
+  { path: '/components/orders/:id', name: 'Order', component: Order },
   { path: '/components/preparations', name: 'Preparations', component: Preparations },
+  { path: '/components/deliveries', name: 'Deliveries', component: Deliveries },
   { path: '/components/users/:id', exact: true, name: 'User Details', component: User },
   { path: '/components/users', name: 'Users', component: Users },
   { path: '/components/taxes/:id', name: 'Tax', component: Tax },

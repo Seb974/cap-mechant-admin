@@ -1,24 +1,28 @@
 import React, { useContext, useEffect, useState } from 'react';
 import OrderActions from '../../../services/OrderActions'
-import { CCard, CCardBody, CCardHeader, CCol, CDataTable, CRow, CButton } from '@coreui/react';
+import { CCard, CCardBody, CCardHeader, CCol, CDataTable, CRow, CButton, CCollapse } from '@coreui/react';
 import { DocsLink } from 'src/reusable'
 import { Link } from 'react-router-dom';
 import AuthContext from 'src/contexts/AuthContext';
 import Roles from 'src/config/Roles';
 import RangeDatePicker from 'src/components/forms/RangeDatePicker';
-import { isDefined } from 'src/helpers/utils';
+import { isDefined, isDefinedAndNotVoid } from 'src/helpers/utils';
 import { isSameDate, getDateFrom } from 'src/helpers/days';
 import Spinner from 'react-bootstrap/Spinner'
+import { Button } from 'bootstrap';
+import OrderDetails from 'src/components/preparationPages/orderDetails';
 
 const Preparations = (props) => {
 
     const itemsPerPage = 30;
-    const fields = ['name', 'date', 'total', ' '];
+    const fields = ['name', 'date', 'total', ' '];      // 'show_details',
     const { currentUser } = useContext(AuthContext);
     const [orders, setOrders] = useState([]);
     const [isAdmin, setIsAdmin] = useState(false);
     const [loading, setLoading] = useState(false);
     const [dates, setDates] = useState({start: new Date(), end: new Date() });
+
+    const [details, setDetails] = useState([])
 
     useEffect(() => {
         setIsAdmin(Roles.hasAdminPrivileges(currentUser));
@@ -33,7 +37,6 @@ const Preparations = (props) => {
         const UTCDates = getUTCDates(dates);
         OrderActions.findPreparations(UTCDates, currentUser)
                 .then(response =>{
-                    console.log(response);
                     setOrders(response);
                     setLoading(false);
                 })
@@ -68,6 +71,18 @@ const Preparations = (props) => {
         return {start: UTCStart, end: UTCEnd};
     }
 
+    const toggleDetails = (index, e) => {
+        e.preventDefault();
+        const position = details.indexOf(index)
+        let newDetails = details.slice()
+        if (position !== -1) {
+            newDetails.splice(position, 1)
+        } else {
+            newDetails = [...details, index]
+        }
+        setDetails(newDetails);
+    }
+
     return (
         <CRow>
         <CCol xs="12" lg="12">
@@ -100,38 +115,49 @@ const Preparations = (props) => {
                     </CRow> 
                     :
                     <CDataTable
-                    items={ orders }
-                    fields={ fields }
-                    bordered
-                    itemsPerPage={ itemsPerPage }
-                    pagination
-                    scopedSlots = {{
-                        'name':
-                            item => <td>
-                                        <Link to={ "/components/preparations/" + item.id }>
-                                            { item.name }<br/>
-                                            <small><i>{ item.metas.zipcode } { item.metas.city }</i></small>
-                                        </Link>
+                        items={ orders }
+                        fields={ fields }
+                        bordered
+                        itemsPerPage={ itemsPerPage }
+                        pagination
+                        scopedSlots = {{
+                            'name':
+                                item => <td>
+                                            <Link to="#" onClick={ e => { toggleDetails(item.id, e) }}>
+                                                { item.isRemains ? 
+                                                    <i className="fas fa-sync-alt mr-2"></i> :
+                                                  isDefinedAndNotVoid(item.packages) ? 
+                                                  <i className="fas fa-plane mr-2"></i> :
+                                                    <i className="fas fa-truck mr-2"></i>
+                                                }{ item.name }<br/>
+                                                <small><i>{ item.metas.zipcode } { item.metas.city }</i></small>
+                                            </Link>
+                                        </td>
+                            ,
+                            'date':
+                                item => <td>
+                                            { isSameDate(new Date(item.deliveryDate), new Date()) ? "Aujourd'hui" : 
+                                            isSameDate(new Date(item.deliveryDate), getDateFrom(new Date(), 1)) ? "Demain" :
+                                            (new Date(item.deliveryDate)).toLocaleDateString('fr-FR', { timeZone: 'UTC'})
+                                            }
+                                        </td>
+                            ,
+                            'total':
+                                item => <td>{ isDefined(item.totalHT) ? item.totalHT.toFixed(2) + " €" : " "}</td>
+                            ,
+                            ' ':
+                                item => (
+                                    <td className="mb-3 mb-xl-0 text-center">
+                                        <CButton color="warning" disabled={ !isAdmin } href={ "#/components/orders/" + item.id } className="mx-1 my-1"><i className="fas fa-pen"></i></CButton>
+                                        <CButton color="danger" disabled={ !isAdmin } onClick={ () => handleDelete(item.id) } className="mx-1 my-1"><i className="fas fa-trash"></i></CButton>
                                     </td>
-                        ,
-                        'date':
-                            item => <td>
-                                        { isSameDate(new Date(item.deliveryDate), new Date()) ? "Aujourd'hui" : 
-                                          isSameDate(new Date(item.deliveryDate), getDateFrom(new Date(), 1)) ? "Demain" :
-                                          (new Date(item.deliveryDate)).toLocaleDateString('fr-FR', { timeZone: 'UTC'})
-                                        }
-                                    </td>
-                        ,
-                        'total':
-                            item => <td>{ isDefined(item.totalHT) ? item.totalHT.toFixed(2) + " €" : " "}</td>
-                        ,
-                        ' ':
-                            item => (
-                                <td className="mb-3 mb-xl-0 text-center">
-                                    <CButton block color="danger" disabled={ !isAdmin } onClick={ () => handleDelete(item.id) }>Supprimer</CButton>
-                                </td>
-                            )
-                    }}
+                                )
+                            ,
+                            'details':
+                                item => <CCollapse show={details.includes(item.id)}>
+                                            <OrderDetails order={ item } />
+                                        </CCollapse>
+                        }}
                     />
                 }
             </CCardBody>
