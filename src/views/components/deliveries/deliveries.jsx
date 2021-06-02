@@ -12,6 +12,10 @@ import Spinner from 'react-bootstrap/Spinner'
 import { Button } from 'bootstrap';
 import OrderDetails from 'src/components/preparationPages/orderDetails';
 import CIcon from '@coreui/icons-react';
+import TouringActions from 'src/services/TouringActions';
+import Select from 'src/components/forms/Select';
+import UserActions from 'src/services/UserActions';
+import { shop, isSamePosition } from 'src/helpers/checkout';
 
 const Deliveries = (props) => {
 
@@ -26,11 +30,20 @@ const Deliveries = (props) => {
     const [priorities, setPriorities] = useState([]);
     const [tripLoading, setTripLoading] = useState(false);
     const [selectAll, setSelectAll] = useState(false);
+    const [deliverers, setDeliverers] = useState([]);
+    const [selectedDeliverer, setSelectedDeliverer] = useState(null);
 
     useEffect(() => {
-        setIsAdmin(Roles.hasAdminPrivileges(currentUser));
+        const isUserAdmin = Roles.hasAdminPrivileges(currentUser);
+        setIsAdmin(isUserAdmin);
         getOrders();
+        if (isUserAdmin)
+            fetchDeliverers();
+        else
+            setSelectedDeliverer(currentUser);
     }, []);
+
+    useEffect(() => console.log(deliverers), [deliverers]);
 
     useEffect(() => setIsAdmin(Roles.hasAdminPrivileges(currentUser)), [currentUser]);
     useEffect(() => getOrders(), [dates]);
@@ -48,6 +61,15 @@ const Deliveries = (props) => {
                     setLoading(false);
                 });
     }
+
+    const fetchDeliverers = () => {
+        UserActions
+            .findDeliverers()
+            .then(response => {
+                setDeliverers(response);
+                setSelectedDeliverer(response[0]);
+            });
+    };
 
     const handleDelete = (id) => {
         const originalOrders = [...orders];
@@ -104,70 +126,91 @@ const Deliveries = (props) => {
 
     const toggleDetails = (index, e) => {
         e.preventDefault();
-        const position = details.indexOf(index)
-        let newDetails = details.slice()
+        const position = details.indexOf(index);
+        let newDetails = details.slice();
         if (position !== -1) {
-            newDetails.splice(position, 1)
+            newDetails.splice(position, 1);
         } else {
-            newDetails = [...details, index]
+            newDetails = [...details, index];
         }
         setDetails(newDetails);
     }
 
     const handleCreateTrip = () => {
-        const shop = {
-            id: "-1",
-            name: "Dépôt",
-            coordinates: [-21.313875, 55.458254],
-            address: "21 chemin Jean Cadet, 97410, Saint-Pierre, La Réunion",
-            zipcode: "97410",
-            city: "Saint-Pierre"
-        }; 
-        const ordersTrip = getOrdersTrip();
-        const tripPriorities = getTripPriorities(ordersTrip);
-        const tripFromShop = [shop, ...ordersTrip];
-        if (ordersTrip.length > 0) {
-            setTripLoading(true);
-            OrderActions
-                .getOptimizedTrip(tripFromShop, tripPriorities)
-                .then(response => {
-                    setTripLoading(false);
-                    if (isDefined(response.waypoints)) {
-                        const waypoints = response.waypoints.map((waypoint, index) => ({...tripFromShop[index], priority: waypoint.waypoint_index}));
-                        const newTrip = waypoints.sort((a, b) => (a.priority > b.priority) ? 1 : -1);
-                        console.log(newTrip);
-                    } else {
-                        console.log(response);
-                    }
-                })
-                .catch(error => {
-                    setTripLoading(false);
-                    console.log(error);
-                })
-        }
+
+        getOrderedOrders()
+            .then(response => {
+                console.log(response);
+                createTouring(response);
+            });
     }
 
-    const getTripPriorities = orders => {
-        let formattedPriorities = "";
+    const getOrderedOrders = () => {
+        let priorizedOrders = [];
+        const ordersTrip = getOrdersTrip();
+        let tripFromShop = [shop, ...ordersTrip, shop];
         if (priorities.length > 0) {
-            let priorityKeys = [];
-            priorities.map(priority => {
-                const selection = orders.find(o => o.id === priority);
-                if (isDefined(selection)) {
-                    priorityKeys = [...priorityKeys, parseInt(Object.keys(orders).find(key => orders[key].id === selection.id))];
-                }
-            });
-            if (priorityKeys.length === orders.length)
-                priorityKeys.splice(-1, 1);
-
-            const unpriorized = getFirstUnpriorized(orders, priorityKeys);
-            priorityKeys.map((key, i) => {
-                const separator = i < priorityKeys.length - 1 ? ';' : '';
-                const newKeyPair = (parseInt(key) + 1) + ',' + (i < priorityKeys.length - 2 ? (parseInt(priorityKeys[i + 1]) + 1) : (parseInt(unpriorized) + 1))
-                formattedPriorities += (newKeyPair + separator);
-            });
+            priorizedOrders = getPriorizedOrders(ordersTrip);
+            const ordersToOptimize = ordersTrip.filter(o => priorizedOrders.findIndex(p => p.id === o.id) === -1);
+            if (ordersToOptimize.length === 0)
+                return new Promise((resolve, reject) => resolve(priorizedOrders));
+            else if (ordersToOptimize.length === 1)
+                return new Promise((resolve, reject) => resolve([...priorizedOrders, {...ordersToOptimize[0], deliveryPriority: (priorizedOrders.length + 1)}]));
+            else {
+                const lastPriorized = priorizedOrders[priorizedOrders.length - 1];
+                tripFromShop = [lastPriorized, ...ordersToOptimize, shop];
+            }
         }
-        return formattedPriorities;
+        return getOptimizedTrip(tripFromShop, priorizedOrders);
+    };
+
+    const getPriorizedOrders = (ordersTrip) => {
+        return priorities.map((priority, index) => {
+            const selection = orders.find(order => order.id === priority);
+            const orderedOrder = ordersTrip.find(order => {
+                return order.name === selection.name && JSON.stringify(order.coordinates) === JSON.stringify(selection.metas.position);
+            });
+            return {...orderedOrder, deliveryPriority: (index + 1)};
+        })
+    }
+
+    const getOptimizedTrip = (tripFromShop, priorizedOrders) => {
+        setTripLoading(true);
+        return OrderActions
+            .getOptimizedTrip(tripFromShop)
+            .then(response => {
+                console.log(response);
+                let optimizedOrders = [];
+                const startIndex = priorizedOrders.length;
+                if (isDefined(response.waypoints)) {
+                    optimizedOrders = response.waypoints.map((waypoint, i) => ({...tripFromShop[i], deliveryPriority: (startIndex + waypoint.waypoint_index)}));
+                } else {
+                    optimizedOrders = tripFromShop.map((order, key) => ({...order, deliveryPriority: (startIndex + key)}))
+                }
+                const [shopPoint, ...optimizedOrdersWithReturn] = optimizedOrders;
+                const waypoints = optimizedOrdersWithReturn.slice(0,-1);
+                const touring = [...priorizedOrders, ...waypoints];
+                setTripLoading(false);
+                return touring.sort((a, b) => (a.deliveryPriority > b.deliveryPriority) ? 1 : -1);
+            });
+    }
+
+    const createTouring = newTrip => {
+        let classifiedPoints = [];
+        const ordersToDeliver = orders.filter(order => order.selected);
+        ordersToDeliver.map(order => {
+            const waypoint = newTrip.find(tripPoint => isSameWaypoint(tripPoint, order));
+            classifiedPoints = [...classifiedPoints, {...order, deliveryPriority: waypoint.deliveryPriority}];
+        });
+        const orderedOrders = classifiedPoints.sort((a, b) => (a.deliveryPriority > b.deliveryPriority) ? 1 : -1);
+        TouringActions
+            .create({
+                orderEntities: orderedOrders.map(order => ({id: order.id, deliveryPriority: order.deliveryPriority, status: 'ON_TRUCK'})),
+                start: new Date(),
+                isOpen: true,
+                deliverer: selectedDeliverer['@id']
+            })
+            .then(response => setOrders(orders.filter(o => !o.selected)));
     };
 
     const getOrdersTrip = () => {
@@ -177,10 +220,10 @@ const Deliveries = (props) => {
         }, []);
         return trip.map(order => ({
             id: order.id,
-            name: order.name, 
-            coordinates: order.metas.position, 
-            address: order.metas.address, 
-            zipcode: order.metas.zipcode, 
+            name: order.name,
+            coordinates: order.metas.position,
+            address: order.metas.address,
+            zipcode: order.metas.zipcode,
             city: order.metas.city
         }));
     };
@@ -190,10 +233,9 @@ const Deliveries = (props) => {
                 JSON.stringify(order1.metas.position) === JSON.stringify(order2.metas.position);
     };
 
-    const getFirstUnpriorized = (orders, filteredPriorities) => {
-        const unpriorized = orders.find((order, key) => !filteredPriorities.includes(key));
-        return Object.keys(orders).find(key => orders[key].id === unpriorized.id);
-    };
+    const isSameWaypoint = (waypoint, order) => {
+        return waypoint.name === order.name && JSON.stringify(waypoint.coordinates) === JSON.stringify(order.metas.position);
+    }
 
     return (
         <CRow>
@@ -229,11 +271,11 @@ const Deliveries = (props) => {
                     </CCol>
                 </CRow>
                 { loading ? 
-                    <CRow>      {/* // className="mx-5"  mx-5*/}
+                    <CRow>
                         <CCol xs="12" lg="12" className="text-center">
                             <Spinner animation="border" variant="danger"/>
                         </CCol>
-                    </CRow> 
+                    </CRow>
                     :
                     <CDataTable
                         items={ orders }
@@ -294,14 +336,19 @@ const Deliveries = (props) => {
                             ,
                             'details':
                                 item => <CCollapse show={details.includes(item.id)}>
-                                            <OrderDetails order={ item } />
+                                            <OrderDetails order={ item } isDelivery={ true }/>
                                         </CCollapse>
                         }}
                     />
                 }
                 { orders.length > 0 &&
-                    <CRow className="mt-4 d-flex justify-content-center">
-                        <CButton size="sm" color="success" onClick={ handleCreateTrip } style={{width: '140px', height: '30px'}}>
+                    <CRow className="mt-4 d-flex justify-content-center align-items-start">
+                        { isAdmin && 
+                            <Select className="mr-2" name="deliverer" label=" " onChange={ ({ currentTarget }) => console.log(currentTarget.value) } style={{width: '140px', height: '35px'}}>
+                                { deliverers.map(deliverer => <option value={ deliverer }>{ deliverer.name }</option>) }
+                            </Select>
+                        }
+                        <CButton size="sm" color="success" onClick={ handleCreateTrip } className={ "ml-2" } style={{width: '140px', height: '35px'}} disabled={ orders.findIndex(o => o.selected) === -1 }>
                             { tripLoading ?
                                 <Spinner
                                     as="span"

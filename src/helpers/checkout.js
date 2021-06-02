@@ -1,6 +1,15 @@
 import { isInSelectedCountry } from "./map";
 import { getFloat, isDefined, isDefinedAndNotVoid } from "./utils";
 
+export const shop = {
+    id: "-1",
+    name: "Dépôt",
+    coordinates: [-21.313875, 55.458254],
+    address: "21 chemin Jean Cadet, 97410, Saint-Pierre, La Réunion",
+    zipcode: "97410",
+    city: "Saint-Pierre"
+};
+
 export const getOrderToWrite = (order, user, informations, productCart, date, objectDiscount, selectedCatalog, condition, settings) => {
     return {
         ...order,
@@ -47,6 +56,26 @@ export const getPreparedOrder = order => {
         })),
         isRemains: false,
         status: "PREPARED"
+    };
+}
+
+export const getDeliveredOrder = order => {
+    const { user, metas, catalog, appliedCondition, promotion, items } = order;
+    return {
+        ...order,
+        user: isDefined(user) ? (typeof user === 'object' ? user['@id'] : user) : null,
+        metas: isDefined(metas) ? (typeof metas === 'object' ? metas['@id'] : metas) : null,
+        catalog: isDefined(catalog) ? (typeof catalog === 'object' ? catalog['@id'] : catalog) : null,
+        appliedCondition: isDefined(appliedCondition) ? (typeof appliedCondition === 'object' ? appliedCondition['@id'] : appliedCondition) : null,
+        promotion: isDefined(promotion) ? (typeof promotion === 'object' ? promotion['@id'] : promotion) : null,
+        items: items.map(item => ({
+            ...item, 
+            product: isDefined(item.product) ? (typeof item.product === 'object' ? item.product['@id'] : item.product) : null,
+            variation: isDefined(item.variation) ? (typeof item.variation === 'object' ? item.variation['@id'] : item.variation) : null,
+            size: isDefined(item.size) ? (typeof item.size === 'object' ? item.size['@id'] : item.size) : null,
+            deliveredQty: getFloat(item.deliveredQty),
+        })),
+        status: "DELIVERED"
     };
 }
 
@@ -106,7 +135,7 @@ const isDeliverable = (catalog, condition) => {
     return isDefined(catalog) && (catalog.needsParcel || (!catalog.needsParcel && isDefined(condition)));
 };
 
-const isSamePosition = (position1, position2) => JSON.stringify(position1) === JSON.stringify(position2);
+export const isSamePosition = (position1, position2) => JSON.stringify(position1) === JSON.stringify(position2);
 
 const isRelaypoint = (condition, relaypoints) => {
     if (!isDefined(condition) || !isDefinedAndNotVoid(relaypoints)) {

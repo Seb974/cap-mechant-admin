@@ -4,15 +4,23 @@ import CIcon from '@coreui/icons-react';
 import OrderDetailsItem from './orderDetailsItem';
 import { getPreparedOrder } from 'src/helpers/checkout';
 import OrderActions from 'src/services/OrderActions';
+import { isDefined } from 'src/helpers/utils';
 
-const OrderDetails = ({ order }) => {
+const OrderDetails = ({ orders = null, order, setOrders = null, isDelivery = false }) => {
 
-    const [viewedOrder, setViewedOrder] = useState({...order, items: order.items.map(item => ({...item, preparedQty: "", isAdjourned: false})) });
+    const [viewedOrder, setViewedOrder] = useState({
+        ...order, 
+        items: order.items.map(item => ({
+            ...item, 
+            preparedQty: (isDelivery && isDefined(item.preparedQty) ? item.preparedQty : ""), 
+            isAdjourned: (isDelivery && isDefined(item.isAdjourned) ? item.isAdjourned : false)
+        })) 
+    });
 
     const onSubmit = () => {
         OrderActions
             .update(order.id, getPreparedOrder(viewedOrder))
-            .then(response => window.location.reload())
+            .then(response => setOrders(orders.filter(o => o.id !== order.id)))
             .catch(error => console.log(error));
     };
 
@@ -33,6 +41,7 @@ const OrderDetails = ({ order }) => {
                                     setOrder={ setViewedOrder } 
                                     total={ order.items.length } 
                                     index={ index }
+                                    isDelivery={ isDelivery }
                                 />
                             </CCol>
                         </CRow>
@@ -42,9 +51,11 @@ const OrderDetails = ({ order }) => {
             <CRow className="text-center mt-0">
                 <CCol md="1">{""}</CCol>
             </CRow>
-            <CRow className="mt-2 mb-5 d-flex justify-content-center">
-                <CButton size="sm" color="success" onClick={ onSubmit }><CIcon name="cil-plus"/>Terminer</CButton>
-            </CRow>
+            { !isDelivery &&
+                <CRow className="mt-2 mb-5 d-flex justify-content-center">
+                    <CButton size="sm" color="success" onClick={ onSubmit }><CIcon name="cil-plus"/>Terminer</CButton>
+                </CRow>
+            }
         </>
     );
 }

@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import OrderActions from '../../../services/OrderActions'
-import { CCard, CCardBody, CCardHeader, CCol, CDataTable, CRow, CButton, CCollapse } from '@coreui/react';
+import { CCard, CCardBody, CCardHeader, CCol, CDataTable, CRow, CButton, CCollapse, CFormGroup, CInputCheckbox, CLabel } from '@coreui/react';
 import { DocsLink } from 'src/reusable'
 import { Link } from 'react-router-dom';
 import AuthContext from 'src/contexts/AuthContext';
@@ -10,51 +10,52 @@ import { isDefined, isDefinedAndNotVoid } from 'src/helpers/utils';
 import { isSameDate, getDateFrom } from 'src/helpers/days';
 import Spinner from 'react-bootstrap/Spinner'
 import { Button } from 'bootstrap';
-import OrderDetails from 'src/components/preparationPages/orderDetails';
+import TouringDetails from 'src/components/touringPages/touringDetails';
+import CIcon from '@coreui/icons-react';
+import TouringActions from 'src/services/TouringActions';
 
-const Preparations = (props) => {
+const Tourings = (props) => {
 
     const itemsPerPage = 30;
-    const fields = ['name', 'date', 'total', ' '];      // 'show_details',
+    const fields = ['Livreur', 'Départ', 'Livraisons', 'Terminer', ' '];
     const { currentUser } = useContext(AuthContext);
-    const [orders, setOrders] = useState([]);
+    const [tourings, setTourings] = useState([]);
     const [isAdmin, setIsAdmin] = useState(false);
     const [loading, setLoading] = useState(false);
     const [dates, setDates] = useState({start: new Date(), end: new Date() });
-
-    const [details, setDetails] = useState([])
+    const [details, setDetails] = useState([]);
 
     useEffect(() => {
         setIsAdmin(Roles.hasAdminPrivileges(currentUser));
-        getOrders();
+        getTourings();
     }, []);
 
     useEffect(() => setIsAdmin(Roles.hasAdminPrivileges(currentUser)), [currentUser]);
-    useEffect(() => getOrders(), [dates]);
+    useEffect(() => getTourings(), [dates]);
 
-    const getOrders = () => {
+    const getTourings = () => {
         setLoading(true);
         const UTCDates = getUTCDates(dates);
-        OrderActions.findPreparations(UTCDates, currentUser)
-                .then(response =>{
-                    setOrders(response);
-                    setLoading(false);
-                })
-                .catch(error => {
-                    console.log(error);
-                    setLoading(false);
-                });
+        TouringActions
+            .getOpenedTourings(UTCDates)
+            .then(response =>{
+                setTourings(response);
+                setLoading(false);
+            })
+            .catch(error => {
+                console.log(error);
+                setLoading(false);
+            });
     }
 
-    const handleDelete = (id) => {
-        const originalOrders = [...orders];
-        setOrders(orders.filter(order => order.id !== id));
-        OrderActions
-            .delete(id)
-            .catch(error => {
-                setOrders(originalOrders);
-                console.log(error.response);
-            });
+    const handleDelete = id => {
+        const originalTourings = [...tourings];
+        setTourings(tourings.filter(order => order.id !== id));
+        TouringActions.delete(id)
+                      .catch(error => {
+                           setTourings(originalTourings);
+                           console.log(error.response);
+                      });
     }
 
     const handleDateChange = datetime => {
@@ -62,7 +63,6 @@ const Preparations = (props) => {
             const newStart = new Date(datetime[0].getFullYear(), datetime[0].getMonth(), datetime[0].getDate(), 0, 0, 0);
             const newEnd = new Date(datetime[1].getFullYear(), datetime[1].getMonth(), datetime[1].getDate(), 23, 59, 0);
             setDates({start: newStart, end: newEnd});
-
         }
     };
 
@@ -84,17 +84,27 @@ const Preparations = (props) => {
         setDetails(newDetails);
     }
 
+    const getFormattedDateTime = date => {
+        const backendDate = new Date(Date.parse(date));
+        const timezoneOffset = parseInt( new Date(Date.parse(date)).getTimezoneOffset() );
+        const formattedDate = new Date(backendDate.getFullYear(), backendDate.getMonth(), backendDate.getDate(), 
+                              backendDate.getHours(), (backendDate.getMinutes() - timezoneOffset), backendDate.getSeconds());
+        return formattedDate.toLocaleTimeString('fr-FR');
+    };
+
+    const handleSubmit = (touring) => {
+        console.log(touring);
+        TouringActions
+            .closeTouring(touring)
+            .then(response => setTourings(tourings.filter(t => t.id !== touring.id)));
+    }
+
     return (
         <CRow>
         <CCol xs="12" lg="12">
           <CCard>
             <CCardHeader>
-                Liste des commandes à préparer
-                { isAdmin &&
-                    <CCol col="6" sm="4" md="2" className="ml-auto">
-                            <Link role="button" to="/components/preparations/new" block variant="outline" color="success">CRÉER</Link>
-                    </CCol>
-                }
+                Liste des commandes à livrer
             </CCardHeader>
             <CCardBody>
                 <CRow>
@@ -109,54 +119,53 @@ const Preparations = (props) => {
                     </CCol>
                 </CRow>
                 { loading ? 
-                    <CRow className="mx-5">
-                        <CCol xs="12" lg="12" className="text-center mx-5">
+                    <CRow>
+                        <CCol xs="12" lg="12" className="text-center">
                             <Spinner animation="border" variant="danger"/>
                         </CCol>
                     </CRow> 
                     :
                     <CDataTable
-                        items={ orders }
+                        items={ tourings }
                         fields={ fields }
                         bordered
                         itemsPerPage={ itemsPerPage }
                         pagination
                         scopedSlots = {{
-                            'name':
+                            'Livreur':
                                 item => <td>
                                             <Link to="#" onClick={ e => { toggleDetails(item.id, e) }}>
-                                                { item.isRemains ? 
-                                                    <i className="fas fa-sync-alt mr-2"></i> :
-                                                  isDefinedAndNotVoid(item.packages) ? 
-                                                  <i className="fas fa-plane mr-2"></i> :
-                                                    <i className="fas fa-truck mr-2"></i>
-                                                }{ item.name }<br/>
-                                                <small><i>{ item.metas.zipcode } { item.metas.city }</i></small>
+                                                { isDefined(item.deliverer) ? item.deliverer.name : '-' }
                                             </Link>
                                         </td>
                             ,
-                            'date':
+                            'Départ':
                                 item => <td>
-                                            { isSameDate(new Date(item.deliveryDate), new Date()) ? "Aujourd'hui" : 
-                                            isSameDate(new Date(item.deliveryDate), getDateFrom(new Date(), 1)) ? "Demain" :
-                                            (new Date(item.deliveryDate)).toLocaleDateString('fr-FR', { timeZone: 'UTC'})
-                                            }
+                                            { getFormattedDateTime(item.start) }
                                         </td>
                             ,
-                            'total':
-                                item => <td>{ isDefined(item.totalHT) ? item.totalHT.toFixed(2) + " €" : " "}</td>
+                            'Livraisons':
+                                item => <td>
+                                            { item.orderEntities.length }
+                                        </td>
+                            ,
+                            'Terminer':
+                                item => <td className="d-flex align-items-center">
+                                        { !details.includes(item.id) &&
+                                           <CButton color="success" onClick={ () => handleSubmit(item) } className="mx-1 my-1"><i className="fas fa-check"></i></CButton>
+                                        }
+                                        </td>
                             ,
                             ' ':
                                 item => (
                                     <td className="mb-3 mb-xl-0 text-center">
-                                        <CButton color="warning" disabled={ !isAdmin } href={ "#/components/orders/" + item.id } className="mx-1 my-1"><i className="fas fa-pen"></i></CButton>
                                         <CButton color="danger" disabled={ !isAdmin } onClick={ () => handleDelete(item.id) } className="mx-1 my-1"><i className="fas fa-trash"></i></CButton>
                                     </td>
                                 )
                             ,
                             'details':
                                 item => <CCollapse show={details.includes(item.id)}>
-                                            <OrderDetails orders={ orders } order={ item } setOrders={ setOrders }/>
+                                            <TouringDetails tourings={ tourings } touring={ item } isAdmin={ isAdmin } setTourings={ setTourings } handleSubmit={ handleSubmit }/>
                                         </CCollapse>
                         }}
                     />
@@ -164,9 +173,8 @@ const Preparations = (props) => {
             </CCardBody>
           </CCard>
         </CCol>
-
       </CRow>
     );
 }
- 
-export default Preparations;
+
+export default Tourings;

@@ -5,7 +5,7 @@ import ProductsContext from 'src/contexts/ProductsContext';
 import { getFloat, isDefined, isDefinedAndNotVoid } from 'src/helpers/utils';
 
 
-const OrderDetailsItem = ({ item, order, setOrder, total, index }) => {
+const OrderDetailsItem = ({ item, order, setOrder, total, index, isDelivery }) => {
 
     const { products } = useContext(ProductsContext);
     const [variants, setVariants] = useState([]);
@@ -109,8 +109,9 @@ const OrderDetailsItem = ({ item, order, setOrder, total, index }) => {
                             name={ item.count }
                             value={ item.preparedQty }
                             onChange={ onChange }
-                            valid={ item.preparedQty.toString().length > 0 && getFloat(item.preparedQty) >= (getFloat(item.orderedQty) * 0.8) }
-                            invalid={ item.preparedQty.toString().length > 0 && getFloat(item.preparedQty) < (getFloat(item.orderedQty) * 0.8) }
+                            disabled={ isDelivery }
+                            valid={ !isDelivery && item.preparedQty.toString().length > 0 && getFloat(item.preparedQty) >= (getFloat(item.orderedQty) * 0.8) }
+                            invalid={ !isDelivery && item.preparedQty.toString().length > 0 && getFloat(item.preparedQty) < (getFloat(item.orderedQty) * 0.8) }
                         />
                         <CInputGroupAppend>
                             <CInputGroupText>{ displayedProduct.unit }</CInputGroupText>
@@ -118,7 +119,7 @@ const OrderDetailsItem = ({ item, order, setOrder, total, index }) => {
                     </CInputGroup>
                 </CFormGroup>
             </CCol>
-            { item.preparedQty.toString().length > 0 && getFloat(item.preparedQty) < (getFloat(item.orderedQty) * 0.8) &&
+            { !isDelivery && item.preparedQty.toString().length > 0 && getFloat(item.preparedQty) < (getFloat(item.orderedQty) * 0.8) &&
                 <CCol xs="12" md="2" className="mt-4">
                     <CFormGroup row className="mb-0 d-flex align-items-end justify-content-start">
                         <CCol xs="4" sm="4" md="4">

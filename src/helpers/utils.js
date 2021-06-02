@@ -18,3 +18,10 @@ export const isSameAddress = (address1, address2) => {
            address1.zipcode === address2.zipcode &&
            address1.address2 === address2.address2;
 };
+
+export const formatUTC = dates => {
+    return {
+        start: new Date(dates.start.toUTCString()), 
+        end: new Date(dates.end.toUTCString())
+    };
+};

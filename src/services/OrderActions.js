@@ -2,6 +2,7 @@ import axios from 'axios';
 import api from 'src/config/api';
 import Roles from 'src/config/Roles';
 import { getStringDate } from 'src/helpers/days';
+import { isDefinedAndNotVoid } from 'src/helpers/utils';
 
 function findAll() {
     return api
@@ -49,13 +50,13 @@ function getOptimizedTrip(positions, distributionsKeys)
 {
     let trip = ""; 
     const accessToken = process.env.REACT_APP_MAPBOX_TOKEN;
-    const options = distributionsKeys.length > 0 ? 
+    const options = isDefinedAndNotVoid(distributionsKeys) ? 
         `source=first&roundtrip=true&distributions=${ distributionsKeys }` :
-        `source=first&roundtrip=true`;      // &destination=last&geometries=geojson
+        `source=first&roundtrip=true&destination=last`;      // &destination=last&geometries=geojson
     positions.map((position, key) => {
-        trip += "" + position.coordinates[1] + "," + position.coordinates[0] + (key === positions.length - 1 ? "" : ";");
+        trip += (key === 0 ? "/" : "") + position.coordinates[1] + "," + position.coordinates[0] + (key === positions.length - 1 ? "" : ";");
     });
-    const url = `https://api.mapbox.com/optimized-trips/v1/mapbox/driving/${ trip }?${ options }&access_token=${ accessToken }`;
+    const url = `https://api.mapbox.com/optimized-trips/v1/mapbox/driving${ trip }?${ options }&access_token=${ accessToken }`;
     return axios.get(url, {withCredentials: false})
                 .then(response => response.data);
 }
@@ -71,7 +72,7 @@ function find(id) {
 }
 
 function update(id, order) {
-    return api.put('/api/order_entities/' + id, {...order});
+    return api.put('/api/order_entities/' + id, order);
 }
 
 function create(order) {

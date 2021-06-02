@@ -48,6 +48,12 @@ function getNav(translation)
       icon: <CIcon name="cil-truck" customClasses="c-sidebar-nav-icon"/>,
     },
     {
+      _tag: 'CSidebarNavItem',
+      name: translation("tourings.label"),
+      to: '/components/tourings',
+      icon: <CIcon name="cil-map" customClasses="c-sidebar-nav-icon"/>,
+    },
+    {
       _tag: 'CSidebarNavTitle',
       _children: [translation("component.label")]
     },
