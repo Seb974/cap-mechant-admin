@@ -40,6 +40,11 @@ const _nav = [
     _children: [
       {
         _tag: 'CSidebarNavItem',
+        name: 'Utilisateurs',
+        to: '/components/users',
+      },
+      {
+        _tag: 'CSidebarNavItem',
         name: 'Breadcrumb',
         to: '/base/breadcrumbs',
       },

@@ -6,24 +6,15 @@ import { Link } from 'react-router-dom';
 
 const Users = (props) => {
 
-
     const itemsPerPage = 15;
     const fields = ['name', 'email', 'roles', ' '];
     const [users, setUsers] = useState([]);
 
     const getBadge = role => {
-      switch (role) {
-        case 'ROLE_PRO':
-        case 'ROLE_CHR':
-        case 'ROLE_GC':
-        case 'ROLE_VIP': return 'success'
-        case 'ROLE_USER_EXT':
-        case 'ROLE_USER_EXT_VIP': return 'secondary'
-        case 'ROLE_TEAM': return 'warning'
-        case 'ROLE_ADMIN':
-        case 'ROLE_SUPER_ADMIN': return 'danger'
-        default: return 'secondary'
-      }
+      const name = role.toUpperCase();
+      return name.includes('ADMIN') ? 'danger' :
+             name.includes('VIP') ? 'warning' :
+             name.includes('USER') ? 'secondary' : 'success';
     }
 
     useEffect(() => {
@@ -35,12 +26,11 @@ const Users = (props) => {
     const handleDelete = (id) => {
       const originalUsers = [...users];
       setUsers(users.filter(user => user.id !== id));
-      console.log("Supprimé");
-      // UserActions.delete(id)
-      //            .catch(error => {
-      //                 setUsers(originalUsers);
-      //                 console.log(error.response);
-      //            });
+      UserActions.delete(id)
+                 .catch(error => {
+                      setUsers(originalUsers);
+                      console.log(error.response);
+                 });
   }
 
     return (
@@ -65,7 +55,7 @@ const Users = (props) => {
                   item => (
                     <td>
                         <CBadge color={ getBadge(Roles.filterRoles(item.roles)) }>
-                            { Roles.getRoleLabel(item.roles) }
+                            { (Roles.filterRoles(item.roles)).substring(5).replace('_', ' ',) }
                         </CBadge>
                     </td>
                 ),

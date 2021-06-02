@@ -51,7 +51,7 @@ const Groups = (props) => {
                   item => <td><Link to={ "/components/groups/" + item.id }>{ item.label }</Link></td>
                 ,
                 ' ':
-                  item =><td><CButton block color="danger" disabled={ item.isFixed  } onClick={ () => handleDelete(item.id) }>Supprimer</CButton></td>
+                  item =><td><CButton block color="danger" disabled={ item.isFixed } onClick={ () => handleDelete(item.id) }>Supprimer</CButton></td>
               }}
             />
             </CCardBody>

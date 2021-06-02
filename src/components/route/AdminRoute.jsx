@@ -5,7 +5,7 @@ import Roles from 'src/config/Roles';
 
 const AdminRoute = ({ path, component }) => {
     const { isAuthenticated, currentUser } = useContext(AuthContext);
-    return isAuthenticated && Roles.hasPrivileges(currentUser) ? <Route path={ path } component={ component } /> : <Redirect to="/404" />
+    return isAuthenticated && Roles.hasPrivileges(currentUser) ? <Route path={ path } component={ component } /> : <Redirect to="/login" />
 }
  
 export default AdminRoute;

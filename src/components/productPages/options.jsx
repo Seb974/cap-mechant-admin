@@ -1,7 +1,15 @@
-import React from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { CCol, CFormGroup, CSwitch } from '@coreui/react';
+import Roles from 'src/config/Roles';
+import AuthContext from 'src/contexts/AuthContext';
 
 const Options = ({ product, setProduct }) => {
+
+    const { currentUser } = useContext(AuthContext);
+    const [isAdmin, setIsAdmin] = useState(false);
+
+    useEffect(() => setIsAdmin(Roles.hasAdminPrivileges(currentUser)), []);
+    useEffect(() => setIsAdmin(Roles.hasAdminPrivileges(currentUser)), [currentUser]);
 
     const handleCheckBoxes = ({ currentTarget }) => setProduct({...product, [currentTarget.name]: !product[currentTarget.name]});
 
@@ -12,7 +20,7 @@ const Options = ({ product, setProduct }) => {
                 <CCol xs="12" md="4" className="mt-4">
                     <CFormGroup row className="mb-0 ml-1 d-flex align-items-end">
                         <CCol xs="3" sm="2" md="3">
-                            <CSwitch name="available" className="mr-1" color="dark" shape="pill" variant="opposite" checked={ product.available } onChange={ handleCheckBoxes }/>
+                            <CSwitch name="available" className="mr-1" color="dark" shape="pill" variant="opposite" checked={ product.available } onChange={ handleCheckBoxes } disabled={ !isAdmin }/>
                         </CCol>
                         <CCol tag="label" xs="9" sm="10" md="9" className="col-form-label">
                             Disponible

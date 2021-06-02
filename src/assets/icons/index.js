@@ -38,8 +38,11 @@ import {
 } from '@coreui/icons'
 import {
   cilApple,
+  cilTruck,
+  cilDinner,
   cilFastfood,
   cilPizza,
+  cilContact,
   cilGift,
   cilCompass,
   cilColumns,
@@ -147,8 +150,11 @@ export const icons = Object.assign({}, {
   logoNegative
 }, {
   cilApple,
+  cilTruck,
+  cilDinner,
   cilFastfood,
   cilPizza,
+  cilContact,
   cilGift,
   cilCompass,
   cilColumns,

@@ -12,6 +12,8 @@ const Catalogs = React.lazy(() => import('./views/components/catalogs/catalogs')
 const Catalog = React.lazy(() => import('./views/components/catalogs/catalog'));
 const Promotions = React.lazy(() => import('./views/components/promotions/promotions'));
 const Promotion = React.lazy(() => import('./views/components/promotions/promotion'));
+const Sellers = React.lazy(() => import('./views/components/sellers/sellers'));
+const Seller = React.lazy(() => import('./views/components/sellers/seller'));
 const PriceGroups = React.lazy(() => import('./views/components/price_groups/priceGroups'));
 const PriceGroup = React.lazy(() => import('./views/components/price_groups/priceGroup'));
 const DaysOff = React.lazy(() => import('./views/components/days_off/daysOff'));
@@ -20,6 +22,10 @@ const Cities = React.lazy(() => import('./views/components/cities/cities'));
 const City = React.lazy(() => import('./views/components/cities/city'));
 const Relaypoints = React.lazy(() => import('./views/components/relaypoints/relaypoints'));
 const Relaypoint = React.lazy(() => import('./views/components/relaypoints/relaypoint'));
+const Preparations = React.lazy(() => import('./views/components/preparations/preparations'));
+const Deliveries = React.lazy(() => import('./views/components/deliveries/deliveries'));
+const Tourings = React.lazy(() => import('./views/components/tourings/tourings'));
+const Order = React.lazy(() => import('./views/components/orders/order'));
 const Users = React.lazy(() => import('./views/components/users/users'));
 const User = React.lazy(() => import('./views/components/users/user'));
 const Taxes = React.lazy(() => import('./views/components/taxes/taxes'));
@@ -89,6 +95,8 @@ const routes = [
   { path: '/components/catalogs', name: 'Catalogs', component: Catalogs },
   { path: '/components/promotions/:id', name: 'Promotion', component: Promotion },
   { path: '/components/promotions', name: 'Promotions', component: Promotions },
+  { path: '/components/sellers/:id', name: 'Seller', component: Seller },
+  { path: '/components/sellers', name: 'Sellers', component: Sellers },
   { path: '/components/price_groups/:id', name: 'PriceGroup', component: PriceGroup },
   { path: '/components/price_groups', name: 'PriceGroups', component: PriceGroups },
   { path: '/components/days_off/:id', name: 'DayOff', component: DayOff },
@@ -97,6 +105,10 @@ const routes = [
   { path: '/components/cities', name: 'Cities', component: Cities },
   { path: '/components/relaypoints/:id', name: 'Relaypoint', component: Relaypoint },
   { path: '/components/relaypoints', name: 'Relaypoints', component: Relaypoints },
+  { path: '/components/orders/:id', name: 'Order', component: Order },
+  { path: '/components/preparations', name: 'Preparations', component: Preparations },
+  { path: '/components/deliveries', name: 'Deliveries', component: Deliveries },
+  { path: '/components/tourings', name: 'Tourings', component: Tourings },
   { path: '/components/users/:id', exact: true, name: 'User Details', component: User },
   { path: '/components/users', name: 'Users', component: Users },
   { path: '/components/taxes/:id', name: 'Tax', component: Tax },

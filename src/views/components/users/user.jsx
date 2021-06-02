@@ -6,8 +6,9 @@ import ContactPanel from 'src/components/userPages/ContactPanel';
 import AuthContext from 'src/contexts/AuthContext';
 import UserActions from 'src/services/UserActions';
 import Roles from 'src/config/Roles';
-import { CButton, CCard, CCardBody, CCardFooter, CCardHeader, CCol, CForm, CFormGroup, CRow } from '@coreui/react';
+import { CButton, CCard, CCardBody, CCardFooter, CCardHeader, CCol, CForm, CRow } from '@coreui/react';
 import CIcon from '@coreui/icons-react';
+import { isDefinedAndNotVoid } from 'src/helpers/utils';
 
 const UserPage = ({ history, match }) => {
 
@@ -29,7 +30,7 @@ const UserPage = ({ history, match }) => {
                 const newUser = await UserActions.find(id);
                 setUser(user => {
                     return {...newUser,
-                                roles: newUser.roles === null || newUser.roles === undefined || newUser.roles.length === 0 ? Roles.getDefaultRole() : Roles.filterRoles(newUser.roles),
+                                roles: !isDefinedAndNotVoid(newUser.roles) ? Roles.getDefaultRole() : Roles.filterRoles(newUser.roles),
                                 password: user.password,
                                 confirmPassword: user.confirmPassword
                             };
@@ -47,7 +48,7 @@ const UserPage = ({ history, match }) => {
             } catch (error) {
                 console.log(error.response);
                 // TODO : Notification flash d'une erreur
-                history.replace("/users");
+                history.replace("/components/users");
             }
         }
     };
@@ -96,7 +97,7 @@ const UserPage = ({ history, match }) => {
             request.then(response => {
                         setErrors({});
                         //TODO : Flash notification de succès
-                        history.replace("/users");
+                        history.replace("/components/users");
                     })
                    .catch( ({ response }) => {
                         const { violations } = response.data;

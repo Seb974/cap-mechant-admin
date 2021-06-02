@@ -1,7 +1,9 @@
 import React from 'react'
 import CIcon from '@coreui/icons-react'
 
-function getNav(translation) {
+function getNav(translation)
+{
+  
   return [
     {
       _tag: 'CSidebarNavItem',
@@ -31,6 +33,22 @@ function getNav(translation) {
     },
     {
       _tag: 'CSidebarNavTitle',
+      _children: [translation("orders.label")]
+    },
+    {
+      _tag: 'CSidebarNavItem',
+      name: translation("deliveries.label"),
+      to: '/components/deliveries',
+      icon: <CIcon name="cil-truck" customClasses="c-sidebar-nav-icon"/>,
+    },
+    {
+      _tag: 'CSidebarNavItem',
+      name: translation("tourings.label"),
+      to: '/components/tourings',
+      icon: <CIcon name="cil-map" customClasses="c-sidebar-nav-icon"/>,
+    },
+    {
+      _tag: 'CSidebarNavTitle',
       _children: [translation("component.label")]
     },
     {
@@ -56,6 +74,12 @@ function getNav(translation) {
       name: translation("relaypoints.label"),
       to: '/components/relaypoints',
       icon: <CIcon name="cil-home" customClasses="c-sidebar-nav-icon"/>,
+    },
+    {
+      _tag: 'CSidebarNavItem',
+      name: translation("sellers.label"),
+      to: '/components/sellers',
+      icon: <CIcon name="cil-contact" customClasses="c-sidebar-nav-icon"/>,
     },
     {
       _tag: 'CSidebarNavItem',

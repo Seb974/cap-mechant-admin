@@ -29,11 +29,25 @@ function create(user) {
     return api.post('/api/users', user);
 }
 
+function findUser(search) {
+    return api
+            .get('/api/users?name=' + search)
+            .then(response => response.data['hydra:member']);
+}
+
+function findDeliverers() {
+    return api
+            .get('/api/users?roles=SELLER')
+            .then(response => response.data['hydra:member']);
+}
+
 export default {
     register,
     findAll,
     delete: deleteUser,
     find, 
     update, 
-    create
+    create,
+    findUser,
+    findDeliverers
 }

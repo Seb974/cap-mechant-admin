@@ -80,7 +80,6 @@ const TaxPage = ({ match, history }) => {
     const handleSubmit = (e) => {
         e.preventDefault();
         const taxToWrite = {...tax, catalogTaxes: catalogOptions.map(catalog => ({catalog: catalog['@id'], percent: (getFloat(catalog.percent) / 100) }))};
-        console.log(taxToWrite);
         const request = !editing ? TaxActions.create(taxToWrite) : TaxActions.update(id, taxToWrite);
         request.then(response => {
                     setErrors({name: ""});

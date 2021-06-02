@@ -55,6 +55,7 @@ export const getProductToWrite = (product, type, categories, variations, adapted
         catalogs: catalogs.map(catalog => catalog['@id']),
         productGroup: type === "mixed" ? null : product.productGroup,
         tax: product.tax['@id'],
+        seller: noImgProduct.seller['@id'],
         categories: product.categories.map(category => categories.find(element => element.id === category.value)['@id']),
         stockManaged: type === "mixed" ? null : noImgProduct.stockManaged,
         unit: type === "mixed" ? "U" : noImgProduct.unit,

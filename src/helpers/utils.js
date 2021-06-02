@@ -9,3 +9,19 @@ export const getDateFrom = (date, nbDaysToAdd = 0, hour = 9, minutes = 0) => {
 export const getNumericOrNull = value => typeof value === 'string' ? (value.length > 0 ? parseFloat(value) : null) : value;
 
 export const getFloat = value => typeof value === 'string' ? parseFloat(value.replace(',','.')) : value;
+
+export const getInt = value => typeof value === 'string' ? parseInt(value) : value;
+
+export const isSameAddress = (address1, address2) => {
+    return isDefined(address1) && isDefined(address2) &&
+           address1.address === address2.address &&
+           address1.zipcode === address2.zipcode &&
+           address1.address2 === address2.address2;
+};
+
+export const formatUTC = dates => {
+    return {
+        start: new Date(dates.start.toUTCString()), 
+        end: new Date(dates.end.toUTCString())
+    };
+};
