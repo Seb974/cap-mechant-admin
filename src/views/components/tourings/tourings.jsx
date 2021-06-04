@@ -9,7 +9,7 @@ import RangeDatePicker from 'src/components/forms/RangeDatePicker';
 import { isDefined, isDefinedAndNotVoid } from 'src/helpers/utils';
 import { isSameDate, getDateFrom } from 'src/helpers/days';
 import Spinner from 'react-bootstrap/Spinner'
-import { Button } from 'bootstrap';
+import Button from 'react-bootstrap/Button';
 import TouringDetails from 'src/components/touringPages/touringDetails';
 import CIcon from '@coreui/icons-react';
 import TouringActions from 'src/services/TouringActions';
@@ -27,7 +27,6 @@ const Tourings = (props) => {
     const [dates, setDates] = useState({start: new Date(), end: new Date() });
     const [details, setDetails] = useState([]);
     const [playedTouring, setPlayedTouring] = useState(null);
-    const [playing, setPlaying] = useState(false);
 
     useEffect(() => {
         setIsAdmin(Roles.hasAdminPrivileges(currentUser));
@@ -38,7 +37,6 @@ const Tourings = (props) => {
     useEffect(() => {
         getTourings();
         setPlayedTouring(null);
-        setPlaying(false);
     }, [dates]);
 
     const getTourings = () => {
@@ -100,18 +98,11 @@ const Tourings = (props) => {
         return formattedDate.toLocaleTimeString('fr-FR');
     };
 
-    const handleStart = (touring) => {
-        setPlayedTouring(touring);
-        setPlaying(true);
-    };
+    const handleStart = (touring) => setPlayedTouring(touring);
 
-    const handleStop = () => {
-        setPlayedTouring(null);
-        setPlaying(false);
-    };
+    const handleStop = () => setPlayedTouring(null);
 
     const handleSubmit = (touring) => {
-        console.log(touring);
         TouringActions
             .closeTouring(touring)
             .then(response => setTourings(tourings.filter(t => t.id !== touring.id)));
@@ -128,13 +119,16 @@ const Tourings = (props) => {
             <CCardBody>
                 <CRow>
                     <CCol xs="12" lg="6">
-                    <RangeDatePicker
-                        minDate={ dates.start }
-                        maxDate={ dates.end }
-                        onDateChange={ handleDateChange }
-                        label="Date"
-                        className = "form-control mb-3"
-                    />
+                        <RangeDatePicker
+                            minDate={ dates.start }
+                            maxDate={ dates.end }
+                            onDateChange={ handleDateChange }
+                            label="Date"
+                            className = "form-control mb-3"
+                        />
+                    </CCol>
+                    <CCol xs="12" lg="6" className="d-flex align-items-center pt-2">
+                        <Button variant="primary" href="/#/components/tourings/visualization">Visualiser</Button>
                     </CCol>
                 </CRow>
                 { loading ? 
@@ -170,7 +164,7 @@ const Tourings = (props) => {
                             ,
                             'Terminer':
                                 item => <td className="d-flex align-items-center">
-                                        { !playing ?
+                                        { !isDefined(playedTouring) || (playedTouring.id !== item.id) ?
                                             <CButton color="warning" onClick={ () => handleStart(item) } className="mx-1 my-1"><i className="fas fa-play"></i></CButton> : 
                                             <CButton color="danger" onClick={ handleStop } className="mx-1 my-1"><i className="fas fa-stop"></i></CButton>
                                         }
@@ -200,12 +194,7 @@ const Tourings = (props) => {
           </CCard>
         </CCol>
       </CRow>
-      { isDefined(playedTouring) &&
-        <CRow>
-            <TruckLocation touring={ playedTouring } playing={ playing }/>
-            {/* <TouringLocation /> */}
-        </CRow>
-      }
+      { isDefined(playedTouring) && <TruckLocation touring={ playedTouring }/> }
       </>
     );
 }

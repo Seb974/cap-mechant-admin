@@ -240,140 +240,135 @@ const Deliveries = (props) => {
     }
 
     return (
-        <>
         <CRow>
-        <CCol xs="12" lg="12">
-          <CCard>
-            <CCardHeader>
-                Liste des commandes à livrer
-            </CCardHeader>
-            <CCardBody>
-                <CRow>
-                    <CCol xs="12" lg="6">
-                    <RangeDatePicker
-                        minDate={ dates.start }
-                        maxDate={ dates.end }
-                        onDateChange={ handleDateChange }
-                        label="Date"
-                        className = "form-control mb-3"
-                    />
-                    </CCol>
-                    <CCol xs="12" lg="6" className="mt-4">
-                        <CFormGroup row variant="custom-checkbox" inline className="d-flex align-items-center">
-                            <input
-                                className="mx-1 my-1"
-                                type="checkbox"
-                                name="inline-checkbox"
-                                checked={ selectAll }
-                                onClick={ handleSelectAll }
-                                disabled={ orders.find(order => order.status !== "WAITING") == undefined }
-                                style={{zoom: 2.3}}
+            <CCol xs="12" lg="12">
+                <CCard>
+                    <CCardHeader>
+                        Liste des commandes à livrer
+                    </CCardHeader>
+                    <CCardBody>
+                        <CRow>
+                            <CCol xs="12" lg="6">
+                            <RangeDatePicker
+                                minDate={ dates.start }
+                                maxDate={ dates.end }
+                                onDateChange={ handleDateChange }
+                                label="Date"
+                                className = "form-control mb-3"
                             />
-                            <label variant="custom-checkbox" htmlFor="inline-checkbox1" className="my-1">Tout sélectionner</label>
-                        </CFormGroup>
-                    </CCol>
-                </CRow>
-                { loading ? 
-                    <CRow>
-                        <CCol xs="12" lg="12" className="text-center">
-                            <Spinner animation="border" variant="danger"/>
-                        </CCol>
-                    </CRow>
-                    :
-                    <CDataTable
-                        items={ orders }
-                        fields={ fields }
-                        bordered
-                        itemsPerPage={ itemsPerPage }
-                        pagination
-                        scopedSlots = {{
-                            'name':
-                                item => <td>
-                                            <Link to="#" onClick={ e => { toggleDetails(item.id, e) }} disabled={ item.status === "WAITING" }>
-                                                { item.isRemains ? 
-                                                    <i className="fas fa-sync-alt mr-2"></i> :
-                                                  isDefinedAndNotVoid(item.packages) ? 
-                                                  <i className="fas fa-plane mr-2"></i> :
-                                                    <i className="fas fa-truck mr-2"></i>
-                                                }{ item.name }<br/>
-                                                <small><i>{ item.metas.zipcode } { item.metas.city }</i></small>
-                                            </Link>
-                                        </td>
-                            ,
-                            'date':
-                                item => <td style={{color: item.status === "WAITING" ? "dimgray" : "black"}}>
-                                            { isSameDate(new Date(item.deliveryDate), new Date()) ? "Aujourd'hui" : 
-                                            isSameDate(new Date(item.deliveryDate), getDateFrom(new Date(), 1)) ? "Demain" :
-                                            (new Date(item.deliveryDate)).toLocaleDateString('fr-FR', { timeZone: 'UTC'})
-                                            }
-                                        </td>
-                            ,
-                            'total':
-                                item => <td style={{color: item.status === "WAITING" ? "dimgray" : "black"}}>
-                                            { isDefined(item.totalHT) ? item.totalHT.toFixed(2) + " €" : " "}
-                                        </td>
-                            ,
-                            'selection':
-                                item => <td className="d-flex align-items-center"style={{color: item.status === "WAITING" ? "dimgray" : "black"}}>
-                                            <input
-                                                className="mx-1 my-1"
-                                                type="checkbox"
-                                                name="inline-checkbox"
-                                                checked={ item.selected }
-                                                onClick={ () => handleSelect(item) }
-                                                disabled={ item.status === "WAITING" }
-                                                style={{zoom: 2.3}}
-                                            />
-                                            <CButton size="sm" color="danger" disabled={ item.status === "WAITING" } onClick={ () => handlePriorities(item) } className="mx-1 my-1" style={{width: '27px', height: '27px'}}>
-                                                { priorities.includes(item.id) ? parseInt(Object.keys(priorities).find(key => priorities[key] === item.id)) + 1 : <i className="fas fa-exclamation"></i> }
-                                            </CButton>
-                                        </td>
-                            ,
-                            ' ':
-                                item => (
-                                    <td className="mb-3 mb-xl-0 text-center" style={{color: item.status === "WAITING" ? "dimgray" : "black"}}>
-                                        <CButton color="warning" disabled={ !isAdmin } href={ "#/components/orders/" + item.id } className="mx-1 my-1"><i className="fas fa-pen"></i></CButton>
-                                        <CButton color="danger" disabled={ !isAdmin } onClick={ () => handleDelete(item.id) } className="mx-1 my-1"><i className="fas fa-trash"></i></CButton>
-                                    </td>
-                                )
-                            ,
-                            'details':
-                                item => <CCollapse show={details.includes(item.id)}>
-                                            <OrderDetails order={ item } isDelivery={ true }/>
-                                        </CCollapse>
-                        }}
-                    />
-                }
-                { orders.length > 0 &&
-                    <CRow className="mt-4 d-flex justify-content-center align-items-start">
-                        { isAdmin && 
-                            <Select className="mr-2" name="deliverer" label=" " onChange={ ({ currentTarget }) => console.log(currentTarget.value) } style={{width: '140px', height: '35px'}}>
-                                { deliverers.map(deliverer => <option value={ deliverer }>{ deliverer.name }</option>) }
-                            </Select>
-                        }
-                        <CButton size="sm" color="success" onClick={ handleCreateTrip } className={ "ml-2" } style={{width: '140px', height: '35px'}} disabled={ orders.findIndex(o => o.selected) === -1 }>
-                            { tripLoading ?
-                                <Spinner
-                                    as="span"
-                                    animation="border"
-                                    size="sm"
-                                    role="status"
-                                    aria-hidden="true"
+                            </CCol>
+                            <CCol xs="12" lg="6" className="mt-4">
+                                <CFormGroup row variant="custom-checkbox" inline className="d-flex align-items-center">
+                                    <input
+                                        className="mx-1 my-1"
+                                        type="checkbox"
+                                        name="inline-checkbox"
+                                        checked={ selectAll }
+                                        onClick={ handleSelectAll }
+                                        disabled={ orders.find(order => order.status !== "WAITING") == undefined }
+                                        style={{zoom: 2.3}}
                                     />
-                                : 
-                                <>Créer une tournée</>
-                            }
-                            </CButton>
-                    </CRow>
-                }
-            </CCardBody>
-          </CCard>
-        </CCol>
-      </CRow>
-      <CRow>
-            <TouringLocation/>
-      </CRow>
-      </>
+                                    <label variant="custom-checkbox" htmlFor="inline-checkbox1" className="my-1">Tout sélectionner</label>
+                                </CFormGroup>
+                            </CCol>
+                        </CRow>
+                        { loading ? 
+                            <CRow>
+                                <CCol xs="12" lg="12" className="text-center">
+                                    <Spinner animation="border" variant="danger"/>
+                                </CCol>
+                            </CRow>
+                            :
+                            <CDataTable
+                                items={ orders }
+                                fields={ fields }
+                                bordered
+                                itemsPerPage={ itemsPerPage }
+                                pagination
+                                scopedSlots = {{
+                                    'name':
+                                        item => <td>
+                                                    <Link to="#" onClick={ e => { toggleDetails(item.id, e) }} disabled={ item.status === "WAITING" }>
+                                                        { item.isRemains ? 
+                                                            <i className="fas fa-sync-alt mr-2"></i> :
+                                                        isDefinedAndNotVoid(item.packages) ? 
+                                                        <i className="fas fa-plane mr-2"></i> :
+                                                            <i className="fas fa-truck mr-2"></i>
+                                                        }{ item.name }<br/>
+                                                        <small><i>{ item.metas.zipcode } { item.metas.city }</i></small>
+                                                    </Link>
+                                                </td>
+                                    ,
+                                    'date':
+                                        item => <td style={{color: item.status === "WAITING" ? "dimgray" : "black"}}>
+                                                    { isSameDate(new Date(item.deliveryDate), new Date()) ? "Aujourd'hui" : 
+                                                    isSameDate(new Date(item.deliveryDate), getDateFrom(new Date(), 1)) ? "Demain" :
+                                                    (new Date(item.deliveryDate)).toLocaleDateString('fr-FR', { timeZone: 'UTC'})
+                                                    }
+                                                </td>
+                                    ,
+                                    'total':
+                                        item => <td style={{color: item.status === "WAITING" ? "dimgray" : "black"}}>
+                                                    { isDefined(item.totalHT) ? item.totalHT.toFixed(2) + " €" : " "}
+                                                </td>
+                                    ,
+                                    'selection':
+                                        item => <td className="d-flex align-items-center"style={{color: item.status === "WAITING" ? "dimgray" : "black"}}>
+                                                    <input
+                                                        className="mx-1 my-1"
+                                                        type="checkbox"
+                                                        name="inline-checkbox"
+                                                        checked={ item.selected }
+                                                        onClick={ () => handleSelect(item) }
+                                                        disabled={ item.status === "WAITING" }
+                                                        style={{zoom: 2.3}}
+                                                    />
+                                                    <CButton size="sm" color="danger" disabled={ item.status === "WAITING" } onClick={ () => handlePriorities(item) } className="mx-1 my-1" style={{width: '27px', height: '27px'}}>
+                                                        { priorities.includes(item.id) ? parseInt(Object.keys(priorities).find(key => priorities[key] === item.id)) + 1 : <i className="fas fa-exclamation"></i> }
+                                                    </CButton>
+                                                </td>
+                                    ,
+                                    ' ':
+                                        item => (
+                                            <td className="mb-3 mb-xl-0 text-center" style={{color: item.status === "WAITING" ? "dimgray" : "black"}}>
+                                                <CButton color="warning" disabled={ !isAdmin } href={ "#/components/orders/" + item.id } className="mx-1 my-1"><i className="fas fa-pen"></i></CButton>
+                                                <CButton color="danger" disabled={ !isAdmin } onClick={ () => handleDelete(item.id) } className="mx-1 my-1"><i className="fas fa-trash"></i></CButton>
+                                            </td>
+                                        )
+                                    ,
+                                    'details':
+                                        item => <CCollapse show={details.includes(item.id)}>
+                                                    <OrderDetails order={ item } isDelivery={ true }/>
+                                                </CCollapse>
+                                }}
+                            />
+                        }
+                        { orders.length > 0 &&
+                            <CRow className="mt-4 d-flex justify-content-center align-items-start">
+                                { isAdmin && 
+                                    <Select className="mr-2" name="deliverer" label=" " onChange={ ({ currentTarget }) => console.log(currentTarget.value) } style={{width: '140px', height: '35px'}}>
+                                        { deliverers.map(deliverer => <option value={ deliverer }>{ deliverer.name }</option>) }
+                                    </Select>
+                                }
+                                <CButton size="sm" color="success" onClick={ handleCreateTrip } className={ "ml-2" } style={{width: '140px', height: '35px'}} disabled={ orders.findIndex(o => o.selected) === -1 }>
+                                    { tripLoading ?
+                                        <Spinner
+                                            as="span"
+                                            animation="border"
+                                            size="sm"
+                                            role="status"
+                                            aria-hidden="true"
+                                            />
+                                        : 
+                                        <>Créer une tournée</>
+                                    }
+                                    </CButton>
+                            </CRow>
+                        }
+                    </CCardBody>
+                </CCard>
+            </CCol>
+        </CRow>
     );
 }
 

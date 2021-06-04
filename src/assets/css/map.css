@@ -192,6 +192,13 @@
   animation: rotate 0.8s infinite cubic-bezier(0.45, 0.05, 0.55, 0.95);
 }
 
+#deckgl-wrapper, #view-default-view {
+  position: relative!important;
+  width: 99%!important;
+  height: 345px!important;
+  margin: auto!important;
+}
+
 /* Animation */
 @-webkit-keyframes rotate {
   from {
@@ -280,10 +287,7 @@
   }
 
   #deckgl-wrapper, #view-default-view {
-    position: relative!important;
-    width: 99%!important;
-    height: 520px!important;
-    margin: auto!important;
+    height: 680px!important;
   }
 
 }

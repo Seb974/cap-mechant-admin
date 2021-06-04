@@ -4,6 +4,7 @@ import ReactMapGL, {GeolocateControl} from "react-map-gl";
 import TouringActions from 'src/services/TouringActions';
 import { shop } from 'src/helpers/checkout';
 import { isDefined } from 'src/helpers/utils';
+import { CCard, CCardBody, CCardHeader, CCol, CRow } from '@coreui/react';
 // eslint-disable-next-line import/no-webpack-loader-syntax
 mapboxgl.workerClass = require("worker-loader!mapbox-gl/dist/mapbox-gl-csp-worker").default;
 
@@ -37,9 +38,22 @@ const TruckLocation = ({ touring, playing }) => {
     }
 
     return !isDefined(touring) ? <></> : (
-        <ReactMapGL {...viewport} width="100vw" height="520px" onViewportChange={ setViewport } mapboxApiAccessToken={ apiToken }>
-            <GeolocateControl style={ geolocateControlStyle } positionOptions={{enableHighAccuracy: true}} trackUserLocation={ true } auto onGeolocate={ onGeolocate }/>
-        </ReactMapGL>
+        <CRow>
+            <CCol xs="12" lg="12">
+                <CCard>
+                    <CCardHeader>
+                        Ma tournée
+                    </CCardHeader>
+                    <CCardBody>
+                        <CRow>
+                            <ReactMapGL {...viewport} width="100vw" height="520px" onViewportChange={ setViewport } mapboxApiAccessToken={ apiToken }>
+                                <GeolocateControl style={ geolocateControlStyle } positionOptions={{enableHighAccuracy: true}} trackUserLocation={ true } auto onGeolocate={ onGeolocate }/>
+                            </ReactMapGL>
+                        </CRow>
+                    </CCardBody>
+                </CCard>
+            </CCol>
+        </CRow>
     );
 }
  

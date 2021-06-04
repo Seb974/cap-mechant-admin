@@ -25,6 +25,7 @@ const Relaypoint = React.lazy(() => import('./views/components/relaypoints/relay
 const Preparations = React.lazy(() => import('./views/components/preparations/preparations'));
 const Deliveries = React.lazy(() => import('./views/components/deliveries/deliveries'));
 const Tourings = React.lazy(() => import('./views/components/tourings/tourings'));
+const MapVisualization = React.lazy(() => import('./views/components/tourings/mapVisualization'));
 const Order = React.lazy(() => import('./views/components/orders/order'));
 const Users = React.lazy(() => import('./views/components/users/users'));
 const User = React.lazy(() => import('./views/components/users/user'));
@@ -108,6 +109,7 @@ const routes = [
   { path: '/components/orders/:id', name: 'Order', component: Order },
   { path: '/components/preparations', name: 'Preparations', component: Preparations },
   { path: '/components/deliveries', name: 'Deliveries', component: Deliveries },
+  { path: '/components/tourings/visualization', name: 'MapVisualization', component: MapVisualization },
   { path: '/components/tourings', name: 'Tourings', component: Tourings },
   { path: '/components/users/:id', exact: true, name: 'User Details', component: User },
   { path: '/components/users', name: 'Users', component: Users },
