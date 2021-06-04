@@ -27,7 +27,6 @@ function create(product) {
 function updateFromMercure(products, product) {
     const filteredProducts = products.filter(item => item.id !== product.id);
     return [...filteredProducts, product].sort((a, b) => (a.name > b.name) ? 1 : -1);
-
 }
 
 function deleteFromMercure(products, id) {

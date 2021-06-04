@@ -45,6 +45,13 @@ function getOpenedTourings(dates, user) {
         .then(response => response.data['hydra:member'].sort((a, b) => (new Date(a.deliveryDate) < new Date(b.deliveryDate)) ? -1 : 1));
 };
 
+function getProcessingTourings() {
+    const parameters = `isOpen=true&exists[position]=true`;
+    return api
+        .get(`/api/tourings?${ parameters }`)
+        .then(response => response.data['hydra:member']);
+};
+
 function closeTouring(touring) {
     return api.put('/api/tourings/' + touring.id, {
         ...touring,
@@ -55,6 +62,20 @@ function closeTouring(touring) {
     });
 }
 
+function updateTruckPosition(touring, position) {
+    return api.put('/api/tourings/' + touring.id, {
+        ...touring,
+        position,
+        orderEntities: touring.orderEntities.map(order => order['@id']),
+        deliverer: touring.deliverer['@id']
+    });
+}
+
+// function updateFromMercure(data) {
+//     const filteredProducts = products.filter(item => item.id !== product.id);
+//     return [...filteredProducts, product].sort((a, b) => (a.name > b.name) ? 1 : -1);
+// }
+
 export default {
     findAll,
     delete: deleteTouring,
@@ -63,5 +84,8 @@ export default {
     create,
     getTourings,
     getOpenedTourings,
-    closeTouring
+    getProcessingTourings,
+    closeTouring,
+    updateTruckPosition,
+    // updateFromMercure
 }

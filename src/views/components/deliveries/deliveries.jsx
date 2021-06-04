@@ -16,6 +16,8 @@ import TouringActions from 'src/services/TouringActions';
 import Select from 'src/components/forms/Select';
 import UserActions from 'src/services/UserActions';
 import { shop, isSamePosition } from 'src/helpers/checkout';
+import TouringLocation from 'src/components/map/touring/touringLocation';
+import DeliveryContext from 'src/contexts/DeliveryContext';
 
 const Deliveries = (props) => {
 
@@ -238,6 +240,7 @@ const Deliveries = (props) => {
     }
 
     return (
+        <>
         <CRow>
         <CCol xs="12" lg="12">
           <CCard>
@@ -367,6 +370,10 @@ const Deliveries = (props) => {
           </CCard>
         </CCol>
       </CRow>
+      <CRow>
+            <TouringLocation/>
+      </CRow>
+      </>
     );
 }
 

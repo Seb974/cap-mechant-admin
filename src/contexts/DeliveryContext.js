@@ -13,4 +13,6 @@ export default React.createContext({
     setTotalWeight: (value) => {},
     availableWeight: 0,
     setAvailableWeight: (value) => {},
+    tourings: [],
+    setTourings: (value) => {},
 });

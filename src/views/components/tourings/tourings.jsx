@@ -13,6 +13,8 @@ import { Button } from 'bootstrap';
 import TouringDetails from 'src/components/touringPages/touringDetails';
 import CIcon from '@coreui/icons-react';
 import TouringActions from 'src/services/TouringActions';
+import TruckLocation from 'src/components/map/touring/truckLocation';
+import TouringLocation from 'src/components/map/touring/touringLocation';
 
 const Tourings = (props) => {
 
@@ -24,6 +26,8 @@ const Tourings = (props) => {
     const [loading, setLoading] = useState(false);
     const [dates, setDates] = useState({start: new Date(), end: new Date() });
     const [details, setDetails] = useState([]);
+    const [playedTouring, setPlayedTouring] = useState(null);
+    const [playing, setPlaying] = useState(false);
 
     useEffect(() => {
         setIsAdmin(Roles.hasAdminPrivileges(currentUser));
@@ -31,7 +35,11 @@ const Tourings = (props) => {
     }, []);
 
     useEffect(() => setIsAdmin(Roles.hasAdminPrivileges(currentUser)), [currentUser]);
-    useEffect(() => getTourings(), [dates]);
+    useEffect(() => {
+        getTourings();
+        setPlayedTouring(null);
+        setPlaying(false);
+    }, [dates]);
 
     const getTourings = () => {
         setLoading(true);
@@ -92,6 +100,16 @@ const Tourings = (props) => {
         return formattedDate.toLocaleTimeString('fr-FR');
     };
 
+    const handleStart = (touring) => {
+        setPlayedTouring(touring);
+        setPlaying(true);
+    };
+
+    const handleStop = () => {
+        setPlayedTouring(null);
+        setPlaying(false);
+    };
+
     const handleSubmit = (touring) => {
         console.log(touring);
         TouringActions
@@ -100,6 +118,7 @@ const Tourings = (props) => {
     }
 
     return (
+        <>
         <CRow>
         <CCol xs="12" lg="12">
           <CCard>
@@ -151,8 +170,15 @@ const Tourings = (props) => {
                             ,
                             'Terminer':
                                 item => <td className="d-flex align-items-center">
+                                        { !playing ?
+                                            <CButton color="warning" onClick={ () => handleStart(item) } className="mx-1 my-1"><i className="fas fa-play"></i></CButton> : 
+                                            <CButton color="danger" onClick={ handleStop } className="mx-1 my-1"><i className="fas fa-stop"></i></CButton>
+                                        }
                                         { !details.includes(item.id) &&
-                                           <CButton color="success" onClick={ () => handleSubmit(item) } className="mx-1 my-1"><i className="fas fa-check"></i></CButton>
+                                            <>
+                                                
+                                                <CButton color="success" onClick={ () => handleSubmit(item) } className="mx-1 my-1"><i className="fas fa-check"></i></CButton>
+                                            </>
                                         }
                                         </td>
                             ,
@@ -174,6 +200,13 @@ const Tourings = (props) => {
           </CCard>
         </CCol>
       </CRow>
+      { isDefined(playedTouring) &&
+        <CRow>
+            <TruckLocation touring={ playedTouring } playing={ playing }/>
+            {/* <TouringLocation /> */}
+        </CRow>
+      }
+      </>
     );
 }
 
