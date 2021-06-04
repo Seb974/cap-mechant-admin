@@ -17,8 +17,7 @@ const TouringLocation = (props) => {
     const initialLocation = shop.coordinates;
     const { selectedCatalog } = useContext(AuthContext);
     const { tourings, setTourings } = useContext(DeliveryContext);
-    const [defaultView, setDefaultView] = useState({ latitude: selectedCatalog.center[0], longitude: selectedCatalog.center[1], zoom: 9.5});
-    // const [defaultView, setDefaultView] = useState({ latitude: initialLocation[0], longitude: initialLocation[1], zoom: 10});
+    const [defaultView, setDefaultView] = useState({ latitude: selectedCatalog.center[0], longitude: selectedCatalog.center[1], zoom: 9.4});
     const [viewport, setViewport] = useState(defaultView);
 
     useEffect(() => fetchTourings(), []);

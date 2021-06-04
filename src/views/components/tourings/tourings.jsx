@@ -127,9 +127,11 @@ const Tourings = (props) => {
                             className = "form-control mb-3"
                         />
                     </CCol>
-                    <CCol xs="12" lg="6" className="d-flex align-items-center pt-2">
-                        <Button variant="primary" href="/#/components/tourings/visualization">Visualiser</Button>
-                    </CCol>
+                    { isAdmin &&
+                        <CCol xs="12" lg="6" className="d-flex align-items-center pt-2">
+                            <Button variant="primary" href="/#/components/tourings/visualization">Visualiser</Button>
+                        </CCol>
+                    }
                 </CRow>
                 { loading ? 
                     <CRow>
