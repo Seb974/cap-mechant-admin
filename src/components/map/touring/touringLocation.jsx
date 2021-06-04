@@ -1,3 +1,4 @@
+import 'src/assets/css/map.css';
 import React, { useContext, useEffect, useState } from 'react';
 import { StaticMap } from 'react-map-gl';
 import mapboxgl from "mapbox-gl";
@@ -12,7 +13,7 @@ mapboxgl.workerClass = require("worker-loader!mapbox-gl/dist/mapbox-gl-csp-worke
 const TouringLocation = (props) => {
 
     const apiToken = process.env.REACT_APP_MAPBOX_TOKEN;
-    const Truck = "/assets/img/icon-img/truck.png";
+    const Truck = "/assets/img/icon-img/package.png";
     const initialLocation = shop.coordinates;
     const { tourings, setTourings } = useContext(DeliveryContext);
     const { currentUser, settings, selectedCatalog } = useContext(AuthContext);
@@ -35,7 +36,7 @@ const TouringLocation = (props) => {
             pickable: false,
             iconAtlas: Truck,
             iconMapping: { truck: { x: 0, y: 0, width: 512, height: 512 } },
-            sizeScale: 50,
+            sizeScale: 30,
             getPosition: d => [d.position[1], d.position[0]],
             getIcon: d => "truck",
             // getAngle: d => 45 + ( * 180) / Math.PI

@@ -279,4 +279,11 @@
     color: #dc3545;
   }
 
+  #deckgl-wrapper, #view-default-view {
+    position: relative!important;
+    width: 99%!important;
+    height: 520px!important;
+    margin: auto!important;
+  }
+
 }
