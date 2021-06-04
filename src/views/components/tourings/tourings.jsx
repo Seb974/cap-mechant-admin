@@ -129,7 +129,7 @@ const Tourings = (props) => {
                     </CCol>
                     { isAdmin &&
                         <CCol xs="12" lg="6" className="d-flex align-items-center pt-2">
-                            <Button variant="primary" href="/#/components/tourings/visualization">Visualiser</Button>
+                            <Button variant="primary" href="/#/components/tourings/visualization"><i className="fas fa-eye mr-2"></i>Visualiser</Button>
                         </CCol>
                     }
                 </CRow>
