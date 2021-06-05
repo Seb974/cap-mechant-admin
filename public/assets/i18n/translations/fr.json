@@ -26,5 +26,6 @@
     "preparations.label": "Commandes",
     "deliveries.label": "Livraisons",
     "tourings.label": "Tournées",
-    "orders.label": "Commandes"
+    "orders.label": "Commandes",
+    "deliverers.label": "Livreurs"
 }

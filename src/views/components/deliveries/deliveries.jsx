@@ -18,6 +18,7 @@ import UserActions from 'src/services/UserActions';
 import { shop, isSamePosition } from 'src/helpers/checkout';
 import TouringLocation from 'src/components/map/touring/touringLocation';
 import DeliveryContext from 'src/contexts/DeliveryContext';
+import DelivererActions from 'src/services/DelivererActions';
 
 const Deliveries = (props) => {
 
@@ -65,12 +66,18 @@ const Deliveries = (props) => {
     }
 
     const fetchDeliverers = () => {
-        UserActions
-            .findDeliverers()
+        // UserActions
+        //     .findDeliverers()
+        //     .then(response => {
+        //         setDeliverers(response);
+        //         setSelectedDeliverer(response[0]);
+        //     });
+        DelivererActions
+            .findAll()
             .then(response => {
-                setDeliverers(response);
-                setSelectedDeliverer(response[0]);
-            });
+                    setDeliverers(response);
+                    setSelectedDeliverer(response[0]);
+                });
     };
 
     const handleDelete = (id) => {
@@ -139,7 +146,6 @@ const Deliveries = (props) => {
     }
 
     const handleCreateTrip = () => {
-
         getOrderedOrders()
             .then(response => {
                 console.log(response);

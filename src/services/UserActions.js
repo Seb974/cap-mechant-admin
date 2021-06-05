@@ -37,7 +37,7 @@ function findUser(search) {
 
 function findDeliverers() {
     return api
-            .get('/api/users?roles=SELLER')
+            .get('/api/users?roles=DELIVERER')
             .then(response => response.data['hydra:member']);
 }
 
