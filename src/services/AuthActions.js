@@ -1,23 +1,18 @@
 import axios from 'axios';
 import jwtDecode from 'jwt-decode';
 import api from 'src/config/api';
+import { isDefined } from 'src/helpers/utils';
 import Roles from '../config/Roles';
 
 function authenticate(credentials) {
     return api.post('/api/login_check', credentials)
-                .then(response => response.data.token)
-                .then(token => {
-                    window.localStorage.setItem("authToken", token);
-                    return true;
-                })
+              .then(response => response.data.token)
+              .then(token => window.localStorage.setItem("authToken", token));
 }
 
 function logout() {
     return api.get('/logout')
-                .then(response => {
-                    window.localStorage.removeItem("authToken");
-                    return true;
-                });
+              .then(response => window.localStorage.removeItem("authToken"));
 }
 
 function setup() {
@@ -71,9 +66,37 @@ function setErrorHandler(setCurrentUser, setIsAuthenticated) {
                     return ;
                 })
             }
+        } else {
+            console.log(error);
         }
         return Promise.reject(error);
     });
+}
+
+function getGeolocation() {
+    const country = window.sessionStorage.getItem("country");
+    return isDefined(country) ? new Promise((resolve, reject) => resolve(country)) :
+        axios.get('https://freegeoip.app/json/')
+            .then(response => {
+                window.sessionStorage.setItem("country", response.data.country_code);
+                return response.data.country_code;
+            })
+            .catch(error => "RE");
+}
+
+function getUserSettings() {
+    return api
+            .get('/api/groups')
+            .then(response => {
+                let data = response.data['hydra:member'];
+                if (data.length > 1) {
+                    const superAdmin = data.find(group => group.value === "ROLE_SUPER_ADMIN");
+                    const admin = data.find(group => group.value === "ROLE_ADMIN");
+                    return isDefined(superAdmin) ? superAdmin : admin;
+                } else {
+                    return data[0];
+                }
+            });
 }
 
 export default {
@@ -83,5 +106,7 @@ export default {
     isAuthenticated,
     getCurrentUser,
     isDefaultUser,
-    setErrorHandler
+    setErrorHandler,
+    getUserSettings,
+    getGeolocation
 }

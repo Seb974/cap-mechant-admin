@@ -34,7 +34,7 @@ const AddressPanel = ({ informations, onInformationsChange, onPositionChange, er
                     />
                 </div>
             </div>
-            <div className="row mb-5">
+            <div className="row mb-3">
                 <div className="col-md-6">
                     <Field 
                         name="zipcode"
@@ -43,6 +43,7 @@ const AddressPanel = ({ informations, onInformationsChange, onPositionChange, er
                         onChange={ onChange }
                         placeholder="Code postal"
                         error={ errors.zipcode }
+                        maxLength={ 5 }
                     />
                 </div>
                 <div className="col-md-6">

@@ -1,12 +1,22 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Field from '../forms/Field';
 import Select from '../forms/Select';
-import Roles from '../../config/Roles';
+import GroupActions from 'src/services/GroupActions';
 
 const AdminSection = ({ user, onUserChange, errors}) => {
 
-    const roles = Roles.getRoles();
-    const [selectedRole, setSelectedRole] = useState(Roles.getDefaultRole());
+    const [groups, setGroups] = useState([]);
+
+    useEffect(() => fetchGroups(), []);
+
+    const fetchGroups = () => {
+        GroupActions.findAll()
+                    .then(response => setGroups(response.filter(group => group.hasShopAccess)))
+                    .catch(error => {
+                        // TODO : Notification flash d'une erreur
+                        window.location.replace("/components/users");
+                    });
+    };
 
     const handleUserChange = ({ currentTarget }) => {
         onUserChange({...user, [currentTarget.name]: currentTarget.value});
@@ -40,7 +50,7 @@ const AdminSection = ({ user, onUserChange, errors}) => {
             <div className="row">
                 <div className="col-md-6">
                     <Select name="roles" label="Catégorie d'utilisateur" value={ user.roles } error={ errors.category } onChange={ handleUserChange }>
-                        { roles.map( (role, key) => <option key={ key } value={ role.value }>{ role.label }</option> ) }
+                        { groups.map(role => <option key={ role.id } value={ role.value }>{ role.label }</option> ) }
                     </Select>
                 </div>
             </div>

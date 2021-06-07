@@ -1,7 +1,9 @@
 import React from 'react'
 import CIcon from '@coreui/icons-react'
 
-function getNav(translation) {
+function getNav(translation)
+{
+  
   return [
     {
       _tag: 'CSidebarNavItem',
@@ -20,21 +22,40 @@ function getNav(translation) {
     {
       _tag: 'CSidebarNavItem',
       name: translation("colors.label"),
-      // name: 'Colors',
       to: '/theme/colors',
       icon: 'cil-drop',
     },
     {
       _tag: 'CSidebarNavItem',
       name: translation("typography.label"),
-      // name: 'Typography',
       to: '/theme/typography',
       icon: 'cil-pencil',
     },
     {
       _tag: 'CSidebarNavTitle',
+      _children: [translation("orders.label")]
+    },
+    {
+      _tag: 'CSidebarNavItem',
+      name: translation("preparations.label"),
+      to: '/components/preparations',
+      icon: <CIcon name="cil-dinner" customClasses="c-sidebar-nav-icon"/>,
+    },
+    {
+      _tag: 'CSidebarNavItem',
+      name: translation("deliveries.label"),
+      to: '/components/deliveries',
+      icon: <CIcon name="cil-truck" customClasses="c-sidebar-nav-icon"/>,
+    },
+    {
+      _tag: 'CSidebarNavItem',
+      name: translation("tourings.label"),
+      to: '/components/tourings',
+      icon: <CIcon name="cil-map" customClasses="c-sidebar-nav-icon"/>,
+    },
+    {
+      _tag: 'CSidebarNavTitle',
       _children: [translation("component.label")]
-      // _children: ['Components']
     },
     {
       _tag: 'CSidebarNavItem',
@@ -50,9 +71,82 @@ function getNav(translation) {
     },
     {
       _tag: 'CSidebarNavItem',
+      name: translation("promotions.label"),
+      to: '/components/promotions',
+      icon: <CIcon name="cil-gift" customClasses="c-sidebar-nav-icon"/>,
+    },
+    {
+      _tag: 'CSidebarNavItem',
+      name: translation("relaypoints.label"),
+      to: '/components/relaypoints',
+      icon: <CIcon name="cil-home" customClasses="c-sidebar-nav-icon"/>,
+    },
+    {
+      _tag: 'CSidebarNavItem',
+      name: translation("sellers.label"),
+      to: '/components/sellers',
+      icon: <CIcon name="cil-contact" customClasses="c-sidebar-nav-icon"/>,
+    },
+    {
+      _tag: 'CSidebarNavItem',
+      name: translation("deliverers.label"),
+      to: '/components/deliverers',
+      icon: <CIcon name="cil-car-alt" customClasses="c-sidebar-nav-icon"/>,
+    },
+    {
+      _tag: 'CSidebarNavItem',
       name: translation("users.label"),
       to: '/components/users',
       icon: <CIcon name="cil-people" customClasses="c-sidebar-nav-icon"/>,
+    },
+    {
+      _tag: 'CSidebarNavDropdown',
+      name: translation("parameters.label"),
+      icon: 'cil-equalizer',
+      _children: [
+        {
+          _tag: 'CSidebarNavItem',
+          name: translation("groups.label"),
+          to: '/components/groups',
+          icon: <CIcon name="cil-people" customClasses="c-sidebar-nav-icon"/>,
+        },
+        {
+          _tag: 'CSidebarNavItem',
+          name: translation("price.groups.label"),
+          to: '/components/price_groups',
+          icon: <CIcon name="cil-euro" customClasses="c-sidebar-nav-icon"/>,
+        },
+        {
+          _tag: 'CSidebarNavItem',
+          name: translation("taxes.label"),
+          to: '/components/taxes',
+          icon: <CIcon name="cil-institution" customClasses="c-sidebar-nav-icon"/>,
+        },
+        {
+          _tag: 'CSidebarNavItem',
+          name: translation("containers.label"),
+          to: '/components/containers',
+          icon: <CIcon name="cil-basket" customClasses="c-sidebar-nav-icon"/>,
+        },
+        {
+          _tag: 'CSidebarNavItem',
+          name: translation("days.off.label"),
+          to: '/components/days_off',
+          icon: <CIcon name="cil-calendar" customClasses="c-sidebar-nav-icon"/>,
+        },
+        {
+          _tag: 'CSidebarNavItem',
+          name: translation("cities.label"),
+          to: '/components/cities',
+          icon: <CIcon name="cil-location-pin" customClasses="c-sidebar-nav-icon"/>,
+        },
+        {
+          _tag: 'CSidebarNavItem',
+          name: translation("catalogs.label"),
+          to: '/components/catalogs',
+          icon: <CIcon name="cil-compass" customClasses="c-sidebar-nav-icon"/>,
+        },
+      ]
     },
     {
       _tag: 'CSidebarNavDropdown',
