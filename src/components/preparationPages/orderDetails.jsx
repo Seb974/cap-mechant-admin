@@ -1,25 +1,33 @@
-import React, { useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { CButton, CCardBody, CCol, CRow } from '@coreui/react';
 import CIcon from '@coreui/icons-react';
 import OrderDetailsItem from './orderDetailsItem';
 import { getPreparedOrder } from 'src/helpers/checkout';
 import OrderActions from 'src/services/OrderActions';
 import { isDefined } from 'src/helpers/utils';
+import AuthContext from 'src/contexts/AuthContext';
+import Roles from 'src/config/Roles';
 
 const OrderDetails = ({ orders = null, order, setOrders = null, isDelivery = false }) => {
 
+    const { currentUser } = useContext(AuthContext);
+
+    useEffect(() => setIsAdmin(Roles.hasAdminPrivileges(currentUser)), [currentUser]);
+
+    const [isAdmin, setIsAdmin] = useState(false);
     const [viewedOrder, setViewedOrder] = useState({
         ...order, 
         items: order.items.map(item => ({
             ...item, 
-            preparedQty: (isDelivery && isDefined(item.preparedQty) ? item.preparedQty : ""), 
-            isAdjourned: (isDelivery && isDefined(item.isAdjourned) ? item.isAdjourned : false)
+            preparedQty: (isDefined(item.preparedQty) ? item.preparedQty : ""), 
+            isAdjourned: (isDefined(item.isAdjourned) ? item.isAdjourned : false)
         })) 
     });
 
     const onSubmit = () => {
+        console.log(getPreparedOrder(viewedOrder, currentUser));
         OrderActions
-            .update(order.id, getPreparedOrder(viewedOrder))
+            .update(order.id, getPreparedOrder(viewedOrder, currentUser))
             .then(response => setOrders(orders.filter(o => o.id !== order.id)))
             .catch(error => console.log(error));
     };
@@ -27,26 +35,28 @@ const OrderDetails = ({ orders = null, order, setOrders = null, isDelivery = fal
     return (
         <>
             { viewedOrder.items.map((item, index) => {
-                return(
-                    <CCardBody>
-                        <CRow className="text-center mt-0">
-                            <CCol md="1">{""}</CCol>
-                        </CRow>
-                        <CRow>
-                            <CCol md="1">{""}</CCol>
-                            <CCol md="10">
-                                <OrderDetailsItem
-                                    item={ item }
-                                    order={ viewedOrder }
-                                    setOrder={ setViewedOrder } 
-                                    total={ order.items.length } 
-                                    index={ index }
-                                    isDelivery={ isDelivery }
-                                />
-                            </CCol>
-                        </CRow>
-                    </CCardBody>
-                );
+                if (isAdmin || (!isAdmin && item.product.seller.users.find(user => user.id == currentUser.id) !== undefined)) {
+                    return(
+                        <CCardBody>
+                            <CRow className="text-center mt-0">
+                                <CCol md="1">{""}</CCol>
+                            </CRow>
+                            <CRow>
+                                <CCol md="1">{""}</CCol>
+                                <CCol md="10">
+                                    <OrderDetailsItem
+                                        item={ item }
+                                        order={ viewedOrder }
+                                        setOrder={ setViewedOrder } 
+                                        total={ order.items.length } 
+                                        index={ index }
+                                        isDelivery={ isDelivery }
+                                    />
+                                </CCol>
+                            </CRow>
+                        </CCardBody>
+                    );
+                } else return <></>
             })}
             <CRow className="text-center mt-0">
                 <CCol md="1">{""}</CCol>

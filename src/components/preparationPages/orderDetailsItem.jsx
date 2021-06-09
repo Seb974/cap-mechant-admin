@@ -15,7 +15,7 @@ const OrderDetailsItem = ({ item, order, setOrder, total, index, isDelivery }) =
     useEffect(() => getDisplayedProduct(), [products]);
 
     const getDisplayedProduct = () => {
-        if (!isDefined(displayedProduct.unit) && products.length > 0) {
+        if ( products.length > 0) {
             const productToDisplay = products.find(product => product.id === item.product.id);
             setDisplayedProduct(productToDisplay);
             if (isDefined(productToDisplay) && isDefined(productToDisplay.variations))

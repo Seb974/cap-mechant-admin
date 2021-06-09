@@ -1,4 +1,5 @@
 import api from 'src/config/api';
+import { getAmericanStringDate } from 'src/helpers/utils';
 
 function findAll() {
     return api
@@ -24,10 +25,17 @@ function create(priceGroup) {
     return api.post('/api/day_offs', {...priceGroup});
 }
 
+function findActives() {
+    return api
+        .get(`/api/day_offs?date[after]=${ getAmericanStringDate(new Date()) }`)
+        .then(response => response.data['hydra:member'].sort((a, b) => (a.date > b.date) ? 1 : -1));
+}
+
 export default {
     findAll,
     delete: deleteDayOff,
     find,
     update,
-    create
+    create,
+    findActives
 }

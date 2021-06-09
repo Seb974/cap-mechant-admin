@@ -1,3 +1,5 @@
+import { isDefinedAndNotVoid } from "./utils";
+
 export const getWeekDays = () => {
     return [
         {value: 1, label: "LUNDI", isFixed: false},
@@ -19,6 +21,10 @@ export const getTwoDigits = number => {
 }
 
 export const isSameDate = (date1, date2) => date1.getFullYear() === date2.getFullYear() && date1.getMonth() === date2.getMonth() && date1.getDate() === date2.getDate();
+
+export const isBetween = (date, start, end) => {
+    return new Date(date) >= new Date(start) && new Date(date) <= new Date(end);
+};
 
 export const getDateFrom = (date, nbDaysToAdd = 0, hour = 9) => {
     return new Date(date.getFullYear(), date.getMonth(), (date.getDate() + nbDaysToAdd), hour, 0, 0);

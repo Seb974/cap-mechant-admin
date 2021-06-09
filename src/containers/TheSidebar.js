@@ -20,6 +20,7 @@ import { useTranslation } from 'react-i18next'
 
 // sidebar nav config
 import adminNavigation from './navigation/adminNavigation';
+import pickerNavigation from './navigation/pickerNavigation';
 import sellerNavigation from './navigation/sellerNavigation';
 import delivererNavigation from './navigation/delivererNavigation';
 import { isDefined } from 'src/helpers/utils'
@@ -40,14 +41,17 @@ const TheSidebar = () => {
   }, [currentUser]);
 
   const defineUserRole = () => {
-    return Roles.hasAdminPrivileges(currentUser) ? "ADMIN" : 
-           Roles.isSeller(currentUser) ? "SELLER" : 
+    const mainRole = Roles.hasAdminPrivileges(currentUser) ? "ADMIN" : 
+           (Roles.isSeller(currentUser) && Roles.isDeliverer(currentUser) || Roles.isPicker(currentUser)) ? "PICKER" : 
+           Roles.isSeller(currentUser) ? "SELLER" :
            Roles.isDeliverer(currentUser) ? "DELIVERER" : "USER";
+    return mainRole;
   };
 
   const setAppropriateNavigation = () => {
     const mainRole = defineUserRole(currentUser);
     const navigation = mainRole === "ADMIN" ? adminNavigation :
+                       mainRole === "PICKER" ? pickerNavigation :
                        mainRole === "SELLER" ? sellerNavigation :
                        mainRole === "DELIVERER" ? delivererNavigation : null;
     if (isDefined(navigation))

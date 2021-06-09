@@ -10,7 +10,9 @@ import CatalogActions from 'src/services/CatalogActions';
 import CategoryActions from 'src/services/CategoryActions';
 import RelaypointActions from 'src/services/RelaypointActions';
 import ContainerContext from 'src/contexts/ContainerContext';
+import Roles from 'src/config/Roles';
 import { isDefined, isDefinedAndNotVoid } from 'src/helpers/utils';
+import SellerActions from 'src/services/SellerActions';
 
 const DataProvider = ({ children }) => {
 
@@ -30,6 +32,7 @@ const DataProvider = ({ children }) => {
     const [catalogs, setCatalogs] = useState([]);
     const [selectedCatalog, setSelectedCatalog] = useState({});
     const [tourings, setTourings] = useState([]);
+    const [seller, setSeller] = useState(null);
 
     useEffect(() => {
         AuthActions.setErrorHandler(setCurrentUser, setIsAuthenticated);
@@ -56,6 +59,13 @@ const DataProvider = ({ children }) => {
     }, [isAuthenticated]);
 
     useEffect(() => {
+        if (Roles.isSeller(currentUser))
+            SellerActions
+                .findAll()
+                .then(response => setSeller(response[0]));
+    },[currentUser]);
+
+    useEffect(() => {
         if (isDefinedAndNotVoid(catalogs) && isDefined(country)) {
             const catalog = catalogs.find(catalogOption => catalogOption.code === country);
             const selection = isDefined(catalog) ? catalog : catalogs.filter(country => country.isDefault);
@@ -64,7 +74,7 @@ const DataProvider = ({ children }) => {
     }, [catalogs, country]);
 
     return (
-        <AuthContext.Provider value={ {isAuthenticated, setIsAuthenticated, currentUser, setCurrentUser, eventSource, setEventSource, settings, setSettings, selectedCatalog, setSelectedCatalog} }>
+        <AuthContext.Provider value={ {isAuthenticated, setIsAuthenticated, currentUser, setCurrentUser, eventSource, setEventSource, settings, setSettings, selectedCatalog, setSelectedCatalog, seller, setSeller} }>
         <DeliveryContext.Provider value={ {cities, setCities, relaypoints, setRelaypoints, condition, setCondition, packages, setPackages, totalWeight, setTotalWeight, availableWeight, setAvailableWeight, tourings, setTourings} }>
         <ContainerContext.Provider value={{ containers, setContainers }}>
         <ProductsContext.Provider value={ {products, setProducts} }>

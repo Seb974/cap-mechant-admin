@@ -22,10 +22,28 @@ function findPreparations(dates, user) {
                 response.data['hydra:member'] :
                 response.data['hydra:member'].filter(order => {
                     return order.items.find(item => {
-                        return item.product.seller.users.find(u => u.id === user.id) !== undefined}) !==undefined;
+                        return !item.isPrepared && item.product.seller.users.find(u => u.id === user.id) !== undefined}) !== undefined;
                 });
             return data.sort((a, b) => (new Date(a.deliveryDate) < new Date(b.deliveryDate)) ? -1 : 1)
         });
+}
+
+function findPickersPreparations(dates) {
+    const status = `status[]=WAITING&status[]=PRE-PREPARED`;
+    const UTCDates = formatUTC(dates);
+    const dateLimits = `deliveryDate[after]=${ getStringDate(UTCDates.start) }&deliveryDate[before]=${ getStringDate(UTCDates.end) }`
+    return api
+        .get(`/api/order_entities?${ status }&${ dateLimits }`)
+        .then(response => response.data['hydra:member'].sort((a, b) => (new Date(a.deliveryDate) < new Date(b.deliveryDate)) ? -1 : 1));
+}
+
+function findRecoveries(dates) {
+    const UTCDates = formatUTC(dates);
+    const status = `status[]=WAITING&status[]=PRE-PREPARED`;
+    // const dateLimits = `deliveryDate[after]=${ getStringDate(UTCDates.start) }&deliveryDate[before]=${ getStringDate(UTCDates.end) }`
+    return api
+        .get(`/api/order_entities?${ status }`)     // &${ dateLimits }
+        .then(response => response.data['hydra:member']);
 }
 
 function findDeliveries(dates, user) {
@@ -90,6 +108,8 @@ export default {
     findAll,
     findDeliveries,
     findPreparations,
+    findRecoveries,
+    findPickersPreparations,
     getOptimizedTrip,
     delete: deleteOrder,
     find,

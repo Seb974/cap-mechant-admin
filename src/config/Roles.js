@@ -5,7 +5,9 @@ function filterAuthorizationRoles(roles) {
 }
 
 function filterRoles(roles) {
-    return roles.length === 1 ? roles[0] : roles.filter(role => role !== getDefaultRole())[0];
+    return  roles.length === 1 ? roles[0] : 
+            roles.includes("ROLE_SELLER") && roles.includes("ROLE_DELIVERER") ? "ROLE_PICKER" : 
+            roles.filter(role => role !== getDefaultRole())[0];
 }
 
 function hasPrivileges(user) {
@@ -13,7 +15,7 @@ function hasPrivileges(user) {
 }
 
 function hasAdminAccess(user) {
-    const adminAccessRoles = ["ROLE_SELLER", "ROLE_DELIVERER"];
+    const adminAccessRoles = ["ROLE_SELLER", "ROLE_DELIVERER", "ROLE_TEAM", "ROLE_PICKER"];
     return adminAccessRoles.includes(user.roles);
 }
 
@@ -23,6 +25,10 @@ function isSeller(user) {
 
 function isDeliverer(user) {
     return user.roles === "ROLE_DELIVERER";
+}
+
+function isPicker(user) {
+    return user.roles === "ROLE_PICKER";
 }
 
 function hasAdminPrivileges(user) {
@@ -46,5 +52,6 @@ export default {
     hasAllPrivileges,
     filterAuthorizationRoles,
     isSeller,
-    isDeliverer
+    isDeliverer,
+    isPicker
 }

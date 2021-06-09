@@ -27,5 +27,6 @@
     "deliveries.label": "Deliveries",
     "tourings.label": "Tourings",
     "orders.label": "Orders",
-    "deliverers.label": "Deliverers"
+    "deliverers.label": "Deliverers",
+    "recoveries.label": "Recoveries"
 }

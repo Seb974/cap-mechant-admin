@@ -1,9 +1,8 @@
-import React from 'react'
-import CIcon from '@coreui/icons-react'
+import React from 'react';
+import CIcon from '@coreui/icons-react';
 
 function getNav(translation)
 {
-  
   return [
     {
       _tag: 'CSidebarNavItem',
@@ -40,6 +39,12 @@ function getNav(translation)
       name: translation("preparations.label"),
       to: '/components/preparations',
       icon: <CIcon name="cil-dinner" customClasses="c-sidebar-nav-icon"/>,
+    },
+    {
+      _tag: 'CSidebarNavItem',
+      name: translation("recoveries.label"),
+      to: '/components/recoveries',
+      icon: <CIcon name="cil-basket" customClasses="c-sidebar-nav-icon"/>,
     },
     {
       _tag: 'CSidebarNavItem',

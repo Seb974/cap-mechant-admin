@@ -11,40 +11,52 @@ import { isSameDate, getDateFrom } from 'src/helpers/days';
 import Spinner from 'react-bootstrap/Spinner'
 import { Button } from 'bootstrap';
 import OrderDetails from 'src/components/preparationPages/orderDetails';
-
+import DayOffActions from 'src/services/DayOffActions';
 const Preparations = (props) => {
 
     const itemsPerPage = 30;
     const fields = ['name', 'date', 'total', ' '];      // 'show_details',
-    const { currentUser } = useContext(AuthContext);
+    const { currentUser, seller } = useContext(AuthContext);
     const [orders, setOrders] = useState([]);
     const [isAdmin, setIsAdmin] = useState(false);
     const [loading, setLoading] = useState(false);
     const [dates, setDates] = useState({start: new Date(), end: new Date() });
+    const [daysOff, setDaysOff] = useState([]);
 
     const [details, setDetails] = useState([])
 
     useEffect(() => {
         setIsAdmin(Roles.hasAdminPrivileges(currentUser));
-        getOrders();
+        fetchDaysOff();
+        // getOrders();
     }, []);
 
     useEffect(() => setIsAdmin(Roles.hasAdminPrivileges(currentUser)), [currentUser]);
     useEffect(() => getOrders(), [dates]);
+    useEffect(() => getOrders(), [daysOff]);
 
     const getOrders = () => {
         setLoading(true);
         const UTCDates = getUTCDates(dates);
-        OrderActions.findPreparations(UTCDates, currentUser)
-                .then(response =>{
-                    setOrders(response);
-                    setLoading(false);
-                })
-                .catch(error => {
-                    console.log(error);
-                    setLoading(false);
-                });
+        const request = isAdmin || Roles.isPicker(currentUser) ?
+            OrderActions.findPickersPreparations(UTCDates) :
+            OrderActions.findPreparations(UTCDates, currentUser);
+        request
+            .then(response =>{
+                setOrders(response);
+                setLoading(false);
+            })
+            .catch(error => {
+                console.log(error);
+                setLoading(false);
+            });
     }
+
+    const fetchDaysOff = () => {
+        DayOffActions
+            .findActives()
+            .then(closedDays => setDaysOff(closedDays));
+    };
 
     const handleDelete = (id) => {
         const originalOrders = [...orders];
@@ -62,15 +74,59 @@ const Preparations = (props) => {
             const newStart = new Date(datetime[0].getFullYear(), datetime[0].getMonth(), datetime[0].getDate(), 0, 0, 0);
             const newEnd = new Date(datetime[1].getFullYear(), datetime[1].getMonth(), datetime[1].getDate(), 23, 59, 0);
             setDates({start: newStart, end: newEnd});
-
         }
     };
 
     const getUTCDates = () => {
-        const UTCStart = new Date(dates.start.getFullYear(), dates.start.getMonth(), dates.start.getDate(), 4, 0, 0);
-        const UTCEnd = new Date(dates.end.getFullYear(), dates.end.getMonth(), dates.end.getDate() + 1, 3, 59, 0);
+        let UTCEnd = 0;
+        let UTCStart = 0;
+        if (Roles.isSeller(currentUser) && isDefined(seller) && isDefined(seller.needsRecovery)) {
+            const dateStart = isOffDay(dates.start) ? dates.start : getDeliveryDay(getStart(dates.start), seller);
+            const dateEnd = isOffDay(dates.end) ? dates.end : getDeliveryDay(getEnd(dates.end), seller);
+            UTCStart = new Date(dateStart.getFullYear(), dateStart.getMonth(), dateStart.getDate(), 4, 0, 0);
+            UTCEnd = new Date(dateEnd.getFullYear(), dateEnd.getMonth(), dateEnd.getDate() + 1, 3, 59, 0);
+        } else {
+            UTCStart = new Date(dates.start.getFullYear(), dates.start.getMonth(), dates.start.getDate(), 4, 0, 0);
+            UTCEnd = new Date(dates.end.getFullYear(), dates.end.getMonth(), dates.end.getDate() + 1, 3, 59, 0);
+        }
         return {start: UTCStart, end: UTCEnd};
     }
+
+    const getStart = date => {
+        let i = 0;
+        let dateStart = date;
+        while ( isOffDay(dateStart) ) {
+            dateStart = getDateFrom(date, i);
+            i--;
+        }
+        return dateStart
+    }
+
+    const getEnd = date => {
+        let i = 1;
+        let dateEnd = getDateFrom(date, i);
+        while ( isOffDay(dateEnd) ) {
+            dateEnd = getDateFrom(date, i);
+            i++;
+        }
+        return getDateFrom(date, i - 1);
+    }
+
+    const getReverseDeliveryDay = date => {
+        let i = 0;
+        let dateStart = getDateFrom(date, i - seller.recoveryDelay);
+        while ( isOffDay(dateStart) ) {
+            i--;
+            dateStart = getDateFrom(date, i - seller.recoveryDelay);
+        }
+        return dateStart;
+    };
+
+    const getDeliveryDay = date => getDeliveryDate(date, seller.recoveryDelay);
+
+    const getDeliveryDate = (date, delta) => new Date(date.getFullYear(), date.getMonth(), (date.getDate() + delta), 9, 0, 0);
+
+    const isOffDay = date => daysOff.find(day => isSameDate(new Date(day.date), date)) !== undefined || date.getDay() === 0;
 
     const toggleDetails = (index, e) => {
         e.preventDefault();
@@ -92,7 +148,7 @@ const Preparations = (props) => {
                 Liste des commandes à préparer
                 { isAdmin &&
                     <CCol col="6" sm="4" md="2" className="ml-auto">
-                            <Link role="button" to="/components/preparations/new" block variant="outline" color="success">CRÉER</Link>
+                            <Link role="button" to="/components/orders/new" block variant="outline" color="success">CRÉER</Link>
                     </CCol>
                 }
             </CCardHeader>
@@ -126,10 +182,10 @@ const Preparations = (props) => {
                                 item => <td>
                                             <Link to="#" onClick={ e => { toggleDetails(item.id, e) }}>
                                                 { item.isRemains ? 
-                                                    <i className="fas fa-sync-alt mr-2"></i> :
+                                                        <i className="fas fa-sync-alt mr-2"></i> :
                                                   isDefinedAndNotVoid(item.packages) ? 
-                                                  <i className="fas fa-plane mr-2"></i> :
-                                                    <i className="fas fa-truck mr-2"></i>
+                                                        <i className="fas fa-plane mr-2"></i> :
+                                                        <i className="fas fa-truck mr-2"></i>
                                                 }{ item.name }<br/>
                                                 <small><i>{ item.metas.zipcode } { item.metas.city }</i></small>
                                             </Link>
@@ -137,9 +193,14 @@ const Preparations = (props) => {
                             ,
                             'date':
                                 item => <td>
-                                            { isSameDate(new Date(item.deliveryDate), new Date()) ? "Aujourd'hui" : 
+                                            { isAdmin || Roles.isPicker(currentUser) ?
+                                            (isSameDate(new Date(item.deliveryDate), new Date()) ? "Aujourd'hui" : 
                                             isSameDate(new Date(item.deliveryDate), getDateFrom(new Date(), 1)) ? "Demain" :
-                                            (new Date(item.deliveryDate)).toLocaleDateString('fr-FR', { timeZone: 'UTC'})
+                                            (new Date(item.deliveryDate)).toLocaleDateString('fr-FR', { timeZone: 'UTC'})) 
+                                            : 
+                                            isSameDate( getReverseDeliveryDay(new Date(item.deliveryDate), seller), new Date()) ? "Aujourd'hui" : 
+                                            isSameDate( getReverseDeliveryDay(new Date(item.deliveryDate), seller), getDateFrom(new Date(), 1)) ? "Demain" :
+                                            ( getReverseDeliveryDay(new Date(item.deliveryDate), seller).toLocaleDateString('fr-FR', { timeZone: 'UTC'}))
                                             }
                                         </td>
                             ,
