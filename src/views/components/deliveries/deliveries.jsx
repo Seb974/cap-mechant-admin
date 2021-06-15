@@ -302,6 +302,7 @@ const Deliveries = (props) => {
                                                             <i className="fas fa-truck mr-2"></i>
                                                         }{ item.name }<br/>
                                                         <small><i>{ item.metas.zipcode } { item.metas.city }</i></small>
+                                                        <br/>
                                                     </Link>
                                                 </td>
                                     ,
