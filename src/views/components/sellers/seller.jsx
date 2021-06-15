@@ -105,7 +105,7 @@ const Seller = ({ match, history }) => {
             ownerRate: getFloat(seller.ownerRate),
             delay: getInt(seller.delay),
             recoveryDelay: seller.needsRecovery ? getInt(seller.recoveryDelay) : null,
-            users: users.map(user => user['@id'])
+            users: isDefinedAndNotVoid(users) ? users.map(user => user['@id']) : []
         };
     };
 

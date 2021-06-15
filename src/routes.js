@@ -34,6 +34,7 @@ const Users = React.lazy(() => import('./views/components/users/users'));
 const User = React.lazy(() => import('./views/components/users/user'));
 const Taxes = React.lazy(() => import('./views/components/taxes/taxes'));
 const Tax = React.lazy(() => import('./views/components/taxes/tax'));
+const Platform = React.lazy(() => import('./views/components/platform/platform'));
 const CodeEditors = React.lazy(() => import('./views/editors/code-editors/CodeEditors'));
 const TextEditors = React.lazy(() => import('./views/editors/text-editors/TextEditors'));
 
@@ -121,6 +122,7 @@ const routes = [
   { path: '/components/users', name: 'Users', component: Users },
   { path: '/components/taxes/:id', name: 'Tax', component: Tax },
   { path: '/components/taxes', name: 'Taxes', component: Taxes },
+  { path: '/components/platform', name: 'Platform', component: Platform },
   { path: '/dashboard', name: 'Dashboard', component: Dashboard },
   { path: '/theme', name: 'Theme', component: Colors, exact: true },
   { path: '/theme/colors', name: 'Colors', component: Colors },

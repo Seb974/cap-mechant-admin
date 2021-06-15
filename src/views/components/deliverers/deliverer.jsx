@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import DelivererActions from 'src/services/DelivererActions';
 import { CButton, CCard, CCardBody, CCardFooter, CCardHeader, CCol, CForm, CFormGroup, CInput, CInvalidFeedback, CLabel, CRow, CInputGroupText, CInputGroupAppend, CInputGroup, CSwitch } from '@coreui/react';
 import CIcon from '@coreui/icons-react';
-import { getFloat, getInt, isDefinedAndNotVoid } from 'src/helpers/utils';
+import { getFloat, getInt, isDefined, isDefinedAndNotVoid } from 'src/helpers/utils';
 import '../../../assets/css/searchBar.css';
 import UserSearchMultiple from 'src/components/forms/UserSearchMultiple';
 import UserSearchSimple from 'src/components/forms/UserSearchSimple';
@@ -46,6 +46,9 @@ const Deliverer = ({ match, history }) => {
                     if (isDefinedAndNotVoid(response.users)) {
                         const dbUsers = response.isIntern ? response.users[0] : response.users;
                         setUsers(dbUsers);
+                    } else {
+                        const nullUser = response.isIntern ? null : [];
+                        setUsers(nullUser);
                     }
                 })
                 .catch(error => {
@@ -84,7 +87,7 @@ const Deliverer = ({ match, history }) => {
         return {
             ...deliverer, 
             cost: getFloat(deliverer.cost),
-            users: !deliverer.isIntern ? users.map(user => user['@id']) : [users['@id']]
+            users: isDefinedAndNotVoid(users) ? (!deliverer.isIntern ? users.map(user => user['@id']) : [users['@id']]) : []
         };
     };
 

@@ -28,5 +28,6 @@
     "tourings.label": "Tournées",
     "orders.label": "Commandes",
     "deliverers.label": "Livreurs",
-    "recoveries.label": "Récupérations"
+    "recoveries.label": "Récupérations",
+    "platform.label": "Votre établissement"
 }

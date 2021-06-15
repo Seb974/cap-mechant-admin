@@ -34,7 +34,7 @@ const Relaypoint = ({ match, history }) => {
 
     useEffect(() => fetchRelaypoint(id), [id]);
 
-    const onInformationsChange = (newInformations) => setInformations(newInformations);
+    // const onInformationsChange = (newInformations) => setInformations(newInformations);
     const onPhoneChange = ({ currentTarget }) => setInformations({...informations, phone: currentTarget.value});
     const handleChange = ({ currentTarget }) => setRelaypoint({...relaypoint, [currentTarget.name]: currentTarget.value});
     const handleCheckBoxes = ({ currentTarget }) => setRelaypoint({...relaypoint, [currentTarget.name]: !relaypoint[currentTarget.name]});
@@ -45,11 +45,11 @@ const Relaypoint = ({ match, history }) => {
         setRelaypoint({...relaypoint, conditions: relaypoint.conditions.filter(element => parseInt(element.count) !== parseInt(condition.count))});
     };
 
-    const onUpdatePosition = (newInformations) => {
-        setInformations(informations => { 
-            return {...newInformations, address2: informations.address2, phone: informations.phone};
-        });
-    };
+    // const onUpdatePosition = (newInformations) => {
+    //     setInformations(informations => { 
+    //         return {...newInformations, address2: informations.address2, phone: informations.phone};
+    //     });
+    // };
 
     const fetchRelaypoint = id => {
         if (id !== "new") {
@@ -191,7 +191,8 @@ const Relaypoint = ({ match, history }) => {
                             <CRow>
                                 <h4 className="ml-3 mt-3">Adresse</h4>
                             </CRow>
-                            <AddressPanel informations={ informations } onInformationsChange={ onInformationsChange } onPositionChange={ onUpdatePosition } errors={ errors }/>
+                            {/* <AddressPanel informations={ informations } onInformationsChange={ onInformationsChange } onPositionChange={ onUpdatePosition } errors={ errors }/> */}
+                            <AddressPanel informations={ informations } setInformations={ setInformations } errors={ errors } />
                             <CRow className="mt-0 mb-3">
                                 <CCol xs="12" md="12">
                                     <CLabel htmlFor="textarea-input">Informations sur le point relais</CLabel>

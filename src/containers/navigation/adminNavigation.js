@@ -151,6 +151,12 @@ function getNav(translation)
           to: '/components/catalogs',
           icon: <CIcon name="cil-compass" customClasses="c-sidebar-nav-icon"/>,
         },
+        {
+          _tag: 'CSidebarNavItem',
+          name: translation("platform.label"),
+          to: '/components/platform',
+          icon: <CIcon name="cil-building" customClasses="c-sidebar-nav-icon"/>,
+        }
       ]
     },
     {

@@ -146,7 +146,7 @@ const Preparations = (props) => {
           <CCard>
             <CCardHeader>
                 Liste des commandes à préparer
-                { isAdmin &&
+                { isAdmin || Roles.isPicker(currentUser) &&
                     <CCol col="6" sm="4" md="2" className="ml-auto">
                             <Link role="button" to="/components/orders/new" block variant="outline" color="success">CRÉER</Link>
                     </CCol>

@@ -28,5 +28,6 @@
     "tourings.label": "Tourings",
     "orders.label": "Orders",
     "deliverers.label": "Deliverers",
-    "recoveries.label": "Recoveries"
+    "recoveries.label": "Recoveries",
+    "platform.label": "Your establishment"
 }
