@@ -125,7 +125,6 @@ const Order = ({ match, history }) => {
             setErrors({...errors, ...newErrors});
         } else {
             const orderToWrite = getOrderToWrite(order, user, informations, items, order.deliveryDate, objectDiscount, selectedCatalog, condition, settings);
-            console.log(orderToWrite);
             const request = !editing ? OrderActions.create(orderToWrite) : OrderActions.patch(id, orderToWrite);
             request.then(response => {
                 setErrors(defaultErrors);

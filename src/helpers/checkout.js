@@ -11,6 +11,12 @@ export const shop = {
     city: "Saint-Pierre"
 };
 
+export const getShop = platform => {
+    const { id, name, metas } = platform;
+    const { position, address, zipcode, city } = metas;
+    return { id: -id, coordinates: position, name, address, zipcode, city };
+};
+
 export const getOrderToWrite = (order, user, informations, productCart, date, objectDiscount, selectedCatalog, condition, settings) => {
     return {
         ...order,

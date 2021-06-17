@@ -13,6 +13,8 @@ import ContainerContext from 'src/contexts/ContainerContext';
 import Roles from 'src/config/Roles';
 import { isDefined, isDefinedAndNotVoid } from 'src/helpers/utils';
 import SellerActions from 'src/services/SellerActions';
+import PlatformContext from 'src/contexts/PlatformContext';
+import PlatformActions from 'src/services/PlatformActions';
 
 const DataProvider = ({ children }) => {
 
@@ -33,13 +35,14 @@ const DataProvider = ({ children }) => {
     const [selectedCatalog, setSelectedCatalog] = useState({});
     const [tourings, setTourings] = useState([]);
     const [seller, setSeller] = useState(null);
+    const [platform, setPlatform] = useState(null);
 
     useEffect(() => {
         AuthActions.setErrorHandler(setCurrentUser, setIsAuthenticated);
         AuthActions.getGeolocation()
                    .then(response => setCountry(response));
-        // AuthActions.getUserSettings()
-        //            .then(response => setSettings(response));
+        PlatformActions.find()
+                       .then(response => setPlatform(response));
         ProductActions.findAll()
                       .then(response => setProducts(response));
         ContainerActions.findAll()
@@ -74,6 +77,7 @@ const DataProvider = ({ children }) => {
     }, [catalogs, country]);
 
     return (
+        <PlatformContext.Provider value={ {platform, setPlatform} }>
         <AuthContext.Provider value={ {isAuthenticated, setIsAuthenticated, currentUser, setCurrentUser, eventSource, setEventSource, settings, setSettings, selectedCatalog, setSelectedCatalog, seller, setSeller} }>
         <DeliveryContext.Provider value={ {cities, setCities, relaypoints, setRelaypoints, condition, setCondition, packages, setPackages, totalWeight, setTotalWeight, availableWeight, setAvailableWeight, tourings, setTourings} }>
         <ContainerContext.Provider value={{ containers, setContainers }}>
@@ -85,6 +89,7 @@ const DataProvider = ({ children }) => {
         </ContainerContext.Provider>
         </DeliveryContext.Provider>
         </AuthContext.Provider>
+        </PlatformContext.Provider>
     );
 }
  
