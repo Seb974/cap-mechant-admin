@@ -93,6 +93,10 @@ function update(id, order) {
     return api.put('/api/order_entities/' + id, order);
 }
 
+function patch(id, order) {
+    return api.patch('/api/order_entities/' + id, order);
+}
+
 function create(order) {
     return api.post('/api/order_entities', order);
 }
@@ -115,4 +119,5 @@ export default {
     find,
     update,
     create,
+    patch
 }

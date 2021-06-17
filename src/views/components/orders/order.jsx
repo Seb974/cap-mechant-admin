@@ -119,12 +119,14 @@ const Order = ({ match, history }) => {
     };
 
     const handleSubmit = () => {
-        const newErrors = validateForm(order, informations, selectedCatalog, condition, relaypoints);
+        console.log(order)
+        const newErrors = validateForm(order, informations, (isDefined(order.calalog) ? order.catalog : selectedCatalog), condition, relaypoints);
         if (isDefined(newErrors) && Object.keys(newErrors).length > 0) {
             setErrors({...errors, ...newErrors});
         } else {
             const orderToWrite = getOrderToWrite(order, user, informations, items, order.deliveryDate, objectDiscount, selectedCatalog, condition, settings);
-            const request = !editing ? OrderActions.create(orderToWrite) : OrderActions.update(id, orderToWrite);
+            console.log(orderToWrite);
+            const request = !editing ? OrderActions.create(orderToWrite) : OrderActions.patch(id, orderToWrite);
             request.then(response => {
                 setErrors(defaultErrors);
                 //TODO : Flash notification de succès

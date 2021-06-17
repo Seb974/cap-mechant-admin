@@ -51,19 +51,16 @@ export const getPreparedOrder = (order, currentUser) => {
         items: items.map(item => {
             return Roles.hasAdminPrivileges(currentUser) || Roles.isPicker(currentUser) || isDefined(item.product) && isDefined(item.product.seller) && item.product.seller.users.find(user => user.id === currentUser.id) !== undefined ? 
                 {...item, 
-                    product: isDefined(item.product) ? (typeof item.product === 'object' ? item.product['@id'] : item.product) : null,
-                    variation: isDefined(item.variation) ? (typeof item.variation === 'object' ? item.variation['@id'] : item.variation) : null,
-                    size: isDefined(item.size) ? (typeof item.size === 'object' ? item.size['@id'] : item.size) : null,
+                    product: isDefined(item.product) ? (typeof item.product === 'string' ? item.product : item.product['@id']) : null,
+                    variation: isDefined(item.variation) ? (typeof item.variation === 'string' ? item.variation : item.variation['@id']) : null,
+                    size: isDefined(item.size) ? (typeof item.size === 'string' ? item.size : item.size['@id']) : null,
                     preparedQty: isDefined(item.preparedQty) ? typeof item.preparedQty === 'string' && item.preparedQty.length > 0 ? getFloat(item.preparedQty) : item.preparedQty: null,
                     isAdjourned: item.isAdjourned,
-                    isPrepared: true
                 }
                 :
                 item['@id']
-
         }),
-        isRemains: false,
-        // status: "PREPARED"
+        isRemains: false
     };
 }
 
@@ -99,7 +96,7 @@ export const validateForm = (user, informations, catalog, condition, relaypoints
         errors['phone'] = "Le numéro de téléphone est invalide ou non renseigné."
     if (!isValidAddress(informations, catalog, condition, relaypoints))
         errors['address'] = "L'adresse n'est pas valide."
-    else if (!isValidCatalog(catalog, informations)) {
+    else if (!isDefined(user.catalog) && !isValidCatalog(catalog, informations)) {
         errors['address'] = "Adresse non disponible depuis le catalogue sélectionné."
         isCatalogError = true;
     } else if (!isDeliverable(catalog, condition)) {

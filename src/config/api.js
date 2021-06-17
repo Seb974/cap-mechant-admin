@@ -22,7 +22,7 @@ function put(route, entity) {
 }
 
 function patch(route, entity) {
-    return axios.patch(API_DOMAIN + route, entity);
+    return axios.patch(API_DOMAIN + route, entity, { headers: {'Content-type': 'application/merge-patch+json'} });
 }
 
 export default {

@@ -98,7 +98,7 @@ const Relaypoint = ({ match, history }) => {
             ...relaypoint,
             discount: isDefined(discountValue) ? parseFloat((discountValue / 100).toFixed(3)) : null,
             accessCode: isDefined(relaypoint.accessCode) && relaypoint.accessCode.length > 0 ? relaypoint.accessCode : null,
-            metas: informations,
+            metas: {...informations, isRelaypoint: true},
             conditions: relaypoint.conditions.map(condition => {
                 return {
                     ...condition,
