@@ -45,6 +45,20 @@ export const getOrderToWrite = (order, user, informations, productCart, date, ob
     };
 };
 
+export const setOrderStatus = (order, status) => {
+    const { user, metas, catalog, appliedCondition, promotion, items } = order;
+    return {
+        ...order,
+        status,
+        user: isDefined(user) ? (typeof user === 'object' ? user['@id'] : user) : null,
+        metas: isDefined(metas) ? (typeof metas === 'object' ? metas['@id'] : metas) : null,
+        catalog: isDefined(catalog) ? (typeof catalog === 'object' ? catalog['@id'] : catalog) : null,
+        appliedCondition: isDefined(appliedCondition) ? (typeof appliedCondition === 'object' ? appliedCondition['@id'] : appliedCondition) : null,
+        promotion: isDefined(promotion) ? (typeof promotion === 'object' ? promotion['@id'] : promotion) : null,
+        items: items.map(item => item['@id']),
+    }
+};
+
 export const getPreparedOrder = (order, currentUser) => {
     const { user, metas, catalog, appliedCondition, promotion, items } = order;
     return {
@@ -86,7 +100,7 @@ export const getDeliveredOrder = order => {
             size: isDefined(item.size) ? (typeof item.size === 'object' ? item.size['@id'] : item.size) : null,
             deliveredQty: getFloat(item.deliveredQty),
         })),
-        status: "DELIVERED"
+        status: isDefined(metas.isRelaypoint) && metas.isRelaypoint ? "COLLECTABLE" : "DELIVERED"
     };
 }
 

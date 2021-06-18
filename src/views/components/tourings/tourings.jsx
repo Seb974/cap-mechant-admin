@@ -54,10 +54,10 @@ const Tourings = (props) => {
             });
     }
 
-    const handleDelete = id => {
+    const handleDelete = item => {
         const originalTourings = [...tourings];
-        setTourings(tourings.filter(order => order.id !== id));
-        TouringActions.delete(id)
+        setTourings(tourings.filter(order => order.id !== item.id));
+        TouringActions.delete(item, isAdmin)
                       .catch(error => {
                            setTourings(originalTourings);
                            console.log(error.response);
@@ -173,7 +173,6 @@ const Tourings = (props) => {
                                         }
                                         { !details.includes(item.id) &&
                                             <>
-                                                
                                                 <CButton color="success" onClick={ () => handleSubmit(item) } className="mx-1 my-1"><i className="fas fa-check"></i></CButton>
                                             </>
                                         }
@@ -182,7 +181,7 @@ const Tourings = (props) => {
                             ' ':
                                 item => (
                                     <td className="mb-3 mb-xl-0 text-center">
-                                        <CButton color="danger" disabled={ !isAdmin } onClick={ () => handleDelete(item.id) } className="mx-1 my-1"><i className="fas fa-trash"></i></CButton>
+                                        <CButton color="danger" disabled={ !isAdmin } onClick={ () => handleDelete(item) } className="mx-1 my-1"><i className="fas fa-trash"></i></CButton>
                                     </td>
                                 )
                             ,

@@ -100,6 +100,7 @@ const DeliveryNote = ({ match }) => {
             .find(id)
             .then(response => {
                 setOrders(response.orderEntities);
+                console.log(response.orderEntities);
             })
             .catch(error => console.log(error));
     };

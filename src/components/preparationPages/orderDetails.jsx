@@ -35,7 +35,7 @@ const OrderDetails = ({ orders = null, order, setOrders = null, isDelivery = fal
     return (
         <>
             { viewedOrder.items.map((item, index) => {
-                if (isAdmin || (!isAdmin && item.product.seller.users.find(user => user.id == currentUser.id) !== undefined)) {
+                if (isAdmin || Roles.isPicker(currentUser) || (!isAdmin && item.product.seller.users.find(user => user.id == currentUser.id) !== undefined)) {
                     return(
                         <CCardBody>
                             <CRow className="text-center mt-0">

@@ -75,10 +75,10 @@ const Deliveries = (props) => {
                 });
     };
 
-    const handleDelete = (id) => {
+    const handleDelete = item => {
         const originalOrders = [...orders];
-        setOrders(orders.filter(order => order.id !== id));
-        OrderActions.delete(id)
+        setOrders(orders.filter(order => order.id !== item.id));
+        OrderActions.delete(item, isAdmin)
                       .catch(error => {
                            setOrders(originalOrders);
                            console.log(error.response);
@@ -334,7 +334,7 @@ const Deliveries = (props) => {
                                         item => (
                                             <td className="mb-3 mb-xl-0 text-center" style={{color: item.status === "WAITING" ? "dimgray" : "black"}}>
                                                 <CButton color="warning" disabled={ !isAdmin } href={ "#/components/orders/" + item.id } className="mx-1 my-1"><i className="fas fa-pen"></i></CButton>
-                                                <CButton color="danger" disabled={ !isAdmin } onClick={ () => handleDelete(item.id) } className="mx-1 my-1"><i className="fas fa-trash"></i></CButton>
+                                                <CButton color="danger" disabled={ !isAdmin } onClick={ () => handleDelete(item) } className="mx-1 my-1"><i className="fas fa-trash"></i></CButton>
                                             </td>
                                         )
                                     ,

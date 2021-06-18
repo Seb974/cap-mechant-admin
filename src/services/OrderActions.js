@@ -1,8 +1,9 @@
 import axios from 'axios';
 import api from 'src/config/api';
 import Roles from 'src/config/Roles';
+import { setOrderStatus } from 'src/helpers/checkout';
 import { getStringDate } from 'src/helpers/days';
-import { isDefinedAndNotVoid } from 'src/helpers/utils';
+import { isDefined, isDefinedAndNotVoid } from 'src/helpers/utils';
 
 function findAll() {
     return api
@@ -79,8 +80,16 @@ function getOptimizedTrip(positions, distributionsKeys)
                 .then(response => response.data);
 }
 
-function deleteOrder(id) {
-    return api.delete('/api/order_entities/' + id);
+function deleteOrder(order, isAdmin) {
+    if (order.isRemains || isAdmin)
+        return api.delete('/api/order_entities/' + order.id)
+                  .then(response => {
+                        const metas = order.metas;
+                        if (!isDefined(metas.user) && !isDefined(metas.isRelaypoint))
+                            return api.delete('/api/metas/' + metas.id);
+                  });
+    else
+        return api.put('/api/order_entities/' + order.id, setOrderStatus(order, 'ABORTED'));
 }
 
 function find(id) {

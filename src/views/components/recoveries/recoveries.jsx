@@ -94,11 +94,11 @@ const Recoveries = (props) => {
             .then(response => setSellers(response));
     };
 
-    const handleDelete = (id) => {
+    const handleDelete = (item) => {
         const originalOrders = [...orders];
-        setOrders(orders.filter(order => order.id !== id));
+        setOrders(orders.filter(order => order.id !== item.id));
         OrderActions
-            .delete(id)
+            .delete(item, isAdmin)
             .catch(error => {
                 setOrders(originalOrders);
                 console.log(error.response);
@@ -204,7 +204,7 @@ const Recoveries = (props) => {
                                 item => (
                                     <td className="mb-3 mb-xl-0 text-center">
                                         <CButton color="warning" disabled={ !isAdmin } href={ "#/components/orders/" + item.order.id } className="mx-1 my-1"><i className="fas fa-pen"></i></CButton>
-                                        <CButton color="danger" disabled={ !isAdmin } onClick={ () => handleDelete(item.order.id) } className="mx-1 my-1"><i className="fas fa-trash"></i></CButton>
+                                        <CButton color="danger" disabled={ !isAdmin } onClick={ () => handleDelete(item.order) } className="mx-1 my-1"><i className="fas fa-trash"></i></CButton>
                                     </td>
                                 )
                             ,

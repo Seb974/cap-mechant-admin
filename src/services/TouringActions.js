@@ -57,7 +57,12 @@ function closeTouring(touring) {
         ...touring,
         end: new Date(),
         isOpen: false,
-        orderEntities: touring.orderEntities.map(order => ({id: order.id, status: 'DELIVERED'})),
+        orderEntities: 
+        touring.orderEntities.map(order => ({
+            id: order.id, 
+            deliveredQty: order.preparedQty,
+            status: isDefined(order.metas.isRelaypoint) && order.metas.isRelaypoint ? 'COLLECTABLE' : 'DELIVERED'
+        })),
         deliverer: isDefined(touring.deliverer) ? typeof touring.deliverer === 'string' ? touring.deliverer : touring.deliverer['@id'] : null
     });
 }
