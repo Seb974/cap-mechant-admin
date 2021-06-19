@@ -27,14 +27,16 @@ const Relaypoint = React.lazy(() => import('./views/components/relaypoints/relay
 const Preparations = React.lazy(() => import('./views/components/preparations/preparations'));
 const Recoveries = React.lazy(() => import('./views/components/recoveries/recoveries'));
 const Deliveries = React.lazy(() => import('./views/components/deliveries/deliveries'));
-// const DeliveryNote = React.lazy(() => import('./views/components/deliveries/deliveryNote'));
 const Tourings = React.lazy(() => import('./views/components/tourings/tourings'));
+const Checkouts = React.lazy(() => import('./views/components/relaypoints/checkouts'));
 const MapVisualization = React.lazy(() => import('./views/components/tourings/mapVisualization'));
 const Order = React.lazy(() => import('./views/components/orders/order'));
 const Users = React.lazy(() => import('./views/components/users/users'));
 const User = React.lazy(() => import('./views/components/users/user'));
 const Taxes = React.lazy(() => import('./views/components/taxes/taxes'));
 const Tax = React.lazy(() => import('./views/components/taxes/tax'));
+const Supervisors = React.lazy(() => import('./views/components/supervisors/supervisors'));
+const Supervisor = React.lazy(() => import('./views/components/supervisors/supervisor'));
 const Platform = React.lazy(() => import('./views/components/platform/platform'));
 const CodeEditors = React.lazy(() => import('./views/editors/code-editors/CodeEditors'));
 const TextEditors = React.lazy(() => import('./views/editors/text-editors/TextEditors'));
@@ -115,15 +117,17 @@ const routes = [
   { path: '/components/relaypoints', name: 'Relaypoints', component: Relaypoints },
   { path: '/components/orders/:id', name: 'Order', component: Order },
   { path: '/components/preparations', name: 'Preparations', component: Preparations },
-  // { path: '/components/deliveries/:id', name: 'DeliveryNote', component: DeliveryNote },
   { path: '/components/deliveries', name: 'Deliveries', component: Deliveries },
   { path: '/components/recoveries', name: 'Recoveries', component: Recoveries },
   { path: '/components/tourings/visualization', name: 'MapVisualization', component: MapVisualization },
   { path: '/components/tourings', name: 'Tourings', component: Tourings },
+  { path: '/components/checkouts', name: 'Checkouts', component: Checkouts },
   { path: '/components/users/:id', exact: true, name: 'User Details', component: User },
   { path: '/components/users', name: 'Users', component: Users },
   { path: '/components/taxes/:id', name: 'Tax', component: Tax },
   { path: '/components/taxes', name: 'Taxes', component: Taxes },
+  { path: '/components/supervisors/:id', name: 'Supervisor', component: Supervisor },
+  { path: '/components/supervisors', name: 'Supervisors', component: Supervisors },
   { path: '/components/platform', name: 'Platform', component: Platform },
   { path: '/dashboard', name: 'Dashboard', component: Dashboard },
   { path: '/theme', name: 'Theme', component: Colors, exact: true },

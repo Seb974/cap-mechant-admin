@@ -39,7 +39,7 @@ function getNav(translation)
       _tag: 'CSidebarNavItem',
       name: translation("deliveries.label"),
       to: '/components/deliveries',
-      icon: <CIcon name="cil-truck" customClasses="c-sidebar-nav-icon"/>,
+      icon: <CIcon name="cil-location-pin" customClasses="c-sidebar-nav-icon"/>,
     },
     {
       _tag: 'CSidebarNavItem',
@@ -79,7 +79,7 @@ function getNav(translation)
       _tag: 'CSidebarNavItem',
       name: translation("sellers.label"),
       to: '/components/sellers',
-      icon: <CIcon name="cil-contact" customClasses="c-sidebar-nav-icon"/>,
+      icon: <CIcon name="cil-industry" customClasses="c-sidebar-nav-icon"/>,
     },
     {
       _tag: 'CSidebarNavItem',

@@ -29,5 +29,7 @@
     "orders.label": "Orders",
     "deliverers.label": "Deliverers",
     "recoveries.label": "Recoveries",
-    "platform.label": "Your establishment"
+    "platform.label": "Your establishment",
+    "supervisors.label": "Supervisors",
+    "checkouts.label": "Relaypoints checkouts"
 }

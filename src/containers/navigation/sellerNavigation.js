@@ -55,7 +55,7 @@ function getNav(translation)
       _tag: 'CSidebarNavItem',
       name: translation("sellers.label"),
       to: '/components/sellers',
-      icon: <CIcon name="cil-contact" customClasses="c-sidebar-nav-icon"/>,
+      icon: <CIcon name="cil-industry" customClasses="c-sidebar-nav-icon"/>,
     },
     {
       _tag: 'CSidebarNavTitle',

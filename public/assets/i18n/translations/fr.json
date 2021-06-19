@@ -29,5 +29,7 @@
     "orders.label": "Commandes",
     "deliverers.label": "Livreurs",
     "recoveries.label": "Récupérations",
-    "platform.label": "Votre établissement"
+    "platform.label": "Votre établissement",
+    "supervisors.label": "Superviseurs",
+    "checkouts.label": "Retraits"
 }

@@ -44,19 +44,25 @@ function getNav(translation)
       _tag: 'CSidebarNavItem',
       name: translation("recoveries.label"),
       to: '/components/recoveries',
-      icon: <CIcon name="cil-basket" customClasses="c-sidebar-nav-icon"/>,
+      icon: <CIcon name="cil-tags" customClasses="c-sidebar-nav-icon"/>,
     },
     {
       _tag: 'CSidebarNavItem',
       name: translation("deliveries.label"),
       to: '/components/deliveries',
-      icon: <CIcon name="cil-truck" customClasses="c-sidebar-nav-icon"/>,
+      icon: <CIcon name="cil-location-pin" customClasses="c-sidebar-nav-icon"/>,
     },
     {
       _tag: 'CSidebarNavItem',
       name: translation("tourings.label"),
       to: '/components/tourings',
       icon: <CIcon name="cil-map" customClasses="c-sidebar-nav-icon"/>,
+    },
+    {
+      _tag: 'CSidebarNavItem',
+      name: translation("checkouts.label"),
+      to: '/components/checkouts',
+      icon: <CIcon name="cil-task" customClasses="c-sidebar-nav-icon"/>,
     },
     {
       _tag: 'CSidebarNavTitle',
@@ -90,13 +96,19 @@ function getNav(translation)
       _tag: 'CSidebarNavItem',
       name: translation("sellers.label"),
       to: '/components/sellers',
-      icon: <CIcon name="cil-contact" customClasses="c-sidebar-nav-icon"/>,
+      icon: <CIcon name="cil-industry" customClasses="c-sidebar-nav-icon"/>,
     },
     {
       _tag: 'CSidebarNavItem',
       name: translation("deliverers.label"),
       to: '/components/deliverers',
       icon: <CIcon name="cil-car-alt" customClasses="c-sidebar-nav-icon"/>,
+    },
+    {
+      _tag: 'CSidebarNavItem',
+      name: translation("supervisors.label"),
+      to: '/components/supervisors',
+      icon: <CIcon name="cil-shield-alt" customClasses="c-sidebar-nav-icon"/>,
     },
     {
       _tag: 'CSidebarNavItem',

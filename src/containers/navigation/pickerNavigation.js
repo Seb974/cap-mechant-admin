@@ -44,13 +44,13 @@ function getNav(translation)
       _tag: 'CSidebarNavItem',
       name: translation("recoveries.label"),
       to: '/components/recoveries',
-      icon: <CIcon name="cil-basket" customClasses="c-sidebar-nav-icon"/>,
+      icon: <CIcon name="cil-tags" customClasses="c-sidebar-nav-icon"/>,
     },
     {
       _tag: 'CSidebarNavItem',
       name: translation("deliveries.label"),
       to: '/components/deliveries',
-      icon: <CIcon name="cil-truck" customClasses="c-sidebar-nav-icon"/>,
+      icon: <CIcon name="cil-location-pin" customClasses="c-sidebar-nav-icon"/>,
     },
     {
       _tag: 'CSidebarNavItem',

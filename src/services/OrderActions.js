@@ -41,14 +41,13 @@ function findPickersPreparations(dates) {
 function findRecoveries(dates) {
     const UTCDates = formatUTC(dates);
     const status = `status[]=WAITING&status[]=PRE-PREPARED`;
-    // const dateLimits = `deliveryDate[after]=${ getStringDate(UTCDates.start) }&deliveryDate[before]=${ getStringDate(UTCDates.end) }`
     return api
-        .get(`/api/order_entities?${ status }`)     // &${ dateLimits }
+        .get(`/api/order_entities?${ status }`)
         .then(response => response.data['hydra:member']);
 }
 
 function findDeliveries(dates, user) {
-    const status = `status[]=WAITING&status[]=PREPARED`;
+    const status = `status[]=WAITING&status[]=PRE-PREPARED&status[]=PREPARED`;
     const UTCDates = formatUTC(dates);
     const dateLimits = `deliveryDate[after]=${ getStringDate(UTCDates.start) }&deliveryDate[before]=${ getStringDate(UTCDates.end) }`
     return api
@@ -62,6 +61,18 @@ function findDeliveries(dates, user) {
                         return item.product.seller.users.find(u => u.id === user.id) !== undefined}) !==undefined;
                 });
             return data.sort((a, b) => (new Date(a.deliveryDate) < new Date(b.deliveryDate)) ? -1 : 1)
+        });
+};
+
+function findCheckouts(dates, relaypoint) {
+    const status = `status[]=WAITING&status[]=PRE-PREPARED&status[]=PREPARED&status[]=ON_TRUCK&status[]=COLLECTABLE`;
+    const UTCDates = formatUTC(dates);
+    const dateLimits = `deliveryDate[after]=${ getStringDate(UTCDates.start) }&deliveryDate[before]=${ getStringDate(UTCDates.end) }`
+    return api
+        .get(`/api/order_entities?${ status }&${ dateLimits }`)
+        .then(response => {
+            const data = response.data['hydra:member'].filter(order => order.metas.id === relaypoint.metas.id);
+            return data.sort((a, b) => (new Date(a.deliveryDate) < new Date(b.deliveryDate)) ? -1 : 1);
         });
 };
 
@@ -123,6 +134,7 @@ export default {
     findPreparations,
     findRecoveries,
     findPickersPreparations,
+    findCheckouts,
     getOptimizedTrip,
     delete: deleteOrder,
     find,
