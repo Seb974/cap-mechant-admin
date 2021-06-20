@@ -10,5 +10,7 @@ export default React.createContext({
     settings: {},
     setSettings: (value) => {},
     seller: {},
-    setSeller: (value) => {}
+    setSeller: (value) => {},
+    supervisor: {},
+    setSupervisor: (value) => {}
 });

@@ -15,7 +15,7 @@ import DayOffActions from 'src/services/DayOffActions';
 const Preparations = (props) => {
 
     const itemsPerPage = 30;
-    const fields = ['name', 'date', 'total', ' '];      // 'show_details',
+    const fields = ['name', 'date', 'total', ' '];
     const { currentUser, seller } = useContext(AuthContext);
     const [orders, setOrders] = useState([]);
     const [isAdmin, setIsAdmin] = useState(false);
@@ -28,7 +28,6 @@ const Preparations = (props) => {
     useEffect(() => {
         setIsAdmin(Roles.hasAdminPrivileges(currentUser));
         fetchDaysOff();
-        // getOrders();
     }, []);
 
     useEffect(() => setIsAdmin(Roles.hasAdminPrivileges(currentUser)), [currentUser]);
@@ -146,7 +145,7 @@ const Preparations = (props) => {
           <CCard>
             <CCardHeader>
                 Liste des commandes à préparer
-                { (isAdmin || Roles.isPicker(currentUser)) &&
+                { (isAdmin || Roles.isPicker(currentUser) || Roles.isSupervisor(currentUser)) &&
                     <CCol col="6" sm="4" md="2" className="ml-auto">
                             <Link role="button" to="/components/orders/new" block variant="outline" color="success">CRÉER</Link>
                     </CCol>
@@ -193,7 +192,7 @@ const Preparations = (props) => {
                             ,
                             'date':
                                 item => <td>
-                                            { isAdmin || Roles.isPicker(currentUser) ?
+                                            { isAdmin || Roles.isPicker(currentUser) || Roles.isSupervisor(currentUser) ?
                                             (isSameDate(new Date(item.deliveryDate), new Date()) ? "Aujourd'hui" : 
                                             isSameDate(new Date(item.deliveryDate), getDateFrom(new Date(), 1)) ? "Demain" :
                                             (new Date(item.deliveryDate)).toLocaleDateString('fr-FR', { timeZone: 'UTC'})) 

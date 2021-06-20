@@ -4,7 +4,7 @@ import SupervisorActions from 'src/services/SupervisorActions';
 import { CButton, CCard, CCardBody, CCardFooter, CCardHeader, CCol, CForm, CFormGroup, CInput, CInputFile, CInputGroup, CInputGroupAppend, CInputGroupText, CInvalidFeedback, CLabel, CRow, CSelect, CSwitch, CTextarea } from '@coreui/react';
 import CIcon from '@coreui/icons-react';
 import Select from 'src/components/forms/Select';
-import { isDefinedAndNotVoid, getFloat } from 'src/helpers/utils';
+import { isDefinedAndNotVoid, getFloat, isDefined } from 'src/helpers/utils';
 import UserSearchMultiple from 'src/components/forms/UserSearchMultiple';
 import UserSearchSimple from 'src/components/forms/UserSearchSimple';
 
@@ -46,25 +46,30 @@ const Supervisor = ({ match, history }) => {
                     //TODO : Flash notification de succès
                     history.replace("/components/supervisors");
                 })
-               .catch( ({ response }) => {
-                    const { violations } = response.data;
-                    if (violations) {
-                        const apiErrors = {};
-                        violations.forEach(({propertyPath, message}) => {
-                            apiErrors[propertyPath] = message;
-                        });
-                        setErrors(apiErrors);
+               .catch( error => {
+                    const { response } = error.response;
+                    if ( isDefined(response) ) {
+                        const { violations } = response.data;
+                        if (violations) {
+                            const apiErrors = {};
+                            violations.forEach(({propertyPath, message}) => {
+                                apiErrors[propertyPath] = message;
+                            });
+                            setErrors(apiErrors);
+                        }
+                        //TODO : Flash notification d'erreur
+                    } else {
+                        console.log(error);
                     }
-                    //TODO : Flash notification d'erreur
                });
     };
 
-    return (
+    return !isDefined(supervisorEntity) ? <></> : (
         <CRow>
             <CCol xs="12" sm="12">
                 <CCard>
                     <CCardHeader>
-                        <h3>{!editing ? "Créer une superviseur" : "Modifier le superviseur " + supervisorEntity.supervisor.name }</h3>
+                        <h3>{!editing ? "Créer une superviseur" : "Modifier '" + supervisorEntity.role + "'" }</h3> 
                     </CCardHeader>
                     <CCardBody>
                         <CForm onSubmit={ handleSubmit }>

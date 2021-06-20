@@ -15,6 +15,7 @@ import { isDefined, isDefinedAndNotVoid } from 'src/helpers/utils';
 import SellerActions from 'src/services/SellerActions';
 import PlatformContext from 'src/contexts/PlatformContext';
 import PlatformActions from 'src/services/PlatformActions';
+import SupervisorActions from 'src/services/SupervisorActions';
 
 const DataProvider = ({ children }) => {
 
@@ -35,6 +36,7 @@ const DataProvider = ({ children }) => {
     const [selectedCatalog, setSelectedCatalog] = useState({});
     const [tourings, setTourings] = useState([]);
     const [seller, setSeller] = useState(null);
+    const [supervisor, setSupervisor] = useState(null);
     const [platform, setPlatform] = useState(null);
 
     useEffect(() => {
@@ -66,6 +68,10 @@ const DataProvider = ({ children }) => {
             SellerActions
                 .findAll()
                 .then(response => setSeller(response[0]));
+        else if (Roles.isSupervisor(currentUser))
+            SupervisorActions
+                .getSupervisor(currentUser)
+                .then(response => setSupervisor(response));
     },[currentUser]);
 
     useEffect(() => {
@@ -78,7 +84,7 @@ const DataProvider = ({ children }) => {
 
     return (
         <PlatformContext.Provider value={ {platform, setPlatform} }>
-        <AuthContext.Provider value={ {isAuthenticated, setIsAuthenticated, currentUser, setCurrentUser, eventSource, setEventSource, settings, setSettings, selectedCatalog, setSelectedCatalog, seller, setSeller} }>
+        <AuthContext.Provider value={ {isAuthenticated, setIsAuthenticated, currentUser, setCurrentUser, eventSource, setEventSource, settings, setSettings, selectedCatalog, setSelectedCatalog, seller, setSeller, supervisor, setSupervisor} }>
         <DeliveryContext.Provider value={ {cities, setCities, relaypoints, setRelaypoints, condition, setCondition, packages, setPackages, totalWeight, setTotalWeight, availableWeight, setAvailableWeight, tourings, setTourings} }>
         <ContainerContext.Provider value={{ containers, setContainers }}>
         <ProductsContext.Provider value={ {products, setProducts} }>

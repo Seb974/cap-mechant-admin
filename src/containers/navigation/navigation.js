@@ -9,6 +9,7 @@ function getNav(translation, currentUser)
            (Roles.isSeller(currentUser) && Roles.isDeliverer(currentUser) || Roles.isPicker(currentUser)) ? "PICKER" : 
            Roles.isSeller(currentUser) ? "SELLER" :
            Roles.isDeliverer(currentUser) ? "DELIVERER" : 
+           Roles.isSupervisor(currentUser) ? "SUPERVISOR" : 
            Roles.isRelaypoint(currentUser.roles) ? "RELAYPOINT" : "USER";
     return mainRole;
   };
@@ -47,7 +48,7 @@ function getNav(translation, currentUser)
       _tag: 'CSidebarNavTitle',
       _children: [translation("orders.label")]
     },
-    !["ADMIN", "PICKER", "SELLER"].includes(mainRole) ? voidValue : 
+    !["ADMIN", "PICKER", "SELLER", "SUPERVISOR"].includes(mainRole) ? voidValue : 
         {
           _tag: 'CSidebarNavItem',
           name: translation("preparations.label"),
@@ -135,14 +136,14 @@ function getNav(translation, currentUser)
           to: '/components/supervisors',
           icon: <CIcon name="cil-shield-alt" customClasses="c-sidebar-nav-icon"/>,
         },
-    !["ADMIN"].includes(mainRole) ? voidValue :  
+    !["ADMIN", "SUPERVISOR"].includes(mainRole) ? voidValue :
         {
           _tag: 'CSidebarNavItem',
           name: translation("users.label"),
           to: '/components/users',
           icon: <CIcon name="cil-people" customClasses="c-sidebar-nav-icon"/>,
         },
-    !["ADMIN"].includes(mainRole) ? voidValue :  
+    !["ADMIN"].includes(mainRole) ? voidValue :
         {
           _tag: 'CSidebarNavDropdown',
           name: translation("parameters.label"),

@@ -7,7 +7,7 @@ import { CButton, CCard, CCardBody, CCardFooter, CCardHeader, CCol, CForm, CForm
 import Tabs from 'react-bootstrap/Tabs';
 import Tab from 'react-bootstrap/Tab';
 import CIcon from '@coreui/icons-react';
-import { isDefined } from 'src/helpers/utils';
+import { isDefined, isDefinedAndNotVoid } from 'src/helpers/utils';
 import Items from 'src/components/preparationPages/Items';
 import UserSearchSimple from 'src/components/forms/UserSearchSimple';
 import ClientPart from 'src/components/preparationPages/ClientPart';
@@ -18,6 +18,8 @@ import { getOrderToWrite, validateForm } from 'src/helpers/checkout';
 import GroupActions from 'src/services/GroupActions';
 import ProductsContext from 'src/contexts/ProductsContext';
 import UserActions from 'src/services/UserActions';
+import Roles from 'src/config/Roles';
+import Select from 'src/components/forms/Select';
 
 const Order = ({ match, history }) => {
 
@@ -25,7 +27,7 @@ const Order = ({ match, history }) => {
     const defaultVariant = null;
     const [editing, setEditing] = useState(false);
     const { products } = useContext(ProductsContext);
-    const { selectedCatalog, setSettings, settings } = useContext(AuthContext);
+    const { currentUser, selectedCatalog, setSettings, settings, supervisor } = useContext(AuthContext);
     const { setCities, condition, relaypoints, setCondition } = useContext(DeliveryContext);
     const [order, setOrder] = useState({ name: "", email: "", deliveryDate: new Date() });
     const defaultErrors = { name: "", email: "", deliveryDate: "", phone: "", address: "" };
@@ -39,9 +41,12 @@ const Order = ({ match, history }) => {
     const [items, setItems] = useState([defaultItem]);
     const [user, setUser] = useState(null);
     const [discount, setDiscount] = useState(0);
+    const [isAdmin, setIsAdmin] = useState(false);
     const [minDate, setMinDate] = useState(new Date());
+    const [selectedUser, setSelectedUser] = useState(null);
 
     useEffect(() => {
+        setIsAdmin(Roles.hasAdminPrivileges(currentUser));
         fetchCities();
         fetchGroups();
         fetchOrder(id);
@@ -52,6 +57,12 @@ const Order = ({ match, history }) => {
     useEffect(() => {
         setUserInformations();
     }, [user]);
+    
+    useEffect(() => {
+        if (isDefined(supervisor) && !isDefined(user)) {
+            setSelectedUser(supervisor.users[0]);
+        }
+    }, []);
 
     useEffect(() => {
         if (groups.length > 0) {
@@ -118,8 +129,12 @@ const Order = ({ match, history }) => {
         setOrder({...order, deliveryDate: newDate});
     };
 
+    const handleSupervisorUserChange = ({ currentTarget }) => {
+        const newUser = supervisor.users.find(u => parseInt(u.id) === parseInt(currentTarget.value));
+        setSelectedUser(newUser);
+    };
+
     const handleSubmit = () => {
-        console.log(order)
         const newErrors = validateForm(order, informations, (isDefined(order.calalog) ? order.catalog : selectedCatalog), condition, relaypoints);
         if (isDefined(newErrors) && Object.keys(newErrors).length > 0) {
             setErrors({...errors, ...newErrors});
@@ -187,8 +202,21 @@ const Order = ({ match, history }) => {
                                         </CFormGroup>
                                     </CCol>
                                 </CRow>
-                                <hr className="my-2"/>
-                                <UserSearchSimple user={ user } setUser={ setUser } label="Client"/>
+                                { (isAdmin || Roles.isPicker(currentUser)) ?
+                                    <>
+                                        <hr className="my-2"/>
+                                        <UserSearchSimple user={ user } setUser={ setUser } label="Client"/>
+                                    </>
+                                    :
+                                    isDefined(supervisor) ?
+                                        <>
+                                            <hr className="my-2"/>
+                                            <Select className="mr-2" name="selectedUser" label="Pour le compte de" onChange={ handleSupervisorUserChange } value={ isDefined(selectedUser) ? selectedUser.id : 0 }>
+                                                { supervisor.users.map(user => <option value={ user.id }>{ user.name + " - " + user.email }</option>) }
+                                            </Select>
+                                        </>
+                                    : <></>
+                                 }
                                 <hr/>
                                 <Items items={ items } setItems={ setItems } defaultItem={ defaultItem } editing={ editing }/>
                             </Tab>

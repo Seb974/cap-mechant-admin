@@ -18,8 +18,7 @@ function findPreparations(dates, user) {
     return api
         .get(`/api/order_entities?${ status }&${ dateLimits }`)
         .then(response => {
-            const isAdmin = Roles.hasAdminPrivileges(user);
-            const data = isAdmin ? 
+            const data = Roles.hasAdminPrivileges(user) || Roles.isSupervisor(user) ? 
                 response.data['hydra:member'] :
                 response.data['hydra:member'].filter(order => {
                     return order.items.find(item => {

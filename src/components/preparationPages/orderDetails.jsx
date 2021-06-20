@@ -25,7 +25,6 @@ const OrderDetails = ({ orders = null, order, setOrders = null, isDelivery = fal
     });
 
     const onSubmit = () => {
-        console.log(getPreparedOrder(viewedOrder, currentUser));
         OrderActions
             .update(order.id, getPreparedOrder(viewedOrder, currentUser))
             .then(response => setOrders(orders.filter(o => o.id !== order.id)))
@@ -35,7 +34,7 @@ const OrderDetails = ({ orders = null, order, setOrders = null, isDelivery = fal
     return (
         <>
             { viewedOrder.items.map((item, index) => {
-                if (isAdmin || Roles.isPicker(currentUser) || (!isAdmin && item.product.seller.users.find(user => user.id == currentUser.id) !== undefined)) {
+                if (isAdmin || Roles.isPicker(currentUser) || Roles.isSupervisor(currentUser) || (!isAdmin && item.product.seller.users.find(user => user.id == currentUser.id) !== undefined)) {
                     return(
                         <CCardBody>
                             <CRow className="text-center mt-0">

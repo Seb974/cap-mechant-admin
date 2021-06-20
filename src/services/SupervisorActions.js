@@ -24,10 +24,16 @@ function create(supervisor) {
     return api.post('/api/supervisors', {...supervisor});
 }
 
+function getSupervisor(user) {
+    return findAll()
+            .then(data => data.find(s => s.supervisor.id === user.id));
+}
+
 export default { 
     findAll,
     delete: deleteSupervisor,
     find, 
     update, 
-    create
+    create,
+    getSupervisor
 }
