@@ -41,7 +41,7 @@ function getCurrentUser() {
     if (token) {
         const { exp, id, name, roles, email, metas } = jwtDecode(token);
         if (exp * 1000 > new Date().getTime())
-            return {id, email, name, roles: Roles.filterRoles(roles), metas} ;
+            return {id, email, name, roles: Roles.filterRoles(roles), metas, isRelaypoint: Roles.isRelaypoint(roles)} ;
     }
     return getDefaultUser();
 }

@@ -10,12 +10,16 @@ function filterRoles(roles) {
             roles.filter(role => role !== getDefaultRole())[0];
 }
 
+function isRelaypoint(roles) {
+    return (Array.isArray(roles) && roles.includes("ROLE_RELAYPOINT")) || roles === "ROLE_RELAYPOINT";
+}
+
 function hasPrivileges(user) {
     return hasAdminPrivileges(user) || hasAdminAccess(user);
 }
 
 function hasAdminAccess(user) {
-    const adminAccessRoles = ["ROLE_SELLER", "ROLE_DELIVERER", "ROLE_TEAM", "ROLE_PICKER"];
+    const adminAccessRoles = ["ROLE_SELLER", "ROLE_DELIVERER", "ROLE_TEAM", "ROLE_PICKER", "ROLE_RELAYPOINT"];
     return adminAccessRoles.includes(user.roles);
 }
 
@@ -53,5 +57,6 @@ export default {
     filterAuthorizationRoles,
     isSeller,
     isDeliverer,
+    isRelaypoint,
     isPicker
 }
