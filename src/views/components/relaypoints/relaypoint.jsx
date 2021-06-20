@@ -6,11 +6,12 @@ import GroupActions from 'src/services/GroupActions';
 import RelaypointActions from 'src/services/RelaypointActions';
 import { CButton, CCard, CCardBody, CCardFooter, CCardHeader, CCol, CForm, CFormGroup, CInput, CInvalidFeedback, CLabel, CRow, CTextarea, CSwitch, CInputGroup, CInputGroupAppend, CInputGroupText } from '@coreui/react';
 import CIcon from '@coreui/icons-react';
-import { getDateFrom, isDefined, getNumericOrNull } from 'src/helpers/utils';
+import { getDateFrom, isDefined, getNumericOrNull, isDefinedAndNotVoid } from 'src/helpers/utils';
 import Condition from 'src/components/conditions/condition';
 import { getWeekDays } from 'src/helpers/days';
 import TaxActions from 'src/services/TaxActions';
 import AddressPanel from 'src/components/userPages/AddressPanel';
+import UserSearchMultiple from 'src/components/forms/UserSearchMultiple';
 
 const Relaypoint = ({ match, history }) => {
 
@@ -24,6 +25,7 @@ const Relaypoint = ({ match, history }) => {
     const defaultCondition = {userGroups: [], days: defaultDays, price: "", tax: {}, minForFree: "", count: 0};
     const defaultErrors = {name:"", phone: "", address: "", address2: "", zipcode: "", city: "", position: "", informations: "", available: "", private: "", accessCode: "", discount: "" };
     const [relaypoint, setRelaypoint] = useState({ name: "", informations: "", conditions: [defaultCondition], available: true, private: false, accessCode: "", discount: "" });
+    const [managers, setManagers] = useState([]);
     const [errors, setErrors] = useState(defaultErrors);
 
     useEffect(() => {
@@ -34,7 +36,6 @@ const Relaypoint = ({ match, history }) => {
 
     useEffect(() => fetchRelaypoint(id), [id]);
 
-    // const onInformationsChange = (newInformations) => setInformations(newInformations);
     const onPhoneChange = ({ currentTarget }) => setInformations({...informations, phone: currentTarget.value});
     const handleChange = ({ currentTarget }) => setRelaypoint({...relaypoint, [currentTarget.name]: currentTarget.value});
     const handleCheckBoxes = ({ currentTarget }) => setRelaypoint({...relaypoint, [currentTarget.name]: !relaypoint[currentTarget.name]});
@@ -44,12 +45,6 @@ const Relaypoint = ({ match, history }) => {
         const condition = relaypoint.conditions.find(option => parseInt(option.count) === parseInt(currentTarget.name));
         setRelaypoint({...relaypoint, conditions: relaypoint.conditions.filter(element => parseInt(element.count) !== parseInt(condition.count))});
     };
-
-    // const onUpdatePosition = (newInformations) => {
-    //     setInformations(informations => { 
-    //         return {...newInformations, address2: informations.address2, phone: informations.phone};
-    //     });
-    // };
 
     const fetchRelaypoint = id => {
         if (id !== "new") {
@@ -63,6 +58,8 @@ const Relaypoint = ({ match, history }) => {
                         conditions : !isDefined(response.conditions) ? [] : response.conditions.map((condition, i) => ({...condition, count: i})) 
                     });
                     setInformations(metas);
+                    if (isDefinedAndNotVoid(response.managers))
+                        setManagers(response.managers);
                 })
                 .catch(error => {
                     console.log(error);
@@ -109,6 +106,7 @@ const Relaypoint = ({ match, history }) => {
                 }
             }),
             promotion: isDefined(discountValue) ? getPromotionToWrite(discountValue) : null,
+            managers: managers.map(manager => manager['@id'])
         };
     };
 
@@ -191,7 +189,6 @@ const Relaypoint = ({ match, history }) => {
                             <CRow>
                                 <h4 className="ml-3 mt-3">Adresse</h4>
                             </CRow>
-                            {/* <AddressPanel informations={ informations } onInformationsChange={ onInformationsChange } onPositionChange={ onUpdatePosition } errors={ errors }/> */}
                             <AddressPanel informations={ informations } setInformations={ setInformations } errors={ errors } />
                             <CRow className="mt-0 mb-3">
                                 <CCol xs="12" md="12">
@@ -273,6 +270,7 @@ const Relaypoint = ({ match, history }) => {
                                     <CButton size="sm" color="warning" onClick={ handleAddRule }><CIcon name="cil-plus"/> Ajouter une règle</CButton>
                                 </CCol>
                             </CRow>
+                            <UserSearchMultiple users={ managers } setUsers={ setManagers }/>
                             <CRow className="mt-4 d-flex justify-content-center">
                                 <CButton type="submit" size="sm" color="success"><CIcon name="cil-save"/> Enregistrer</CButton>
                             </CRow>
