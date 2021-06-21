@@ -59,8 +59,8 @@ const Order = ({ match, history }) => {
     }, [user]);
     
     useEffect(() => {
-        if (isDefined(supervisor) && !isDefined(user)) {
-            setSelectedUser(supervisor.users[0]);
+        if (id === "new" && isDefined(supervisor) && !isDefined(user)) {
+            setUser(supervisor.users[0]);
         }
     }, []);
 
@@ -163,7 +163,7 @@ const Order = ({ match, history }) => {
     const getUserGroup = () => {
         const defaultGroup = groups.find(group => group.value === "ROLE_USER");
         if (!isDefined(user))
-            return defaultGroup
+            return defaultGroup;
         else {
             const shopGroups = groups.filter(group => group.hasShopAccess && group.value !== "ROLE_USER");
             const userGroup = shopGroups.find(group => user.roles.includes(group.value));
@@ -197,42 +197,44 @@ const Order = ({ match, history }) => {
                                                     locale: French,
                                                     disable: [(date) => date.getDay() === 0],
                                                 }}
+                                                style={{ height: "35px" }}
                                             />
                                             <CInvalidFeedback>{ errors.deliveryDate }</CInvalidFeedback>
                                         </CFormGroup>
                                     </CCol>
+                                    { !(isAdmin || Roles.isPicker(currentUser)) && isDefined(supervisor) ?
+                                        <CCol xs="12" sm="12" md="6" className="mt-4">
+                                            <Select className="mr-2" name="selectedUser" label="Pour le compte de" onChange={ handleSupervisorUserChange } value={ isDefined(user) ? user.id : 0 }>
+                                                { supervisor.users.map(user => <option value={ user.id }>{ user.name + " - " + user.email }</option>) }
+                                            </Select>
+                                        </CCol>
+                                     : <></>
+                                    }
                                 </CRow>
-                                { (isAdmin || Roles.isPicker(currentUser)) ?
+                                { (isAdmin || Roles.isPicker(currentUser)) &&
                                     <>
                                         <hr className="my-2"/>
                                         <UserSearchSimple user={ user } setUser={ setUser } label="Client"/>
                                     </>
-                                    :
-                                    isDefined(supervisor) ?
-                                        <>
-                                            <hr className="my-2"/>
-                                            <Select className="mr-2" name="selectedUser" label="Pour le compte de" onChange={ handleSupervisorUserChange } value={ isDefined(selectedUser) ? selectedUser.id : 0 }>
-                                                { supervisor.users.map(user => <option value={ user.id }>{ user.name + " - " + user.email }</option>) }
-                                            </Select>
-                                        </>
-                                    : <></>
-                                 }
+                                }
                                 <hr/>
                                 <Items items={ items } setItems={ setItems } defaultItem={ defaultItem } editing={ editing }/>
                             </Tab>
-                            <Tab eventKey="metas" title="Client">
-                                <ClientPart
-                                    user={ order }
-                                    informations={ informations }
-                                    objectDiscount={ objectDiscount }
-                                    displayedRelaypoints={ relaypoints }
-                                    setUser={ setOrder }
-                                    setInformations={ setInformations }
-                                    setDiscount={ setDiscount }
-                                    setObjectDiscount={ setObjectDiscount }
-                                    errors={ errors }
-                                />
-                            </Tab>
+                            {/* { (isAdmin || Roles.isPicker(currentUser)) && */}
+                                <Tab eventKey="metas" title="Client">
+                                    <ClientPart
+                                        user={ order }
+                                        informations={ informations }
+                                        objectDiscount={ objectDiscount }
+                                        displayedRelaypoints={ relaypoints }
+                                        setUser={ setOrder }
+                                        setInformations={ setInformations }
+                                        setDiscount={ setDiscount }
+                                        setObjectDiscount={ setObjectDiscount }
+                                        errors={ errors }
+                                    />
+                                </Tab>
+                            {/* } */}
                         </Tabs>
                         <hr className="mt-5 mb-5"/>
                         <CRow className="mt-4 d-flex justify-content-center">
