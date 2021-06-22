@@ -4,6 +4,8 @@ import { logoNegative } from './logo-negative'
 
 import {
   cibSkype,
+  cibEmlakjet,
+  cibZingat,
   cibFacebook,
   cibTwitter,
   cibLinkedin,
@@ -38,6 +40,7 @@ import {
 } from '@coreui/icons'
 import {
   cilApple,
+  cilClipboard,
   cilStorage,
   cilIndustry,
   cilBuilding,
@@ -154,6 +157,7 @@ export const icons = Object.assign({}, {
   logoNegative
 }, {
   cilApple,
+  cilClipboard,
   cilStorage,
   cilIndustry,
   cilBuilding,
@@ -271,6 +275,8 @@ export const icons = Object.assign({}, {
   cifPl
 }, {
   cibSkype,
+  cibEmlakjet,
+  cibZingat,
   cibFacebook,
   cibTwitter,
   cibLinkedin,

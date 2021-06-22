@@ -83,18 +83,30 @@ function getNav(translation, currentUser)
           to: '/components/checkouts',
           icon: <CIcon name="cil-task" customClasses="c-sidebar-nav-icon"/>,
         },
-    !["ADMIN", "PICKER"].includes(mainRole) ? voidValue : 
+    !["ADMIN", "PICKER", "SELLER"].includes(mainRole) ? voidValue : 
     {
       _tag: 'CSidebarNavTitle',
       _children: [translation("activity.label")],
     },
-    !["ADMIN"].includes(mainRole) ? voidValue :  
+    !["ADMIN", "PICKER", "SELLER"].includes(mainRole) ? voidValue :  
         {
           _tag: 'CSidebarNavItem',
           name: translation("stocks.label"),
           to: '/components/stocks',
           icon: <CIcon name="cil-storage" customClasses="c-sidebar-nav-icon"/>,
         },
+    !["ADMIN", "SUPERVISOR"].includes(mainRole) ? voidValue : 
+        {
+          _tag: 'CSidebarNavTitle',
+          _children: [translation("management.label")],
+        },
+    !["ADMIN", "SUPERVISOR"].includes(mainRole) ? voidValue :  
+            {
+              _tag: 'CSidebarNavItem',
+              name: translation("orders.label"),
+              to: '/components/orders',
+              icon: <CIcon name="cil-clipboard" customClasses="c-sidebar-nav-icon"/>,
+            },
     {
       _tag: 'CSidebarNavTitle',
       _children: [translation("component.label")]
@@ -125,14 +137,14 @@ function getNav(translation, currentUser)
         _tag: 'CSidebarNavItem',
         name: translation("relaypoints.label"),
         to: '/components/relaypoints',
-        icon: <CIcon name="cil-home" customClasses="c-sidebar-nav-icon"/>,
+        icon: <CIcon name="cib-zingat" customClasses="c-sidebar-nav-icon"/>,
       },
     !["ADMIN", "SELLER"].includes(mainRole) ? voidValue :  
         {
           _tag: 'CSidebarNavItem',
           name: translation("sellers.label"),
           to: '/components/sellers',
-          icon: <CIcon name="cil-industry" customClasses="c-sidebar-nav-icon"/>,
+          icon: <CIcon name="cib-emlakjet" customClasses="c-sidebar-nav-icon"/>,
         },
     !["ADMIN", "DELIVERER"].includes(mainRole) ? voidValue :  
         {
@@ -140,6 +152,13 @@ function getNav(translation, currentUser)
           name: translation("deliverers.label"),
           to: '/components/deliverers',
           icon: <CIcon name="cil-car-alt" customClasses="c-sidebar-nav-icon"/>,
+        },
+    !["ADMIN", "SELLER"].includes(mainRole) ? voidValue :  
+        {
+          _tag: 'CSidebarNavItem',
+          name: translation("suppliers.label"),
+          to: '/components/suppliers',
+          icon: <CIcon name="cil-industry" customClasses="c-sidebar-nav-icon"/>,
         },
     !["ADMIN"].includes(mainRole) ? voidValue : 
         {

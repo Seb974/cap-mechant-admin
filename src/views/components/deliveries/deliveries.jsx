@@ -1,7 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import OrderActions from '../../../services/OrderActions'
 import { CCard, CCardBody, CCardHeader, CCol, CDataTable, CRow, CButton, CCollapse, CFormGroup, CInputCheckbox, CLabel } from '@coreui/react';
-// import { DocsLink } from 'src/reusable'
 import { Link } from 'react-router-dom';
 import AuthContext from 'src/contexts/AuthContext';
 import Roles from 'src/config/Roles';
@@ -9,15 +8,11 @@ import RangeDatePicker from 'src/components/forms/RangeDatePicker';
 import { isDefined, isDefinedAndNotVoid } from 'src/helpers/utils';
 import { isSameDate, getDateFrom } from 'src/helpers/days';
 import Spinner from 'react-bootstrap/Spinner'
-// import { Button } from 'bootstrap';
 import OrderDetails from 'src/components/preparationPages/orderDetails';
 // import CIcon from '@coreui/icons-react';
 import TouringActions from 'src/services/TouringActions';
 import Select from 'src/components/forms/Select';
-// import UserActions from 'src/services/UserActions';
 import { getShop, isSamePosition } from 'src/helpers/checkout';
-// import TouringLocation from 'src/components/map/touring/touringLocation';
-// import DeliveryContext from 'src/contexts/DeliveryContext';
 import DelivererActions from 'src/services/DelivererActions';
 import PlatformContext from 'src/contexts/PlatformContext';
 

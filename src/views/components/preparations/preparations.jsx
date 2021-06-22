@@ -12,6 +12,7 @@ import Spinner from 'react-bootstrap/Spinner'
 import { Button } from 'bootstrap';
 import OrderDetails from 'src/components/preparationPages/orderDetails';
 import DayOffActions from 'src/services/DayOffActions';
+
 const Preparations = (props) => {
 
     const itemsPerPage = 30;

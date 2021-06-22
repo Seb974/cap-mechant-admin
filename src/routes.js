@@ -31,6 +31,7 @@ const Tourings = React.lazy(() => import('./views/components/tourings/tourings')
 const Checkouts = React.lazy(() => import('./views/components/relaypoints/checkouts'));
 const MapVisualization = React.lazy(() => import('./views/components/tourings/mapVisualization'));
 const Order = React.lazy(() => import('./views/components/orders/order'));
+const Orders = React.lazy(() => import('./views/components/orders/orders'));
 const Users = React.lazy(() => import('./views/components/users/users'));
 const User = React.lazy(() => import('./views/components/users/user'));
 const Taxes = React.lazy(() => import('./views/components/taxes/taxes'));
@@ -38,6 +39,8 @@ const Tax = React.lazy(() => import('./views/components/taxes/tax'));
 const Stocks = React.lazy(() => import('./views/components/stocks/stocks'));
 const Supervisors = React.lazy(() => import('./views/components/supervisors/supervisors'));
 const Supervisor = React.lazy(() => import('./views/components/supervisors/supervisor'));
+const Suppliers = React.lazy(() => import('./views/components/suppliers/suppliers'));
+const Supplier = React.lazy(() => import('./views/components/suppliers/supplier'));
 const Platform = React.lazy(() => import('./views/components/platform/platform'));
 const CodeEditors = React.lazy(() => import('./views/editors/code-editors/CodeEditors'));
 const TextEditors = React.lazy(() => import('./views/editors/text-editors/TextEditors'));
@@ -117,6 +120,7 @@ const routes = [
   { path: '/components/relaypoints/:id', name: 'Relaypoint', component: Relaypoint },
   { path: '/components/relaypoints', name: 'Relaypoints', component: Relaypoints },
   { path: '/components/orders/:id', name: 'Order', component: Order },
+  { path: '/components/orders', name: 'Orders', component: Orders },
   { path: '/components/preparations', name: 'Preparations', component: Preparations },
   { path: '/components/deliveries', name: 'Deliveries', component: Deliveries },
   { path: '/components/recoveries', name: 'Recoveries', component: Recoveries },
@@ -130,6 +134,8 @@ const routes = [
   { path: '/components/stocks', name: 'Stocks', component: Stocks },
   { path: '/components/supervisors/:id', name: 'Supervisor', component: Supervisor },
   { path: '/components/supervisors', name: 'Supervisors', component: Supervisors },
+  { path: '/components/suppliers/:id', name: 'Supplier', component: Supplier },
+  { path: '/components/suppliers', name: 'Suppliers', component: Suppliers },
   { path: '/components/platform', name: 'Platform', component: Platform },
   { path: '/dashboard', name: 'Dashboard', component: Dashboard },
   { path: '/theme', name: 'Theme', component: Colors, exact: true },

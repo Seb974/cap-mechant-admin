@@ -33,5 +33,7 @@
     "supervisors.label": "Supervisors",
     "checkouts.label": "Relaypoints checkouts",
     "activity.label": "Activity",
-    "stocks.label": "Stocks"
+    "stocks.label": "Stocks",
+    "suppliers.label": "Suppliers",
+    "management.label": "Management"
 }

@@ -11,6 +11,23 @@ function findAll() {
         .then(response => response.data['hydra:member'].sort((a, b) => (a.name > b.name) ? 1 : -1));
 }
 
+function findStatusBetween(dates, statuses, user) {
+    const status = getStatusList(statuses);
+    const UTCDates = formatUTC(dates);
+    const dateLimits = `deliveryDate[after]=${ getStringDate(UTCDates.start) }&deliveryDate[before]=${ getStringDate(UTCDates.end) }`
+    return api
+        .get(`/api/order_entities?${ status }&${ dateLimits }`)
+        .then(response => {
+            const data = Roles.hasAdminPrivileges(user) || Roles.isSupervisor(user) ? 
+                response.data['hydra:member'] :
+                response.data['hydra:member'].filter(order => {
+                    return order.items.find(item => {
+                        return !item.isPrepared && item.product.seller.users.find(u => u.id === user.id) !== undefined}) !== undefined;
+                });
+            return data.sort((a, b) => (new Date(a.deliveryDate) < new Date(b.deliveryDate)) ? -1 : 1)
+        });
+}
+
 function findPreparations(dates, user) {
     const status = `status=WAITING`;
     const UTCDates = formatUTC(dates);
@@ -127,6 +144,15 @@ function formatUTC(dates) {
     };
 }
 
+function getStatusList(status) {
+    let statusList = "";
+    status.map((s, i) => {
+        const separator = i < status.length - 1 ? "&" : "";
+        statusList += "status[]=" + s.value + separator;
+    });
+    return statusList;
+}
+
 export default {
     findAll,
     findDeliveries,
@@ -134,6 +160,7 @@ export default {
     findRecoveries,
     findPickersPreparations,
     findCheckouts,
+    findStatusBetween,
     getOptimizedTrip,
     delete: deleteOrder,
     find,

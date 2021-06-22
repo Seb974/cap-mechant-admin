@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
-import SellerActions from '../../../services/SellerActions'
+import SellerActions from '../../../services/SellerActions';
 import { CBadge, CCard, CCardBody, CCardHeader, CCol, CDataTable, CRow, CButton } from '@coreui/react';
 import { DocsLink } from 'src/reusable'
 import { Link } from 'react-router-dom';

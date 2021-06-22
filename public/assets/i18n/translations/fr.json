@@ -33,5 +33,7 @@
     "supervisors.label": "Superviseurs",
     "checkouts.label": "Retraits",
     "activity.label": "Activité",
-    "stocks.label": "Stocks"
+    "stocks.label": "Stocks",
+    "suppliers.label": "Fournisseurs",
+    "management.label": "Gestion"
 }
