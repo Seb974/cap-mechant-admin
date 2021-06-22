@@ -24,6 +24,7 @@ const MercureHub = ({ children }) => {
     useEffect(() => {
         closeIfExists();
         url.searchParams.append('topic', api.API_DOMAIN + '/api/products/{id}');
+        url.searchParams.append('topic', api.API_DOMAIN + '/api/stocks/{id}');
         url.searchParams.append('topic', api.API_DOMAIN + '/api/categories/{id}');
         url.searchParams.append('topic', api.API_DOMAIN + '/api/tourings/{id}');
         url.searchParams.append('topic', api.API_DOMAIN + '/api/users/{id}');
@@ -40,7 +41,7 @@ const MercureHub = ({ children }) => {
     // eventSource.onmessage = event => eventHandler.dispatch(event);
     eventSource.onmessage = event => {
         const data = JSON.parse(event.data);
-        // console.log(data);
+        console.log(data);
         if (data['@id'].includes('tourings'))
             touringEvents.update(data, tourings, setTourings);
 

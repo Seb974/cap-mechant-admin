@@ -38,6 +38,7 @@ import {
 } from '@coreui/icons'
 import {
   cilApple,
+  cilStorage,
   cilIndustry,
   cilBuilding,
   cilCarAlt,
@@ -153,6 +154,7 @@ export const icons = Object.assign({}, {
   logoNegative
 }, {
   cilApple,
+  cilStorage,
   cilIndustry,
   cilBuilding,
   cilCarAlt,

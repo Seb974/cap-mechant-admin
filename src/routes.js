@@ -35,6 +35,7 @@ const Users = React.lazy(() => import('./views/components/users/users'));
 const User = React.lazy(() => import('./views/components/users/user'));
 const Taxes = React.lazy(() => import('./views/components/taxes/taxes'));
 const Tax = React.lazy(() => import('./views/components/taxes/tax'));
+const Stocks = React.lazy(() => import('./views/components/stocks/stocks'));
 const Supervisors = React.lazy(() => import('./views/components/supervisors/supervisors'));
 const Supervisor = React.lazy(() => import('./views/components/supervisors/supervisor'));
 const Platform = React.lazy(() => import('./views/components/platform/platform'));
@@ -126,6 +127,7 @@ const routes = [
   { path: '/components/users', name: 'Users', component: Users },
   { path: '/components/taxes/:id', name: 'Tax', component: Tax },
   { path: '/components/taxes', name: 'Taxes', component: Taxes },
+  { path: '/components/stocks', name: 'Stocks', component: Stocks },
   { path: '/components/supervisors/:id', name: 'Supervisor', component: Supervisor },
   { path: '/components/supervisors', name: 'Supervisors', component: Supervisors },
   { path: '/components/platform', name: 'Platform', component: Platform },

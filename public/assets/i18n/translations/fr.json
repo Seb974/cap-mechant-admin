@@ -31,5 +31,7 @@
     "recoveries.label": "Récupérations",
     "platform.label": "Votre établissement",
     "supervisors.label": "Superviseurs",
-    "checkouts.label": "Retraits"
+    "checkouts.label": "Retraits",
+    "activity.label": "Activité",
+    "stocks.label": "Stocks"
 }

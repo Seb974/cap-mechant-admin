@@ -31,5 +31,7 @@
     "recoveries.label": "Recoveries",
     "platform.label": "Your establishment",
     "supervisors.label": "Supervisors",
-    "checkouts.label": "Relaypoints checkouts"
+    "checkouts.label": "Relaypoints checkouts",
+    "activity.label": "Activity",
+    "stocks.label": "Stocks"
 }
