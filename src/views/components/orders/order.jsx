@@ -20,6 +20,7 @@ import ProductsContext from 'src/contexts/ProductsContext';
 import UserActions from 'src/services/UserActions';
 import Roles from 'src/config/Roles';
 import Select from 'src/components/forms/Select';
+import { getStatus } from 'src/helpers/orders';
 
 const Order = ({ match, history }) => {
 
@@ -44,6 +45,7 @@ const Order = ({ match, history }) => {
     const [isAdmin, setIsAdmin] = useState(false);
     const [minDate, setMinDate] = useState(new Date());
     const [selectedUser, setSelectedUser] = useState(null);
+    const statuses = getStatus();
 
     useEffect(() => {
         setIsAdmin(Roles.hasAdminPrivileges(currentUser));
@@ -129,6 +131,10 @@ const Order = ({ match, history }) => {
         setOrder({...order, deliveryDate: newDate});
     };
 
+    const handleStatusChange = ({ currentTarget }) => {
+        setOrder({...order, status: currentTarget.value});
+    };
+
     const handleSupervisorUserChange = ({ currentTarget }) => {
         const newUser = supervisor.users.find(u => parseInt(u.id) === parseInt(currentTarget.value));
         setSelectedUser(newUser);
@@ -206,6 +212,12 @@ const Order = ({ match, history }) => {
                                         <CCol xs="12" sm="12" md="6" className="mt-4">
                                             <Select className="mr-2" name="selectedUser" label="Pour le compte de" onChange={ handleSupervisorUserChange } value={ isDefined(user) ? user.id : 0 }>
                                                 { supervisor.users.map(user => <option value={ user.id }>{ user.name + " - " + user.email }</option>) }
+                                            </Select>
+                                        </CCol>
+                                     : (isAdmin || Roles.isPicker(currentUser)) && id !== "new" ?
+                                        <CCol xs="12" sm="12" md="6" className="mt-4">
+                                            <Select name="status" label="Statut" onChange={ handleStatusChange } value={ order.status }>
+                                                { statuses.map((status, i) => <option key={ status.value } value={ status.value }>{ status.label }</option>) }
                                             </Select>
                                         </CCol>
                                      : <></>
