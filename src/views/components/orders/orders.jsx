@@ -38,7 +38,10 @@ const Orders = (props) => {
     }, []);
 
     useEffect(() => setIsAdmin(Roles.hasAdminPrivileges(currentUser)), [currentUser]);
-    useEffect(() => getOrders(), [dates, selectedStatus]);
+    useEffect(() => {
+        if (isDefinedAndNotVoid(selectedStatus))
+            getOrders();
+    }, [dates, selectedStatus]);
 
     const getOrders = () => {
         setLoading(true);

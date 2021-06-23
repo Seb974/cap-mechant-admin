@@ -4,6 +4,10 @@ import { logoNegative } from './logo-negative'
 
 import {
   cibSkype,
+  cibAllocine,
+  cibItchIo,
+  cibAzureArtifacts,
+  cibEverplaces,
   cibEmlakjet,
   cibZingat,
   cibFacebook,
@@ -40,6 +44,7 @@ import {
 } from '@coreui/icons'
 import {
   cilApple,
+  cilCart,
   cilClipboard,
   cilStorage,
   cilIndustry,
@@ -117,6 +122,7 @@ import {
   cilMagnifyingGlass,
   cilMap,
   cilMoon,
+  cilMoney,
   cilNotes,
   cilOptions,
   cilPaperclip,
@@ -157,6 +163,7 @@ export const icons = Object.assign({}, {
   logoNegative
 }, {
   cilApple,
+  cilCart,
   cilClipboard,
   cilStorage,
   cilIndustry,
@@ -234,6 +241,7 @@ export const icons = Object.assign({}, {
   cilMagnifyingGlass,
   cilMap,
   cilMoon,
+  cilMoney,
   cilNotes,
   cilOptions,
   cilPaperclip,
@@ -275,6 +283,10 @@ export const icons = Object.assign({}, {
   cifPl
 }, {
   cibSkype,
+  cibAllocine,
+  cibItchIo,
+  cibAzureArtifacts,
+  cibEverplaces,
   cibEmlakjet,
   cibZingat,
   cibFacebook,

@@ -95,18 +95,21 @@ function getNav(translation, currentUser)
           to: '/components/stocks',
           icon: <CIcon name="cil-storage" customClasses="c-sidebar-nav-icon"/>,
         },
-    !["ADMIN", "SUPERVISOR"].includes(mainRole) ? voidValue : 
-        {
-          _tag: 'CSidebarNavTitle',
-          _children: [translation("management.label")],
-        },
+    !["ADMIN", "PICKER", "SELLER"].includes(mainRole) ? voidValue :  
+      {
+        _tag: 'CSidebarNavItem',
+        name: translation("provisions.label"),
+        to: '/components/provisions',
+        icon: <CIcon name="cib-azure-artifacts" customClasses="c-sidebar-nav-icon"/>,
+        // icon: <CIcon name="cil-cart" customClasses="c-sidebar-nav-icon"/>,
+      },
     !["ADMIN", "SUPERVISOR"].includes(mainRole) ? voidValue :  
-            {
-              _tag: 'CSidebarNavItem',
-              name: translation("orders.label"),
-              to: '/components/orders',
-              icon: <CIcon name="cil-clipboard" customClasses="c-sidebar-nav-icon"/>,
-            },
+      {
+        _tag: 'CSidebarNavItem',
+        name: translation("sales.label"),
+        to: '/components/orders',
+        icon: <CIcon name="cil-money" customClasses="c-sidebar-nav-icon"/>,
+      },
     {
       _tag: 'CSidebarNavTitle',
       _children: [translation("component.label")]
@@ -130,21 +133,24 @@ function getNav(translation, currentUser)
           _tag: 'CSidebarNavItem',
           name: translation("promotions.label"),
           to: '/components/promotions',
-          icon: <CIcon name="cil-gift" customClasses="c-sidebar-nav-icon"/>,
+          icon: <CIcon name="cib-allocine" customClasses="c-sidebar-nav-icon"/>,
+          // icon: <CIcon name="cil-gift" customClasses="c-sidebar-nav-icon"/>,
         },
     !(["ADMIN", "RELAYPOINT"].includes(mainRole) || currentUser.isRelaypoint) ? voidValue :  
       {
         _tag: 'CSidebarNavItem',
         name: translation("relaypoints.label"),
         to: '/components/relaypoints',
-        icon: <CIcon name="cib-zingat" customClasses="c-sidebar-nav-icon"/>,
+        icon: <CIcon name="cib-everplaces" customClasses="c-sidebar-nav-icon"/>,
+        // icon: <CIcon name="cib-zingat" customClasses="c-sidebar-nav-icon"/>,
       },
     !["ADMIN", "SELLER"].includes(mainRole) ? voidValue :  
         {
           _tag: 'CSidebarNavItem',
           name: translation("sellers.label"),
           to: '/components/sellers',
-          icon: <CIcon name="cib-emlakjet" customClasses="c-sidebar-nav-icon"/>,
+          icon: <CIcon name="cib-itch-io" customClasses="c-sidebar-nav-icon"/>,
+          // icon: <CIcon name="cib-emlakjet" customClasses="c-sidebar-nav-icon"/>,
         },
     !["ADMIN", "DELIVERER"].includes(mainRole) ? voidValue :  
         {

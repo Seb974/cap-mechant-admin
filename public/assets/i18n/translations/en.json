@@ -35,5 +35,7 @@
     "activity.label": "Activity",
     "stocks.label": "Stocks",
     "suppliers.label": "Suppliers",
-    "management.label": "Management"
+    "management.label": "Management",
+    "provisions.label": "Receipts",
+    "sales.label": "Sales"
 }
