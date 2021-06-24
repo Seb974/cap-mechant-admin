@@ -34,6 +34,7 @@ const Order = React.lazy(() => import('./views/components/orders/order'));
 const Orders = React.lazy(() => import('./views/components/orders/orders'));
 const Provisions = React.lazy(() => import('./views/components/provisions/provisions'));
 const Provision = React.lazy(() => import('./views/components/provisions/provision'));
+const Supplying = React.lazy(() => import('./views/components/supplies/supplying'));
 const Users = React.lazy(() => import('./views/components/users/users'));
 const User = React.lazy(() => import('./views/components/users/user'));
 const Taxes = React.lazy(() => import('./views/components/taxes/taxes'));
@@ -125,6 +126,7 @@ const routes = [
   { path: '/components/orders', name: 'Orders', component: Orders },
   { path: '/components/provisions/:id', name: 'Provision', component: Provision },
   { path: '/components/provisions', name: 'Provisions', component: Provisions },
+  { path: '/components/supplies/shop', name: 'Supplying', component: Supplying },
   { path: '/components/preparations', name: 'Preparations', component: Preparations },
   { path: '/components/deliveries', name: 'Deliveries', component: Deliveries },
   { path: '/components/recoveries', name: 'Recoveries', component: Recoveries },

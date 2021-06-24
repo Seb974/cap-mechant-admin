@@ -89,6 +89,13 @@ function getNav(translation, currentUser)
       _children: [translation("activity.label")],
     },
     !["ADMIN", "PICKER", "SELLER"].includes(mainRole) ? voidValue :  
+      {
+        _tag: 'CSidebarNavItem',
+        name: translation("supply.label"),
+        to: '/components/supplies/shop',
+        icon: <CIcon name="cil-clipboard" customClasses="c-sidebar-nav-icon"/>,
+      },
+    !["ADMIN", "PICKER", "SELLER"].includes(mainRole) ? voidValue :  
         {
           _tag: 'CSidebarNavItem',
           name: translation("stocks.label"),

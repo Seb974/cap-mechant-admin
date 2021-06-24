@@ -115,5 +115,14 @@ export const formatProduct = (product, defaultStock) => {
     return formattedProduct;
 };
 
+export const getProductGroups = () => {
+    return [
+        {value: "J + 1", label: "DLC à J + 1", isFixed: false},
+        {value: "J + 3", label: "DLC à J + 3", isFixed: false},
+        {value: "J + 6", label: "DLC à J + 6", isFixed: false},
+        {value: "J + 10", label: "DLC à J + 10", isFixed: false},
+    ];
+}
+
 const isDefined = variable => variable !== undefined && variable !== null;
 const isDefinedAndNotVoid = variable => Array.isArray(variable) ? isDefined(variable) && variable.length > 0 : isDefined(variable);

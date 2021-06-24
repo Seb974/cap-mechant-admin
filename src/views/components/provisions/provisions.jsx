@@ -18,7 +18,7 @@ import SellerActions from 'src/services/SellerActions';
 const Provisions = (props) => {
 
     const itemsPerPage = 30;
-    const fields = ['Client', 'Fournisseur', 'Date', 'Total', ' '];
+    const fields = ['Vendeur', 'Fournisseur', 'Date', 'Total', ' '];
     const { currentUser } = useContext(AuthContext);
     const [provisions, setProvisions] = useState([]);
     const [suppliers, setSuppliers] = useState([]);
@@ -176,8 +176,9 @@ const Provisions = (props) => {
                                 bordered
                                 itemsPerPage={ itemsPerPage }
                                 pagination
+                                hover
                                 scopedSlots = {{
-                                    'Client':
+                                    'Vendeur':
                                         item => <td>
                                                     <Link to="#" onClick={ e => { toggleDetails(item.id, e) }} >
                                                         { item.seller.name }
@@ -223,6 +224,7 @@ const Provisions = (props) => {
                                                         bordered
                                                         itemsPerPage={ itemsPerPage }
                                                         pagination
+                                                        hover
                                                         scopedSlots = {{
                                                             'Produit':
                                                                 item => <td>{ getProductName(item.product, item.variation, item.size) }</td>

@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import OrderActions from '../../../services/OrderActions'
-import { CCard, CCardBody, CCardHeader, CCol, CDataTable, CRow, CButton, CCollapse } from '@coreui/react';
+import { CCard, CCardBody, CCardHeader, CCol, CDataTable, CRow, CButton, CCollapse, CWidgetIcon } from '@coreui/react';
 import { DocsLink } from 'src/reusable'
 import { Link } from 'react-router-dom';
 import AuthContext from 'src/contexts/AuthContext';
@@ -12,6 +12,7 @@ import Spinner from 'react-bootstrap/Spinner'
 import { Button } from 'bootstrap';
 import OrderDetails from 'src/components/preparationPages/orderDetails';
 import DayOffActions from 'src/services/DayOffActions';
+import CIcon from '@coreui/icons-react';
 
 const Preparations = (props) => {
 
@@ -128,6 +129,10 @@ const Preparations = (props) => {
 
     const isOffDay = date => daysOff.find(day => isSameDate(new Date(day.date), date)) !== undefined || date.getDay() === 0;
 
+    const getTurnover = () => orders.reduce((sum, current) => sum + current.totalHT, 0);
+
+    const getUserCount = () => [...new Set(orders.map(order => order.email))].length;
+
     const toggleDetails = (index, e) => {
         e.preventDefault();
         const position = details.indexOf(index)
@@ -153,6 +158,28 @@ const Preparations = (props) => {
                 }
             </CCardHeader>
             <CCardBody>
+                <CRow>
+                    <CCol xs="12" sm="6" lg="3">
+                        <CWidgetIcon text="Commandes" header={ orders.length } color="primary" iconPadding={false}>
+                            <CIcon width={24} name="cil-clipboard"/>
+                        </CWidgetIcon>
+                        </CCol>
+                        <CCol xs="12" sm="6" lg="3">
+                        <CWidgetIcon text="Clients" header={ getUserCount() } color="info" iconPadding={false}>
+                            <CIcon width={24} name="cil-people"/>
+                        </CWidgetIcon>
+                        </CCol>
+                        <CCol xs="12" sm="6" lg="3">
+                        <CWidgetIcon text="Moyenne" header={ (getUserCount() > 0 ? (getTurnover() / getUserCount()).toFixed(2) : "0.00") + " €"} color="warning" iconPadding={false}>
+                            <CIcon width={24} name="cil-chart"/>
+                        </CWidgetIcon>
+                        </CCol>
+                        <CCol xs="12" sm="6" lg="3">
+                        <CWidgetIcon text="Total" header={ getTurnover().toFixed(2) + " €" } color="danger" iconPadding={false}>
+                            <CIcon width={24} name="cil-money"/>
+                        </CWidgetIcon>
+                    </CCol>
+                </CRow>
                 <CRow>
                     <CCol xs="12" lg="6">
                     <RangeDatePicker

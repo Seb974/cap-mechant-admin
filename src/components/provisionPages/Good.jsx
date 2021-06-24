@@ -88,6 +88,12 @@ const Good = ({ good, handleChange, handleDelete, total, index, editing }) => {
         </CRow>
         <CRow>
             <CCol xs="12" sm="4">
+                <Select name={ good.count } id="unit" value={ good.unit } label="Unité" onChange={ onChange }>
+                    <option value="U">U</option>
+                    <option value="Kg">Kg</option>
+                </Select>
+            </CCol>
+            <CCol xs="12" sm="4">
                 <CFormGroup>
                     <CLabel htmlFor="name">Prix
                     </CLabel>
@@ -100,16 +106,10 @@ const Good = ({ good, handleChange, handleDelete, total, index, editing }) => {
                             onChange={ onChange }
                         />
                         <CInputGroupAppend>
-                            <CInputGroupText>€</CInputGroupText>
+                            <CInputGroupText>€/{ good.unit }</CInputGroupText>
                         </CInputGroupAppend>
                     </CInputGroup>
                 </CFormGroup>
-            </CCol>
-            <CCol xs="12" sm="4">
-                <Select name={ good.count } id="unit" value={ good.unit } label="Unité" onChange={ onChange }>
-                    <option value="U">U</option>
-                    <option value="Kg">Kg</option>
-                </Select>
             </CCol>
             <CCol xs="12" sm="4">
                 <CFormGroup>

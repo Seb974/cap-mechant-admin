@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import OrderActions from '../../../services/OrderActions'
-import { CCard, CCardBody, CCardHeader, CCol, CDataTable, CRow, CButton, CCollapse, CFormGroup, CInputCheckbox, CLabel } from '@coreui/react';
+import { CCard, CCardBody, CCardHeader, CCol, CDataTable, CRow, CButton, CCollapse, CFormGroup, CInputCheckbox, CLabel, CWidgetIcon } from '@coreui/react';
 import { Link } from 'react-router-dom';
 import AuthContext from 'src/contexts/AuthContext';
 import Roles from 'src/config/Roles';
@@ -17,6 +17,7 @@ import { getShop, isSamePosition } from 'src/helpers/checkout';
 import PlatformContext from 'src/contexts/PlatformContext';
 import SelectMultiple from 'src/components/forms/SelectMultiple';
 import { getStatus, getStatusName } from 'src/helpers/orders';
+import CIcon from '@coreui/icons-react';
 
 const Orders = (props) => {
 
@@ -29,7 +30,7 @@ const Orders = (props) => {
     const [loading, setLoading] = useState(false);
     const [dates, setDates] = useState({start: new Date(), end: new Date() });
     const [details, setDetails] = useState([]);
-    const [selectedStatus, setSelectedStatus] = useState(getStatus());
+    const [selectedStatus, setSelectedStatus] = useState(getStatus().filter(s => !["ON_PAYMENT", "ABORTED"].includes(s.value)));
 
     useEffect(() => {
         const isUserAdmin = Roles.hasAdminPrivileges(currentUser);
@@ -81,7 +82,11 @@ const Orders = (props) => {
         const UTCStart = new Date(dates.start.getFullYear(), dates.start.getMonth(), dates.start.getDate(), 4, 0, 0);
         const UTCEnd = new Date(dates.end.getFullYear(), dates.end.getMonth(), dates.end.getDate() + 1, 3, 59, 0);
         return {start: UTCStart, end: UTCEnd};
-    }
+    };
+
+    const getTurnover = () => orders.reduce((sum, current) => sum + current.totalHT, 0);
+
+    const getUserCount = () => [...new Set(orders.map(order => order.email))].length;
 
     const toggleDetails = (index, e) => {
         e.preventDefault();
@@ -93,7 +98,7 @@ const Orders = (props) => {
             newDetails = [...details, index];
         }
         setDetails(newDetails);
-    }
+    };
 
     return (
         <CRow>
@@ -103,6 +108,28 @@ const Orders = (props) => {
                         Liste des commandes
                     </CCardHeader>
                     <CCardBody>
+                    <CRow>
+                        <CCol xs="12" sm="6" lg="3">
+                            <CWidgetIcon text="Commandes" header={ orders.length } color="primary" iconPadding={false}>
+                                <CIcon width={24} name="cil-clipboard"/>
+                            </CWidgetIcon>
+                            </CCol>
+                            <CCol xs="12" sm="6" lg="3">
+                            <CWidgetIcon text="Clients" header={ getUserCount() } color="info" iconPadding={false}>
+                                <CIcon width={24} name="cil-people"/>
+                            </CWidgetIcon>
+                            </CCol>
+                            <CCol xs="12" sm="6" lg="3">
+                            <CWidgetIcon text="Moyenne" header={ (getUserCount() > 0 ? (getTurnover() / getUserCount()).toFixed(2) : "0.00") + " €"} color="warning" iconPadding={false}>
+                                <CIcon width={24} name="cil-chart"/>
+                            </CWidgetIcon>
+                            </CCol>
+                            <CCol xs="12" sm="6" lg="3">
+                            <CWidgetIcon text="Total" header={ getTurnover().toFixed(2) + " €" } color="danger" iconPadding={false}>
+                                <CIcon width={24} name="cil-money"/>
+                            </CWidgetIcon>
+                        </CCol>
+                    </CRow>
                         <CRow>
                             <CCol xs="12" lg="6">
                                 <RangeDatePicker

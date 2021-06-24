@@ -36,3 +36,13 @@ export const formatUTC = dates => {
         end: new Date(dates.end.toUTCString())
     };
 };
+
+export const getEvolutionPoints = (start = -100, end = 100, step = 10) => {
+    let result = [];
+    let i = start;
+    while (i <= end) {
+        result = [...result, {value: i, label: i === 0 ? "Pas d'évolution" : i < 0 ? i + " %" : "+" + i + " %" }];
+        i += step;
+    }
+    return result;
+};

@@ -37,5 +37,6 @@
     "suppliers.label": "Suppliers",
     "management.label": "Management",
     "provisions.label": "Receipts",
-    "sales.label": "Sales"
+    "sales.label": "Sales",
+    "supply.label": "Supply"
 }

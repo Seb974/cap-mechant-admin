@@ -48,8 +48,11 @@ const Provision = ({ match, history }) => {
     }, [suppliers, provision]);
 
     useEffect(() => {
-        if (isDefinedAndNotVoid(sellers))
+        if (isDefinedAndNotVoid(sellers)) {
             getAvailableProducts();
+            if (!isDefined(provision.seller))
+                setProvision({...provision, seller: sellers[0]});
+        }
     }, [sellers, products]);
 
 
@@ -105,6 +108,7 @@ const Provision = ({ match, history }) => {
 
     const handleSubmit = () => {
         const provisionToWrite = getProvisionToWrite();
+        console.log(provisionToWrite);
         const request = !editing ? ProvisionActions.create(provisionToWrite) : ProvisionActions.patch(id, provisionToWrite);
         request.then(response => {
             setErrors(defaultErrors);
@@ -131,14 +135,17 @@ const Provision = ({ match, history }) => {
             seller: seller['@id'],
             supplier: supplier['@id'],
             provisionDate: new Date(provisionDate),
-            goods: goods.map(good => ({
-                ...good,
-                product: good.product['@id'],
-                variation: isDefined(good.variation) ? good.variation['@id'] : null,
-                size: isDefined(good.size) ? good.size['@id'] : null,
-                price: getFloat(good.price),
-                quantity: getFloat(good.quantity)
-            }))
+            goods: goods.map(good => {
+                const { product, variation, size, price, quantity } = good;
+                return {
+                    ...good,
+                    product: product['@id'],
+                    variation: isDefined(variation) ? variation['@id'] : null,
+                    size: isDefined(size) ? size['@id'] : null,
+                    price: getFloat(price),
+                    quantity: getFloat(quantity)
+                };
+            })
         }
     }
 
