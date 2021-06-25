@@ -96,13 +96,6 @@ function getNav(translation, currentUser)
         icon: <CIcon name="cil-clipboard" customClasses="c-sidebar-nav-icon"/>,
       },
     !["ADMIN", "PICKER", "SELLER"].includes(mainRole) ? voidValue :  
-        {
-          _tag: 'CSidebarNavItem',
-          name: translation("stocks.label"),
-          to: '/components/stocks',
-          icon: <CIcon name="cil-storage" customClasses="c-sidebar-nav-icon"/>,
-        },
-    !["ADMIN", "PICKER", "SELLER"].includes(mainRole) ? voidValue :  
       {
         _tag: 'CSidebarNavItem',
         name: translation("provisions.label"),
@@ -110,6 +103,13 @@ function getNav(translation, currentUser)
         icon: <CIcon name="cib-azure-artifacts" customClasses="c-sidebar-nav-icon"/>,
         // icon: <CIcon name="cil-cart" customClasses="c-sidebar-nav-icon"/>,
       },
+    !["ADMIN", "PICKER", "SELLER"].includes(mainRole) ? voidValue :  
+        {
+          _tag: 'CSidebarNavItem',
+          name: translation("stocks.label"),
+          to: '/components/stocks',
+          icon: <CIcon name="cil-storage" customClasses="c-sidebar-nav-icon"/>,
+        },
     !["ADMIN", "SUPERVISOR"].includes(mainRole) ? voidValue :  
       {
         _tag: 'CSidebarNavItem',

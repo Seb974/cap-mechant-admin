@@ -16,9 +16,9 @@ const Supplier = ({ match, history }) => {
     const [isAdmin, setIsAdmin] = useState([]);
     const [editing, setEditing] = useState(false);
     const { currentUser } = useContext(AuthContext);
-    const [supplier, setSupplier] = useState({ name: "", seller: null });
+    const [supplier, setSupplier] = useState({ name: "", seller: null, email: "", phone: "" });
     const [sellers, setSellers] = useState([]);
-    const [errors, setErrors] = useState({ name: "", seller: "" });
+    const [errors, setErrors] = useState({ name: "", seller: "", email: "", phone: "" });
 
     useEffect(() => {
         fetchSellers();
@@ -67,20 +67,24 @@ const Supplier = ({ match, history }) => {
         console.log(formattedSupplier);
         const request = !editing ? SupplierActions.create(formattedSupplier) : SupplierActions.update(id, formattedSupplier);
         request.then(response => {
-                    setErrors({name: ""});
+                    setErrors({ name: "", seller: "", email: "", phone: "" });
                     //TODO : Flash notification de succès
                     history.replace("/components/suppliers");
                 })
-               .catch( ({ response }) => {
-                    const { violations } = response.data;
-                    if (violations) {
-                        const apiErrors = {};
-                        violations.forEach(({propertyPath, message}) => {
-                            apiErrors[propertyPath] = message;
-                        });
-                        setErrors(apiErrors);
-                    }
-                    //TODO : Flash notification d'erreur
+               .catch( error => {
+                    const { response } = error;
+                    if (isDefined(response)) {
+                        const { violations } = response.data;
+                        if (violations) {
+                            const apiErrors = {};
+                            violations.forEach(({propertyPath, message}) => {
+                                apiErrors[propertyPath] = message;
+                            });
+                            setErrors(apiErrors);
+                        }
+                        //TODO : Flash notification d'erreur
+                    } else 
+                        console.log(error);
                });
     }
 
@@ -115,6 +119,37 @@ const Supplier = ({ match, history }) => {
                                         </Select>
                                     </CCol>
                                 }
+                            </CRow>
+                            <CRow>
+                                <CCol xs="12" sm="6">
+                                    <CFormGroup>
+                                        <CLabel htmlFor="email">Email</CLabel>
+                                        <CInput
+                                            id="email"
+                                            name="email"
+                                            value={ supplier.email }
+                                            onChange={ handleChange }
+                                            placeholder="Email du fournisseur"
+                                            invalid={ errors.email.length > 0 } 
+                                        />
+                                        <CInvalidFeedback>{ errors.email }</CInvalidFeedback>
+                                    </CFormGroup>
+                                </CCol>
+                                <CCol xs="12" sm="6">
+                                    <CFormGroup>
+                                        <CLabel htmlFor="phone">Portable</CLabel>
+                                        <CInput
+                                            id="phone"
+                                            type="tel"
+                                            name="phone"
+                                            value={ supplier.phone }
+                                            onChange={ handleChange }
+                                            placeholder="Portable du fournisseur"
+                                            invalid={ errors.phone.length > 0 } 
+                                        />
+                                        <CInvalidFeedback>{ errors.phone }</CInvalidFeedback>
+                                    </CFormGroup>
+                                </CCol>
                             </CRow>
                             <CRow className="mt-4 d-flex justify-content-center">
                                 <CButton type="submit" size="sm" color="success"><CIcon name="cil-save"/> Enregistrer</CButton>

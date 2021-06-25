@@ -14,6 +14,7 @@ import SelectMultiple from 'src/components/forms/SelectMultiple';
 
 import SupplierActions from 'src/services/SupplierActions';
 import SellerActions from 'src/services/SellerActions';
+import ProvisionModal from 'src/components/provisionPages/provisionModal';
 
 const Provisions = (props) => {
 
@@ -58,7 +59,6 @@ const Provisions = (props) => {
         const UTCDates = getUTCDates(dates);
         ProvisionActions.findSuppliersBetween(UTCDates, selectedSuppliers, selectedSellers, currentUser)
                 .then(response =>{
-                    console.log(response);
                     setProvisions(response);
                     setLoading(false);
                 })
@@ -204,13 +204,14 @@ const Provisions = (props) => {
                                     ,
                                     'Total':
                                         item => <td style={{color: item.status === "WAITING" ? "dimgray" : "black"}}>
-                                                    { isDefined(item.totalHT) ? item.totalHT.toFixed(2) + " €" : " "}
-                                                    { item.goods.reduce((sum, current) => sum + (current.quantity * current.price), 0).toFixed(2) + " €"}
+                                                    { item.status === "RECEIVED" && isDefined(item.totalHT) ? item.totalHT.toFixed(2) + " €" : " "}
+                                                    { item.status === "RECEIVED" ? item.goods.reduce((sum, current) => sum + (current.received * current.price), 0).toFixed(2) + " €" : "-"}
                                                 </td>
                                     ,
                                     ' ':
                                         item => (
-                                            <td className="mb-3 mb-xl-0 text-center" style={{color: item.status === "WAITING" ? "dimgray" : "black"}}>
+                                            <td className="mb-3 mb-xl-0 text-right" style={{color: item.status === "WAITING" ? "dimgray" : "black"}}>
+                                                { item.status === "ORDERED" && <ProvisionModal item={ item } provisions={ provisions } setProvisions={ setProvisions }/> }
                                                 <CButton color="warning" disabled={ !isAdmin } href={ "#/components/provisions/" + item.id } className="mx-1 my-1"><i className="fas fa-pen"></i></CButton>
                                                 <CButton color="danger" disabled={ !isAdmin } onClick={ () => handleDelete(item) } className="mx-1 my-1"><i className="fas fa-trash"></i></CButton>
                                             </td>
@@ -220,7 +221,7 @@ const Provisions = (props) => {
                                         item => <CCollapse show={details.includes(item.id)}>
                                                     <CDataTable
                                                         items={ item.goods }
-                                                        fields={ ['Produit', 'Prix U', 'Quantité', 'Sous-total'] }
+                                                        fields={ ['Produit', 'Commandé', 'Reçu', 'Prix U','Sous-total'] }
                                                         bordered
                                                         itemsPerPage={ itemsPerPage }
                                                         pagination
@@ -229,14 +230,17 @@ const Provisions = (props) => {
                                                             'Produit':
                                                                 item => <td>{ getProductName(item.product, item.variation, item.size) }</td>
                                                             ,
-                                                            'Prix U':
-                                                                item => <td>{ item.price.toFixed(2) + " €" }</td>
-                                                            ,
-                                                            'Quantité':
+                                                            'Commandé':
                                                                 item => <td>{ item.quantity.toFixed(2) + " " + item.unit }</td>
                                                             ,
+                                                            'Reçu':
+                                                                item => <td>{ isDefined(item.received) ? item.received.toFixed(2) + " " + item.unit : "-" }</td>
+                                                            ,
+                                                            'Prix U':
+                                                                item => <td>{ isDefined(item.price) ? item.price.toFixed(2) + " €" : "-" }</td>
+                                                            ,
                                                             'Sous-total':
-                                                                item => <td>{ (item.quantity * item.price).toFixed(2) + " €" }</td>
+                                                                item => <td>{ isDefined(item.price) && isDefined(item.received) ? (item.received * item.price).toFixed(2) + " €" : "-" }</td>
                                                         }}
                                                     />
                                                 </CCollapse>

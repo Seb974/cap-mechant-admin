@@ -14,7 +14,7 @@ function findSuppliersBetween(dates, suppliers, sellers, user) {
     const supplierList = getSuppliersList(suppliers);
     const sellerList = getSellersList(sellers);
     const UTCDates = formatUTC(dates);
-    const dateLimits = `provisionDate[after]=${ getStringDate(UTCDates.start) }&provisionDate[before]=${ getStringDate(UTCDates.end) }`
+    const dateLimits = `provisionDate[after]=${ getStringDate(UTCDates.start) }&provisionDate[before]=${ getStringDate(UTCDates.end) }`;
     return api
         .get(`/api/provisions?${ supplierList }&${ sellerList }&${ dateLimits }`)
         .then(response => {

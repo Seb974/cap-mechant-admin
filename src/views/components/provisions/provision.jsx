@@ -108,7 +108,6 @@ const Provision = ({ match, history }) => {
 
     const handleSubmit = () => {
         const provisionToWrite = getProvisionToWrite();
-        console.log(provisionToWrite);
         const request = !editing ? ProvisionActions.create(provisionToWrite) : ProvisionActions.patch(id, provisionToWrite);
         request.then(response => {
             setErrors(defaultErrors);
