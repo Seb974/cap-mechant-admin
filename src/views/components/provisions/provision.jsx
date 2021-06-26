@@ -21,12 +21,12 @@ const Provision = ({ match, history }) => {
     const [editing, setEditing] = useState(false);
     const { products } = useContext(ProductsContext);
     const { currentUser } = useContext(AuthContext);
-    const [provision, setProvision] = useState({ provisionDate: new Date() });
+    const [provision, setProvision] = useState({ provisionDate: new Date(), status: "ORDERED" });
     const defaultErrors = { provisionDate: "" };
     const [errors, setErrors] = useState(defaultErrors);
     const defaultVariantSize = defaultVariant !== null && products[0].variations[0].sizes && products[0].variations[0].sizes.length > 0 ? products[0].variations[0].sizes[0] : null;
     const defaultProduct = {product: products[0], variation: defaultVariant, size: defaultVariantSize};
-    const defaultGood = {...defaultProduct, count: 0, quantity: "", price: "", unit: defaultProduct.product.unit};
+    const defaultGood = {...defaultProduct, count: 0, quantity: "", received: "", price: "", unit: defaultProduct.product.unit};
     const [goods, setGoods] = useState([defaultGood]);
     const [sellers, setSellers] = useState([]);
     const [suppliers, setSuppliers] = useState([]);
@@ -68,8 +68,18 @@ const Provision = ({ match, history }) => {
             setEditing(true);
             ProvisionActions.find(id)
                 .then(response => {
-                    setProvision({...response, provisionDate: new Date(response.provisionDate)});
-                    setGoods(response.goods.map((good, key) => ({...good, product: products.find(product => good.product.id === product.id), count: key})));
+                    setProvision({
+                        ...response, 
+                        provisionDate: new Date(response.provisionDate), 
+                        status: isDefined(response.status) ? response.status : provision.status
+                    });
+                    setGoods(response.goods.map((good, key) => ({
+                        ...good,
+                        price: isDefined(good.price) ? good.price : "",
+                        received: isDefined(good.received) ? good.received : "",
+                        product: products.find(product => good.product.id === product.id),
+                        count: key
+                    })));
                 })
                 .catch(error => {
                     console.log(error);
@@ -95,6 +105,8 @@ const Provision = ({ match, history }) => {
         const newDate = new Date(datetime[0].getFullYear(), datetime[0].getMonth(), datetime[0].getDate(), 9, 0, 0);
         setProvision({...provision, provisionDate: newDate});
     };
+
+    const onStatusChange = ({ currentTarget }) => setProvision({...provision, [currentTarget.name]: currentTarget.value});
 
     const handleSupplierChange = ({ currentTarget }) => {
         const newSupplier = suppliers.find(s => parseInt(s.id) === parseInt(currentTarget.value));
@@ -128,21 +140,22 @@ const Provision = ({ match, history }) => {
     };
 
     const getProvisionToWrite = () => {
-        const { seller, supplier, provisionDate } = provision;
+        const { seller, supplier, provisionDate, status } = provision;
         return {
             ...provision, 
             seller: seller['@id'],
             supplier: supplier['@id'],
             provisionDate: new Date(provisionDate),
             goods: goods.map(good => {
-                const { product, variation, size, price, quantity } = good;
+                const { product, variation, size, price, quantity, received } = good;
                 return {
                     ...good,
                     product: product['@id'],
                     variation: isDefined(variation) ? variation['@id'] : null,
                     size: isDefined(size) ? size['@id'] : null,
-                    price: getFloat(price),
-                    quantity: getFloat(quantity)
+                    quantity: getFloat(quantity),
+                    price: isDefined(price) && status === "RECEIVED" ? getFloat(price) : null,
+                    received: isDefined(received) && status === "RECEIVED" ? getFloat(received) : null,
                 };
             })
         }
@@ -157,6 +170,11 @@ const Provision = ({ match, history }) => {
                     </CCardHeader>
                     <CCardBody>
                             <CRow>
+                                <CCol xs="12" sm="12" md="6" className="mt-4">
+                                    <Select className="mr-2" name="seller" label="Pour le compte de" onChange={ handleSellerChange } value={ isDefined(provision.seller) ? provision.seller.id : 0 }>
+                                        { sellers.map(seller => <option key={ seller.id } value={ seller.id }>{ seller.name }</option>) }
+                                    </Select>
+                                </CCol>
                                 <CCol xs="12" sm="12" md="6" className="mt-4">
                                     <CFormGroup>
                                         <CLabel htmlFor="name">Date d'approvisionnement</CLabel>
@@ -178,8 +196,9 @@ const Provision = ({ match, history }) => {
                             </CRow>
                             <CRow>
                                 <CCol xs="12" sm="12" md="6" className="mt-4">
-                                    <Select className="mr-2" name="seller" label="Pour le compte de" onChange={ handleSellerChange } value={ isDefined(provision.seller) ? provision.seller.id : 0 }>
-                                        { sellers.map(seller => <option key={ seller.id } value={ seller.id }>{ seller.name }</option>) }
+                                    <Select className="mr-2" name="status" label="Statut de la commande" onChange={ onStatusChange } value={ isDefined(provision.status) ? provision.status : "ORDERED" }>
+                                        <option value="ORDERED">A envoyer</option>
+                                        <option value="RECEIVED">Reçue</option>
                                     </Select>
                                 </CCol>
                                 <CCol xs="12" sm="12" md="6" className="mt-4">
@@ -189,7 +208,7 @@ const Provision = ({ match, history }) => {
                                 </CCol>
                             </CRow>
                             <hr/>
-                            <Goods goods={ goods } setGoods={ setGoods } defaultGood={ defaultGood } editing={ editing }/>
+                            <Goods provision={ provision } goods={ goods } setGoods={ setGoods } defaultGood={ defaultGood } editing={ editing }/>
                         <hr className="mt-5 mb-5"/>
                         <CRow className="mt-4 d-flex justify-content-center">
                             <CButton onClick={ handleSubmit } size="sm" color="success"><CIcon name="cil-save"/> Enregistrer</CButton>

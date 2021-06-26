@@ -26,10 +26,12 @@ const ProvisionModal = ({ item, provisions, setProvisions }) => {
     };
 
     const handleSubmit = () => {
-        console.log(getProvisionToWrite());
         ProvisionActions
             .update(receivedProvision.id, getProvisionToWrite())
-            .then(response => updateProvisions())
+            .then(response => {
+                updateProvisions(response.data);
+                setModalShow(false);
+            })
             .catch(error => console.log(error));
     };
 
@@ -38,19 +40,20 @@ const ProvisionModal = ({ item, provisions, setProvisions }) => {
             ...receivedProvision, 
             seller: receivedProvision.seller['@id'], 
             supplier: receivedProvision.supplier['@id'],
-            status: "RECEIVED",
             goods: receivedProvision.goods.map(g => ({
                 ...g,
                 product: g.product['@id'],
+                variation: isDefined(g.variation) ? g.variation['@id'] : null,
+                size: isDefined(g.size) ? g.size['@id'] : null,
                 price: getFloat(g.price),
                 received: getFloat(g.received)
             }))
         };
     };
 
-    const updateProvisions = () => {
-        const index = provisions.findIndex(p => parseInt(p.id) === parseInt(receivedProvision.id));
-        const newProvisions = provisions.map((p, i) => i !== index ? p : receivedProvision);
+    const updateProvisions = newProvision => {
+        const index = provisions.findIndex(p => parseInt(p.id) === parseInt(newProvision.id));
+        const newProvisions = provisions.map((p, i) => i !== index ? p : newProvision);
         setProvisions(newProvisions);
     };
 
@@ -64,7 +67,7 @@ const ProvisionModal = ({ item, provisions, setProvisions }) => {
                         { item.supplier.name } pour le { (new Date(item.provisionDate)).toLocaleDateString('fr-FR', { timeZone: 'UTC'}) }
                     </Modal.Title>
                 </Modal.Header>
-                <Modal.Body style={{  overflow: 'scroll' }}>
+                <Modal.Body style={{ overflow: 'scroll' }}>
                     {/* <h6>Détail</h6> */}
                     <CDataTable
                         items={ receivedProvision.goods }

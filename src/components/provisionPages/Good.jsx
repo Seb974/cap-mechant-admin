@@ -7,7 +7,7 @@ import AuthContext from 'src/contexts/AuthContext';
 import Select from '../forms/Select';
 import Roles from 'src/config/Roles';
 
-const Good = ({ good, handleChange, handleDelete, total, index, editing }) => {
+const Good = ({ provision, good, handleChange, handleDelete, total, index, editing }) => {
 
     const [isAdmin, setIsAdmin] = useState(false);
     const { products } = useContext(ProductsContext);
@@ -52,7 +52,7 @@ const Good = ({ good, handleChange, handleDelete, total, index, editing }) => {
     return !isDefined(good) || !isDefined(good.product) ? <></> : (
         <>
         <CRow>
-            <CCol xs="12" sm="6">
+            <CCol xs="12" sm="4">
                 <CFormGroup>
                     <CLabel htmlFor="name">{"Produit " + (total > 1 ? index + 1 : "")}
                     </CLabel>
@@ -61,7 +61,7 @@ const Good = ({ good, handleChange, handleDelete, total, index, editing }) => {
                     </CSelect>
                 </CFormGroup>
             </CCol>
-            <CCol xs="12" sm="5">
+            <CCol xs="12" sm="4">
                 <CFormGroup>
                     <CLabel htmlFor="name">{"Variante"}
                     </CLabel>
@@ -74,25 +74,6 @@ const Good = ({ good, handleChange, handleDelete, total, index, editing }) => {
                     </CSelect>
                 </CFormGroup>
             </CCol>
-            <CCol xs="12" sm="1" className="d-flex align-items-center justify-content-end mt-2">
-                <CButton 
-                    name={ good.count }
-                    size="sm" 
-                    color="danger" 
-                    onClick={ handleDelete }
-                    disabled={ total <= 1 }
-                >
-                    <CIcon name="cil-trash"/>
-                </CButton>
-            </CCol>
-        </CRow>
-        <CRow>
-            <CCol xs="12" sm="4">
-                <Select name={ good.count } id="unit" value={ good.unit } label="Unité" onChange={ onChange }>
-                    <option value="U">U</option>
-                    <option value="Kg">Kg</option>
-                </Select>
-            </CCol>
             <CCol xs="12" sm="4">
                 <CFormGroup>
                     <CLabel htmlFor="name">Prix
@@ -104,6 +85,7 @@ const Good = ({ good, handleChange, handleDelete, total, index, editing }) => {
                             name={ good.count }
                             value={ good.price }
                             onChange={ onChange }
+                            disabled={ provision.status !== "RECEIVED" }
                         />
                         <CInputGroupAppend>
                             <CInputGroupText>€/{ good.unit }</CInputGroupText>
@@ -111,6 +93,8 @@ const Good = ({ good, handleChange, handleDelete, total, index, editing }) => {
                     </CInputGroup>
                 </CFormGroup>
             </CCol>
+        </CRow>
+        <CRow>
             <CCol xs="12" sm="4">
                 <CFormGroup>
                     <CLabel htmlFor="name">Quantité
@@ -128,6 +112,42 @@ const Good = ({ good, handleChange, handleDelete, total, index, editing }) => {
                         </CInputGroupAppend>
                     </CInputGroup>
                 </CFormGroup>
+            </CCol>
+            <CCol xs="12" sm="4">
+                <CFormGroup>
+                    <CLabel htmlFor="name">Quantité reçue
+                    </CLabel>
+                    <CInputGroup>
+                        <CInput
+                            id="received"
+                            type="number"
+                            name={ good.count }
+                            value={ good.received }
+                            onChange={ onChange }
+                            disabled={ provision.status !== "RECEIVED" }
+                        />
+                        <CInputGroupAppend>
+                            <CInputGroupText>{ good.unit }</CInputGroupText>
+                        </CInputGroupAppend>
+                    </CInputGroup>
+                </CFormGroup>
+            </CCol>
+            <CCol xs="12" sm="3">
+                <Select name={ good.count } id="unit" value={ good.unit } label="Unité" onChange={ onChange }>
+                    <option value="U">U</option>
+                    <option value="Kg">Kg</option>
+                </Select>
+            </CCol>
+            <CCol xs="12" sm="1" className="d-flex align-items-center justify-content-end mt-2">
+                <CButton 
+                    name={ good.count }
+                    size="sm" 
+                    color="danger" 
+                    onClick={ handleDelete }
+                    disabled={ total <= 1 }
+                >
+                    <CIcon name="cil-trash"/>
+                </CButton>
             </CCol>
         </CRow>
         </>

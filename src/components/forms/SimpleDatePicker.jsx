@@ -5,11 +5,6 @@ import Flatpickr from 'react-flatpickr';
 
 const SimpleDatePicker = ({selectedDate, minDate = new Date(), onDateChange, label="Date", className = ""}) => {
 
-    useEffect(() => {
-        console.log(selectedDate);
-        console.log(minDate);
-    }, []);
-
     return (
         <>
             <label htmlFor="date" className="date-label">{ label }</label>
@@ -19,7 +14,7 @@ const SimpleDatePicker = ({selectedDate, minDate = new Date(), onDateChange, lab
                 onChange={ onDateChange }
                 className={`form-control ${ className }`}
                 options={{
-                    // mode: "simple",
+                    mode: "simple",
                     minDate: minDate,
                     dateFormat: "d/m/Y",
                     locale: French,

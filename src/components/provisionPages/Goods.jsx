@@ -3,7 +3,7 @@ import { CButton, CCol, CRow } from '@coreui/react';
 import CIcon from '@coreui/icons-react';
 import Good from './Good';
 
-const Goods = ({ goods, setGoods, defaultGood, editing }) => {
+const Goods = ({ provision, goods, setGoods, defaultGood, editing }) => {
 
     const handleGoodAdd = () => {
         setGoods([
@@ -38,6 +38,7 @@ const Goods = ({ goods, setGoods, defaultGood, editing }) => {
                             <CCol md="1">{""}</CCol>
                             <CCol md="10">
                                 <Good
+                                    provision={ provision }
                                     good={ good } 
                                     handleChange={ handleGoodChange } 
                                     handleDelete={ handleGoodDelete } 

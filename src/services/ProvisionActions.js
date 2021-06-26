@@ -36,6 +36,10 @@ function update(id, provision) {
     return api.put('/api/provisions/' + id, {...provision});
 }
 
+function patch(id, provision) {
+    return api.patch('/api/provisions/' + id, provision);
+}
+
 function create(provision) {
     return api.post('/api/provisions', {...provision});
 }
@@ -71,5 +75,6 @@ export default {
     delete: deleteProvision,
     find,
     update,
+    patch,
     create
 }

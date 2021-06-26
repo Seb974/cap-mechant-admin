@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import ProvisionActions from '../../../services/ProvisionActions'
-import { CCard, CCardBody, CCardHeader, CCol, CDataTable, CRow, CButton, CCollapse, CFormGroup, CInputCheckbox, CLabel } from '@coreui/react';
+import { CCard, CCardBody, CCardHeader, CCol, CDataTable, CRow, CButton, CCollapse, CFormGroup, CInputCheckbox, CLabel, CWidgetIcon } from '@coreui/react';
 import { Link } from 'react-router-dom';
 import AuthContext from 'src/contexts/AuthContext';
 import Roles from 'src/config/Roles';
@@ -15,6 +15,7 @@ import SelectMultiple from 'src/components/forms/SelectMultiple';
 import SupplierActions from 'src/services/SupplierActions';
 import SellerActions from 'src/services/SellerActions';
 import ProvisionModal from 'src/components/provisionPages/provisionModal';
+import CIcon from '@coreui/icons-react';
 
 const Provisions = (props) => {
 
@@ -133,6 +134,12 @@ const Provisions = (props) => {
         return isDefined(entity) && isDefined(entity[variable]) && entity[variable].length > 0 && entity[variable] !== " ";
     };
 
+    const getTotalProvision = provision => provision.goods.reduce((sum, current) => {
+        return sum + ((isDefined(current.received) ? current.received : 0) * (isDefined(current.price) ? current.price : 0))
+    }, 0);
+    const getSupplierCount = () => [...new Set(provisions.map(provision => provision.supplier.id))].length;
+    const getTurnover = () => provisions.reduce((sum, current) => sum + getTotalProvision(current), 0);
+
     return (
         <CRow>
             <CCol xs="12" lg="12">
@@ -144,6 +151,28 @@ const Provisions = (props) => {
                         </CCol>
                     </CCardHeader>
                     <CCardBody>
+                        <CRow>
+                            <CCol xs="12" sm="6" lg="3">
+                                <CWidgetIcon text="Commandes" header={ provisions.length } color="primary" iconPadding={false}>
+                                    <CIcon width={24} name="cil-clipboard"/>
+                                </CWidgetIcon>
+                                </CCol>
+                                <CCol xs="12" sm="6" lg="3">
+                                <CWidgetIcon text="Fournisseurs" header={ getSupplierCount() } color="info" iconPadding={false}>
+                                    <CIcon width={24} name="cil-people"/>
+                                </CWidgetIcon>
+                                </CCol>
+                                <CCol xs="12" sm="6" lg="3">
+                                <CWidgetIcon text="Moyenne" header={ (provisions.length > 0 ? (getTurnover() / provisions.length).toFixed(2) : "0.00") + " €"} color="warning" iconPadding={false}>
+                                    <CIcon width={24} name="cil-chart"/>
+                                </CWidgetIcon>
+                                </CCol>
+                                <CCol xs="12" sm="6" lg="3">
+                                <CWidgetIcon text="Total" header={ getTurnover().toFixed(2) + " €" } color="danger" iconPadding={false}>
+                                    <CIcon width={24} name="cil-money"/>
+                                </CWidgetIcon>
+                            </CCol>
+                        </CRow>
                         <CRow>
                             <CCol xs="12" lg="6">
                                 <RangeDatePicker
@@ -195,22 +224,22 @@ const Provisions = (props) => {
                                                 </td>
                                     ,
                                     'Date':
-                                        item => <td style={{color: item.status === "WAITING" ? "dimgray" : "black"}}>
+                                        item => <td style={{color: item.status === "RECEIVED" ? "dimgray" : "black"}}>
                                                     { isSameDate(new Date(item.provisionDate), new Date()) ? "Aujourd'hui" : 
                                                     isSameDate(new Date(item.provisionDate), getDateFrom(new Date(), -1)) ? "Hier" :
+                                                    isSameDate(new Date(item.provisionDate), getDateFrom(new Date(), 1)) ? "Demain" :
                                                     (new Date(item.provisionDate)).toLocaleDateString('fr-FR', { timeZone: 'UTC'})
                                                     }
                                                 </td>
                                     ,
                                     'Total':
-                                        item => <td style={{color: item.status === "WAITING" ? "dimgray" : "black"}}>
-                                                    { item.status === "RECEIVED" && isDefined(item.totalHT) ? item.totalHT.toFixed(2) + " €" : " "}
-                                                    { item.status === "RECEIVED" ? item.goods.reduce((sum, current) => sum + (current.received * current.price), 0).toFixed(2) + " €" : "-"}
+                                        item => <td style={{color: item.status === "RECEIVED" ? "dimgray" : "black"}}>
+                                                    { item.status === "RECEIVED" ? (getTotalProvision(item)).toFixed(2) + " €" : "-"}
                                                 </td>
                                     ,
                                     ' ':
                                         item => (
-                                            <td className="mb-3 mb-xl-0 text-right" style={{color: item.status === "WAITING" ? "dimgray" : "black"}}>
+                                            <td className="mb-3 mb-xl-0 text-right">
                                                 { item.status === "ORDERED" && <ProvisionModal item={ item } provisions={ provisions } setProvisions={ setProvisions }/> }
                                                 <CButton color="warning" disabled={ !isAdmin } href={ "#/components/provisions/" + item.id } className="mx-1 my-1"><i className="fas fa-pen"></i></CButton>
                                                 <CButton color="danger" disabled={ !isAdmin } onClick={ () => handleDelete(item) } className="mx-1 my-1"><i className="fas fa-trash"></i></CButton>
@@ -234,10 +263,10 @@ const Provisions = (props) => {
                                                                 item => <td>{ item.quantity.toFixed(2) + " " + item.unit }</td>
                                                             ,
                                                             'Reçu':
-                                                                item => <td>{ isDefined(item.received) ? item.received.toFixed(2) + " " + item.unit : "-" }</td>
+                                                                item => <td>{ isDefined(item.received) ? item.received.toFixed(2) + " " + item.unit : "-" }</td>        //  item.received.toFixed(2) + " " + item.unit item.received + " U :" + (typeof item.received)
                                                             ,
                                                             'Prix U':
-                                                                item => <td>{ isDefined(item.price) ? item.price.toFixed(2) + " €" : "-" }</td>
+                                                                item => <td>{ isDefined(item.price) ? item.price.toFixed(2) + " €" : "-" }</td>     // item.price.toFixed(2) + " €"  item.price + " € :" + (typeof item.price)
                                                             ,
                                                             'Sous-total':
                                                                 item => <td>{ isDefined(item.price) && isDefined(item.received) ? (item.received * item.price).toFixed(2) + " €" : "-" }</td>
