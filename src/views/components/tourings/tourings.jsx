@@ -57,7 +57,7 @@ const Tourings = (props) => {
     const handleDelete = item => {
         const originalTourings = [...tourings];
         setTourings(tourings.filter(order => order.id !== item.id));
-        TouringActions.delete(item, isAdmin)
+        TouringActions.delete(item.id)
                       .catch(error => {
                            setTourings(originalTourings);
                            console.log(error.response);

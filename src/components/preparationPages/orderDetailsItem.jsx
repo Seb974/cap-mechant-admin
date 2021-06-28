@@ -88,7 +88,7 @@ const OrderDetailsItem = ({ item, order, setOrder, total, index, isDelivery }) =
                         <CInput
                             id="orderedQty"
                             type="number"
-                            name={ item.count }
+                            name={ item.id }
                             value={ item.orderedQty }
                             onChange={ onChange }
                             disabled={ true }
@@ -106,7 +106,7 @@ const OrderDetailsItem = ({ item, order, setOrder, total, index, isDelivery }) =
                         <CInput
                             id="preparedQty"
                             type="number"
-                            name={ item.count }
+                            name={ item.id }
                             value={ item.preparedQty }
                             onChange={ onChange }
                             disabled={ isDelivery }

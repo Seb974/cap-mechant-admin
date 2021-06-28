@@ -36,6 +36,8 @@ const Preparations = (props) => {
     useEffect(() => getOrders(), [dates]);
     useEffect(() => getOrders(), [daysOff]);
 
+    useEffect(() => console.log(orders), [orders]);
+
     const getOrders = () => {
         setLoading(true);
         const UTCDates = getUTCDates(dates);
@@ -244,7 +246,7 @@ const Preparations = (props) => {
                             ,
                             'details':
                                 item => <CCollapse show={details.includes(item.id)}>
-                                            <OrderDetails orders={ orders } order={ item } setOrders={ setOrders }/>
+                                            <OrderDetails orders={ orders } order={ item } setOrders={ setOrders } id={ item.id }/>
                                         </CCollapse>
                         }}
                     />

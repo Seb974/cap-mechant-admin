@@ -89,6 +89,11 @@ const Deliveries = (props) => {
         }
     };
 
+    const handleDelivererChange = ({ currentTarget }) => {
+        const newDeliverer = deliverers.find(deliverer => deliverer.id === parseInt(currentTarget.value));
+        setSelectedDeliverer(newDeliverer);
+    };
+
     const handleSelect = item => {
         const newOrders = orders.map(order => (order.id === item.id ? {...order, selected: !order.selected} : order));
         if (item.selected && priorities.includes(item.id))
@@ -343,8 +348,8 @@ const Deliveries = (props) => {
                         { orders.length > 0 &&
                             <CRow className="mt-4 d-flex justify-content-center align-items-start">
                                 { isAdmin && 
-                                    <Select className="mr-2" name="deliverer" label=" " onChange={ ({ currentTarget }) => console.log(currentTarget.value) } style={{width: '140px', height: '35px'}}>
-                                        { deliverers.map(deliverer => <option value={ deliverer }>{ deliverer.name }</option>) }
+                                    <Select className="mr-2" name="deliverer" label=" " value={ isDefined(selectedDeliverer) ? selectedDeliverer.id : 0 } onChange={ handleDelivererChange } style={{width: '140px', height: '35px'}}>
+                                        { deliverers.map(deliverer => <option key={ deliverer.id } value={ deliverer.id }>{ deliverer.name }</option>) }
                                     </Select>
                                 }
                                 <CButton size="sm" color="success" onClick={ handleCreateTrip } className={ "ml-2" } style={{width: '140px', height: '35px'}} disabled={ orders.findIndex(o => o.selected) === -1 }>
