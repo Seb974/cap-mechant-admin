@@ -36,8 +36,6 @@ const Preparations = (props) => {
     useEffect(() => getOrders(), [dates]);
     useEffect(() => getOrders(), [daysOff]);
 
-    useEffect(() => console.log(orders), [orders]);
-
     const getOrders = () => {
         setLoading(true);
         const UTCDates = getUTCDates(dates);

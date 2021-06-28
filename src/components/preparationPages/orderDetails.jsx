@@ -8,15 +8,19 @@ import { isDefined, isDefinedAndNotVoid } from 'src/helpers/utils';
 import AuthContext from 'src/contexts/AuthContext';
 import Roles from 'src/config/Roles';
 
-const OrderDetails = ({ orders = null, order, setOrders = null, isDelivery = false, id }) => {
+const OrderDetails = ({ orders = null, order, setOrders = null, isDelivery = false, id = order.id }) => {
 
     const displayedOrder = isDefinedAndNotVoid(orders) ? orders.find(o => o.id === id) : null;
     const { currentUser } = useContext(AuthContext);
     const [isAdmin, setIsAdmin] = useState(false);
     const [viewedOrder, setViewedOrder] = useState(null);
 
-    useEffect(() => getCurrentOrder(), [displayedOrder]);
     useEffect(() => setIsAdmin(Roles.hasAdminPrivileges(currentUser)), [currentUser]);
+    
+    useEffect(() => {
+        if (isDefined(displayedOrder))
+            getCurrentOrder();
+    }, [displayedOrder]);
 
     const getCurrentOrder = () => {
         const currentOrder = {
