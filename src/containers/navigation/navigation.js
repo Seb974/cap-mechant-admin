@@ -119,6 +119,24 @@ function getNav(translation, currentUser)
       },
     {
       _tag: 'CSidebarNavTitle',
+      _children: [translation("partners.label")]
+    },
+    !["ADMIN"].includes(mainRole) ? voidValue :  
+      {
+        _tag: 'CSidebarNavItem',
+        name: translation("sales.label"),
+        to: '/components/account/sellers',
+        icon: <CIcon name="cib-itch-io" customClasses="c-sidebar-nav-icon"/>,
+      },
+    !["ADMIN"].includes(mainRole) ? voidValue :  
+      {
+        _tag: 'CSidebarNavItem',
+        name: translation("sales.label"),
+        to: '/components/account/deliverers',
+        icon: <CIcon name="cil-car-alt" customClasses="c-sidebar-nav-icon"/>,
+      },
+    {
+      _tag: 'CSidebarNavTitle',
       _children: [translation("component.label")]
     },
     !["ADMIN"].includes(mainRole) ? voidValue :  

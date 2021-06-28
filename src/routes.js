@@ -14,6 +14,8 @@ const Promotions = React.lazy(() => import('./views/components/promotions/promot
 const Promotion = React.lazy(() => import('./views/components/promotions/promotion'));
 const Sellers = React.lazy(() => import('./views/components/sellers/sellers'));
 const Seller = React.lazy(() => import('./views/components/sellers/seller'));
+const SellerAccount = React.lazy(() => import('./views/components/sellers/sellerAccount'));
+const DelivererAccount = React.lazy(() => import('./views/components/deliverers/delivererAccount'));
 const Deliverers = React.lazy(() => import('./views/components/deliverers/deliverers'));
 const Deliverer = React.lazy(() => import('./views/components/deliverers/deliverer'));
 const PriceGroups = React.lazy(() => import('./views/components/price_groups/priceGroups'));
@@ -112,6 +114,8 @@ const routes = [
   { path: '/components/promotions', name: 'Promotions', component: Promotions },
   { path: '/components/sellers/:id', name: 'Seller', component: Seller },
   { path: '/components/sellers', name: 'Sellers', component: Sellers },
+  { path: '/components/account/sellers', name: 'Sellers', component: SellerAccount },
+  { path: '/components/account/deliverers', name: 'Sellers', component: DelivererAccount },
   { path: '/components/deliverers/:id', name: 'Deliverer', component: Deliverer },
   { path: '/components/deliverers', name: 'Deliverers', component: Deliverers },
   { path: '/components/price_groups/:id', name: 'PriceGroup', component: PriceGroup },

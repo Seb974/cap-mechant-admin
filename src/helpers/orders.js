@@ -15,3 +15,10 @@ export const getStatusName = (status) => {
     const all = getStatus();
     return all.find(s => s.value === status).label;
 };
+
+export const getDeliveredStatus = () => {
+    return [
+        {value: "COLLECTABLE", label: "En point relais", isFixed: false},
+        {value: "DELIVERED", label: "Livré", isFixed: false}
+    ];
+}
