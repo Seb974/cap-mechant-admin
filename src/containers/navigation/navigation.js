@@ -131,7 +131,7 @@ function getNav(translation, currentUser)
     !["ADMIN"].includes(mainRole) ? voidValue :  
       {
         _tag: 'CSidebarNavItem',
-        name: translation("sales.label"),
+        name: translation("deliveries.label"),
         to: '/components/account/deliverers',
         icon: <CIcon name="cil-car-alt" customClasses="c-sidebar-nav-icon"/>,
       },

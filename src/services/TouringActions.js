@@ -87,6 +87,10 @@ function updateTruckPosition(touring, position) {
     });
 }
 
+function patch(id, touring) {
+    return api.patch('/api/tourings/' + id, touring);
+}
+
 // function formatUTC(dates) {
 //     return {
 //         start: new Date(dates.start.toUTCString()), 
@@ -104,6 +108,7 @@ export default {
     findDelivererBetween,
     delete: deleteTouring,
     find,
+    patch,
     update,
     create,
     getTourings,

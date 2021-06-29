@@ -1,4 +1,4 @@
-import { CButton, CCard, CCardBody, CCardHeader, CCol, CCollapse, CDataTable, CRow, CWidgetIcon } from '@coreui/react';
+import { CButton, CCard, CCardBody, CCardHeader, CCol, CCollapse, CDataTable, CFormGroup, CRow, CWidgetIcon } from '@coreui/react';
 import React, { useContext, useEffect, useState } from 'react';
 import Select from 'src/components/forms/Select';
 import { Link } from 'react-router-dom';
@@ -11,6 +11,7 @@ import { getDateFrom, isSameDate } from 'src/helpers/days';
 import Roles from 'src/config/Roles';
 import DelivererActions from 'src/services/DelivererActions';
 import TouringActions from 'src/services/TouringActions';
+import CIcon from '@coreui/icons-react';
 
 
 const DelivererAccount = (props) => {
@@ -23,9 +24,11 @@ const DelivererAccount = (props) => {
     const [deliverers, setDeliverers] = useState([]);
     const [tourings, setTourings] = useState([]);
     const [loading, setLoading] = useState(false);
+    const [selectAll, setSelectAll] = useState(false);
     const [viewedDeliveries, setViewedDeliveries] = useState([]);
     const [selectedDeliverer, setSelectedDeliverer] = useState(null);
     const [priceView, setPriceView] = useState("HT");
+    const [selectedStatus, setSelectedStatus] = useState("false");
     const [dates, setDates] = useState({start: new Date(), end: new Date() });
 
     useEffect(() => {
@@ -44,7 +47,8 @@ const DelivererAccount = (props) => {
         if (isDefined(selectedDeliverer))
             fetchTourings();
     }, [selectedDeliverer, dates]);
-    useEffect(() => setViewedDeliveries(getDeliveries()), [tourings]);
+
+    useEffect(() => setViewedDeliveries(getDeliveries()), [tourings, selectedStatus]);
 
     const fetchTourings = () => {
         const UTCDates = getUTCDates(dates);
@@ -80,18 +84,41 @@ const DelivererAccount = (props) => {
 
     const handlePriceView = ({ currentTarget }) => setPriceView(currentTarget.value);
 
+    const handleStatusChange = ({ currentTarget }) => setSelectedStatus(currentTarget.value);
+
     const handlePay = () => {
-        const ownerPart = selectedDeliverer.ownerRate;
-        const totalHT = viewedDeliveries.reduce((sum, current) => sum += current.totalHT, 0);
-        const totalTTC = viewedDeliveries.reduce((sum, current) => sum += current.totalTTC, 0);
-        const totalToPay = getPartToPay(totalHT, ownerPart);
-        const totalToPayTTC = getPartToPay(totalTTC, ownerPart);
-        const lastTouring = viewedDeliveries.reduce((max, current) => new Date(current.end) > max ? new Date(current.end) : max, new Date(viewedDeliveries[0].end));
-        console.log(totalHT);
-        console.log(totalTTC);
-        console.log(totalToPay);
-        console.log(totalToPayTTC);
-        console.log(lastTouring);
+        const paidDeliveries = viewedDeliveries.filter(delivery => delivery.selected);
+        const newTourings = paidDeliveries.map(delivery => {
+            const touring = tourings.find(touring => touring.id === parseInt(delivery.id));
+            return {...touring, regulated: true, orderEntities: touring.orderEntities.map(o => o['@id']), deliverer: touring.deliverer['@id']};
+        });
+        updateTourings(newTourings)
+            .then(response => {
+                const newDeliveries = viewedDeliveries.map(delivery => {
+                    const index = response.findIndex(update => update.data.id === delivery.id);
+                    return index !== -1 ? response[index].data : delivery;
+                });
+                const filteredDeliveries = getFilteredResults(newDeliveries);
+                setViewedDeliveries(filteredDeliveries);
+            });
+    };
+
+    const handleSelect = item => {
+        let newValue = null;
+        const newDeliveryList = viewedDeliveries.map(element => {
+            newValue = !element.selected;
+            return element.id === item.id ? {...element, selected: !element.selected} : element;
+        });
+        setViewedDeliveries(newDeliveryList);
+        if (!newValue && selectAll)
+            setSelectAll(false);
+    };
+
+    const handleSelectAll = () => {
+        const newSelection = !selectAll;
+        setSelectAll(newSelection);
+        const newDeliveryList = viewedDeliveries.map(element => ({...element, selected: newSelection}));
+        setViewedDeliveries(newDeliveryList);
     };
 
     const getUTCDates = () => {
@@ -102,7 +129,7 @@ const DelivererAccount = (props) => {
 
     const getDeliveries = () => {
         const selectedTourings = tourings.map(touring => {
-            const { id, start, end } = touring;
+            const { id, start, end, regulated } = touring;
             const totalHT = getTotalHT(touring);
             const totalTTC = getTotalTTC(touring);
             const ownerPart = selectedDeliverer.ownerRate;
@@ -112,12 +139,23 @@ const DelivererAccount = (props) => {
                 end,
                 totalHT,
                 totalTTC,
+                regulated,
                 totalToPay: getPartToPay(totalHT, ownerPart),
-                totalToPayTTC: getPartToPay(totalTTC, ownerPart)
+                totalToPayTTC: getPartToPay(totalTTC, ownerPart),
+                count: touring.orderEntities.length,
+                selected: false
             };
         });
-        return selectedTourings;
+        return getFilteredResults(selectedTourings);
     };
+
+    const getFilteredResults = tourings => {
+        return tourings.filter(touring => {
+            return selectedStatus === "all" || 
+                   (selectedStatus === "true" && touring.regulated) ||
+                   (selectedStatus === "false" && !touring.regulated);
+        });
+    }
 
     const getTotalHT = touring => selectedDeliverer.cost * (isDefinedAndNotVoid(touring.orderEntities) ? touring.orderEntities.length : 0);
 
@@ -140,6 +178,33 @@ const DelivererAccount = (props) => {
         setDetails(newDetails);
     };
 
+    const getTotalStat = () => {
+        const selection = priceView === "HT" ? 'totalHT' : 'totalTTC';
+        return viewedDeliveries.reduce((sum, current) => sum += current[selection], 0);
+    };
+
+    const getTotalToPayStat = () => {
+        const selection = priceView === "HT" ? 'totalToPay' : 'totalToPayTTC';
+        return viewedDeliveries.reduce((sum, current) => sum += current[selection], 0);
+    };
+
+    const getTotalDeliveriesStat = () => {
+        return viewedDeliveries.reduce((sum, current) => sum += current.count, 0);
+    };
+
+    const getEarnedTotal = () => {
+        const total = getTotalStat();
+        const totalToPay = getTotalToPayStat();
+        return total - totalToPay;
+    }
+
+    const updateTourings = async (newTourings) => {
+        const savedTourings = await Promise.all(newTourings.map( async touring => {
+            return await TouringActions.update(touring.id, touring);
+        }));
+        return savedTourings;
+    };
+
     return !isDefined(viewedDeliveries) ? <></> : (
         <CCard>
             <CCardHeader className="d-flex align-items-center">
@@ -147,34 +212,34 @@ const DelivererAccount = (props) => {
             </CCardHeader>
             <CCardBody>
                 <CRow>
-                    {/* <CCol xs="12" sm="6" lg="3">
-                        <CWidgetIcon text="Commandes" header={ provisions.length } color="primary" iconPadding={false}>
-                            <CIcon width={24} name="cil-clipboard"/>
+                    <CCol xs="12" sm="6" lg="3">
+                        <CWidgetIcon text={"Livraisons - " + viewedDeliveries.length + " tournées"} header={ getTotalDeliveriesStat() } color="primary" iconPadding={false}>
+                            <CIcon width={24} name="cil-truck"/>
                         </CWidgetIcon>
                         </CCol>
                         <CCol xs="12" sm="6" lg="3">
-                        <CWidgetIcon text="Fournisseurs" header={ getSupplierCount() } color="info" iconPadding={false}>
-                            <CIcon width={24} name="cil-people"/>
-                        </CWidgetIcon>
-                        </CCol>
-                        <CCol xs="12" sm="6" lg="3">
-                        <CWidgetIcon text="Moyenne" header={ (provisions.length > 0 ? (getTurnover() / provisions.length).toFixed(2) : "0.00") + " €"} color="warning" iconPadding={false}>
+                        <CWidgetIcon text="Chiffre d'affaires" header={(viewedDeliveries.length > 0 ? (getTotalStat()).toFixed(2) : "0.00") + " €"} color="info" iconPadding={false}>
                             <CIcon width={24} name="cil-chart"/>
                         </CWidgetIcon>
                         </CCol>
                         <CCol xs="12" sm="6" lg="3">
-                        <CWidgetIcon text="Total" header={ getTurnover().toFixed(2) + " €" } color="danger" iconPadding={false}>
+                        <CWidgetIcon text="Revenus" header={(viewedDeliveries.length > 0 ? (getEarnedTotal()).toFixed(2) : "0.00") + " €"} color="warning" iconPadding={false}>
+                            <CIcon width={24} name="cil-wallet"/>
+                        </CWidgetIcon>
+                        </CCol>
+                        <CCol xs="12" sm="6" lg="3">
+                        <CWidgetIcon text="A payer" header={ (viewedDeliveries.length > 0 ? (getTotalToPayStat()).toFixed(2) : "0.00") + " €" } color="danger" iconPadding={false}>
                             <CIcon width={24} name="cil-money"/>
                         </CWidgetIcon>
-                    </CCol> */}
+                    </CCol>
                 </CRow>
                 <CRow>
-                    <CCol xs="12" sm="12" md="4" className="mt-4">
+                    <CCol xs="12" sm="12" md="6" className="mt-4">
                         <Select className="mr-2" name="deliverer" label="Vendeur" onChange={ handleDelivererChange } value={ isDefined(selectedDeliverer) ? selectedDeliverer.id : 0 }>
                             { deliverers.map(deliverer => <option key={ deliverer.id } value={ deliverer.id }>{ deliverer.name }</option>) }
                         </Select>
                     </CCol>
-                    <CCol xs="12" sm="12" md="4" className="mt-4">
+                    <CCol xs="12" sm="12" md="6" className="mt-4">
                         <RangeDatePicker
                             minDate={ dates.start }
                             maxDate={ dates.end }
@@ -183,29 +248,57 @@ const DelivererAccount = (props) => {
                             className = "form-control mb-3"
                         />
                     </CCol>
+                </CRow>
+                <CRow>
+                    <CCol xs="12" sm="12" md="6" className="mt-4">
+                        <Select className="mr-2" name="status" label="Statuts" onChange={ handleStatusChange } value={ selectedStatus }>
+                            <option value={ "all" }>{ "Toutes" }</option>
+                            <option value={ false }>{ "A régler" }</option>
+                            <option value={ true }>{ "Réglées" }</option>
+                        </Select>
+                    </CCol>
                     <CCol xs="12" sm="12" md="4" className="mt-4">
                         <Select className="mr-2" name="priceView" label="Affichage" onChange={ handlePriceView } value={ priceView }>
                             <option value={ "HT" }>{ "Hors taxe" }</option>
                             <option value={ "TTC" }>{ "Taxes comprises" }</option>
                         </Select>
                     </CCol>
+                    <CCol xs="12" md="2" className="mt-4 d-flex align-items-center justify-content-end pr-5">
+                        <CFormGroup row variant="custom-checkbox" inline className="d-flex align-items-center">
+                            <input
+                                className="mx-1 my-2"
+                                type="checkbox"
+                                name="inline-checkbox"
+                                checked={ selectAll }
+                                onClick={ handleSelectAll }
+                                disabled={ viewedDeliveries.length === 0 }
+                                style={{zoom: 2.3}}
+                                disabled={ viewedDeliveries.filter(d => !d.regulated).length <= 0 }
+                            />
+                            <label variant="custom-checkbox" htmlFor="inline-checkbox1" className="my-1">Tous</label>
+                        </CFormGroup>
+                    </CCol>
                 </CRow>
                 <CDataTable
                     items={ viewedDeliveries }
-                    fields={ ['Commande', 'Date', 'Total', 'Total Net'] }
+                    fields={ ['Date', 'Commandes', 'Total', 'Total Net', 'Selection'] }
                     bordered
                     itemsPerPage={ itemsPerPage }
                     pagination
                     hover
                     scopedSlots = {{
-                        'Commande':
+                        'Date':
                             item => <td>
+                                        { item.regulated ? 
+                                            <i className="far fa-check-circle mr-2 text-success"></i> :
+                                            <i className="far fa-times-circle mr-2 text-warning"></i>
+                                        }
                                         { (new Date(item.start)).toLocaleString('fr-FR', { timeZone: 'UTC'}) }
                                     </td>
                         ,
-                        'Date':
+                        'Commandes':
                             item => <td>
-                                        { (new Date(item.end)).toLocaleString('fr-FR', { timeZone: 'UTC'}) }
+                                        { item.count }
                                     </td>
                         ,
                         'Total':
@@ -217,11 +310,24 @@ const DelivererAccount = (props) => {
                             item => <td>
                                         { priceView === "HT" ? item.totalToPay.toFixed(2): item.totalToPayTTC.toFixed(2) } €
                                     </td>
+                        ,
+                        'Selection':
+                            item => <td style={{width: '10%', textAlign: 'center'}}>
+                                        <input
+                                            className="mx-1 my-1"
+                                            type="checkbox"
+                                            name="inline-checkbox"
+                                            checked={ item.selected }
+                                            onClick={ () => handleSelect(item) }
+                                            style={{zoom: 2.3}}
+                                            disabled={ item.regulated }
+                                        />
+                                    </td>
                         }}
                     />
-                    { isAdmin && viewedDeliveries.length > 0 &&
+                    { isAdmin && viewedDeliveries.filter(d => !d.regulated).length > 0 &&
                         <CRow className="mt-4 d-flex justify-content-center align-items-start">
-                            <CButton size="sm" color="success" onClick={ handlePay } style={{width: '140px', height: '35px'}}>
+                            <CButton size="sm" color="success" onClick={ handlePay } style={{width: '140px', height: '35px'}} disabled={ viewedDeliveries.findIndex(p => p.selected) === -1 }>
                                 Clôturer
                             </CButton>
                         </CRow>
