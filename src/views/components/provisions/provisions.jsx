@@ -9,9 +9,7 @@ import { isDefined, isDefinedAndNotVoid } from 'src/helpers/utils';
 import { isSameDate, getDateFrom } from 'src/helpers/days';
 import Spinner from 'react-bootstrap/Spinner'
 import OrderDetails from 'src/components/preparationPages/orderDetails';
-
 import SelectMultiple from 'src/components/forms/SelectMultiple';
-
 import SupplierActions from 'src/services/SupplierActions';
 import SellerActions from 'src/services/SellerActions';
 import ProvisionModal from 'src/components/provisionPages/provisionModal';

@@ -22,6 +22,18 @@ function findSuppliersBetween(dates, suppliers, sellers, user) {
         });
 }
 
+function findBetween(dates, sellers) {
+    const sellerList = getSellersList(sellers);
+    const UTCDates = formatUTC(dates);
+    const dateLimits = `provisionDate[after]=${ getStringDate(UTCDates.start) }&provisionDate[before]=${ getStringDate(UTCDates.end) }`;
+    return api
+        .get(`/api/provisions?${ sellerList }&${ dateLimits }`)
+        .then(response => {
+            return response.data['hydra:member'].sort((a, b) => (new Date(a.deliveryDate) < new Date(b.deliveryDate)) ? -1 : 1)
+        });
+}
+
+
 function deleteProvision(id) {
     return api.delete('/api/provisions/' + id);
 }
@@ -71,6 +83,7 @@ function formatUTC(dates) {
 
 export default { 
     findAll,
+    findBetween,
     findSuppliersBetween,
     delete: deleteProvision,
     find,

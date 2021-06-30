@@ -40,5 +40,6 @@
     "sales.label": "Sales",
     "supply.label": "Supply",
     "partners.label": "Partners",
-    "zones.label": "Areas"
+    "zones.label": "Areas",
+    "prices.label": "Prices"
 }
