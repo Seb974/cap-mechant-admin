@@ -243,6 +243,12 @@ function getNav(translation, currentUser)
             },
             {
               _tag: 'CSidebarNavItem',
+              name: translation("zones.label"),
+              to: '/components/zones',
+              icon: <CIcon name="cil-compass" customClasses="c-sidebar-nav-icon"/>,
+            },
+            {
+              _tag: 'CSidebarNavItem',
               name: translation("cities.label"),
               to: '/components/cities',
               icon: <CIcon name="cil-location-pin" customClasses="c-sidebar-nav-icon"/>,
@@ -251,7 +257,7 @@ function getNav(translation, currentUser)
               _tag: 'CSidebarNavItem',
               name: translation("catalogs.label"),
               to: '/components/catalogs',
-              icon: <CIcon name="cil-compass" customClasses="c-sidebar-nav-icon"/>,
+              icon: <CIcon name="cil-globe-alt" customClasses="c-sidebar-nav-icon"/>,
             },
             {
               _tag: 'CSidebarNavItem',

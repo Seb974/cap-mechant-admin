@@ -24,6 +24,8 @@ const DaysOff = React.lazy(() => import('./views/components/days_off/daysOff'));
 const DayOff = React.lazy(() => import('./views/components/days_off/dayOff'));
 const Cities = React.lazy(() => import('./views/components/cities/cities'));
 const City = React.lazy(() => import('./views/components/cities/city'));
+const Zones = React.lazy(() => import('./views/components/zones/zones'));
+const Zone = React.lazy(() => import('./views/components/zones/zone'));
 const Relaypoints = React.lazy(() => import('./views/components/relaypoints/relaypoints'));
 const Relaypoint = React.lazy(() => import('./views/components/relaypoints/relaypoint'));
 const Preparations = React.lazy(() => import('./views/components/preparations/preparations'));
@@ -124,6 +126,8 @@ const routes = [
   { path: '/components/days_off', name: 'DaysOff', component: DaysOff },
   { path: '/components/cities/:id', name: 'City', component: City },
   { path: '/components/cities', name: 'Cities', component: Cities },
+  { path: '/components/zones/:id', name: 'Zone', component: Zone },
+  { path: '/components/zones', name: 'Zones', component: Zones },
   { path: '/components/relaypoints/:id', name: 'Relaypoint', component: Relaypoint },
   { path: '/components/relaypoints', name: 'Relaypoints', component: Relaypoints },
   { path: '/components/orders/:id', name: 'Order', component: Order },
