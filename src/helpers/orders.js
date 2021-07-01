@@ -22,3 +22,14 @@ export const getDeliveredStatus = () => {
         {value: "DELIVERED", label: "Livré", isFixed: false}
     ];
 }
+
+export const getActiveStatus = () => {
+    return [
+        {value: "WAITING", label: "En attente", isFixed: false},
+        {value: "PRE-PREPARED", label: "En préparation", isFixed: false},
+        {value: "PREPARED", label: "A l'expédition", isFixed: false},
+        {value: "ON_TRUCK", label: "En livraison", isFixed: false},
+        {value: "COLLECTABLE", label: "En point relais", isFixed: false},
+        {value: "DELIVERED", label: "Livré", isFixed: false}
+    ];
+}

@@ -1,12 +1,12 @@
 import React, { useContext, useEffect, useState } from 'react';
 import OrderActions from '../../../services/OrderActions'
-import { CCard, CCardBody, CCardHeader, CCol, CDataTable, CRow, CButton, CCollapse, CFormGroup, CInputCheckbox, CLabel, CWidgetIcon } from '@coreui/react';
+import { CCard, CCardBody, CCardHeader, CCol, CDataTable, CRow, CButton, CCollapse, CFormGroup, CInputCheckbox, CLabel, CWidgetIcon, CCardFooter } from '@coreui/react';
 import { Link } from 'react-router-dom';
 import AuthContext from 'src/contexts/AuthContext';
 import Roles from 'src/config/Roles';
 import RangeDatePicker from 'src/components/forms/RangeDatePicker';
 import { isDefined, isDefinedAndNotVoid } from 'src/helpers/utils';
-import { isSameDate, getDateFrom } from 'src/helpers/days';
+import { isSameDate, getDateFrom, getArchiveDate } from 'src/helpers/days';
 import Spinner from 'react-bootstrap/Spinner'
 import OrderDetails from 'src/components/preparationPages/orderDetails';
 // import CIcon from '@coreui/icons-react';
@@ -31,6 +31,9 @@ const Orders = (props) => {
     const [dates, setDates] = useState({start: new Date(), end: new Date() });
     const [details, setDetails] = useState([]);
     const [selectedStatus, setSelectedStatus] = useState(getStatus().filter(s => !["ON_PAYMENT", "ABORTED"].includes(s.value)));
+    const [csvContent, setCsvContent] = useState("");
+
+    const csvCode = 'data:text/csv;charset=utf-8,SEP=,%0A' + encodeURIComponent(csvContent);
 
     useEffect(() => {
         const isUserAdmin = Roles.hasAdminPrivileges(currentUser);
@@ -43,6 +46,11 @@ const Orders = (props) => {
         if (isDefinedAndNotVoid(selectedStatus))
             getOrders();
     }, [dates, selectedStatus]);
+
+    useEffect(() => {
+        if (isDefinedAndNotVoid(orders))
+            setCsvContent(getCsvContent());
+    },[orders])
 
     const getOrders = () => {
         setLoading(true);
@@ -99,6 +107,16 @@ const Orders = (props) => {
         }
         setDetails(newDetails);
     };
+
+    const getCsvContent = () => orders.map(item => 
+        [
+            item.name,
+            (new Date(item.deliveryDate)).toLocaleDateString('fr-FR', { timeZone: 'UTC'}),
+            isDefined(item.totalHT) ? item.totalHT.toFixed(2) : "-",
+            isDefined(item.totalHT) ? "euros" : "-",
+            getStatusName(item.status)
+        ].join(',')
+    ).join('\n');
 
     return (
         <CRow>
@@ -206,6 +224,17 @@ const Orders = (props) => {
                             />
                         }
                     </CCardBody>
+                    <CCardFooter className="d-flex justify-content-start">
+                        { isDefinedAndNotVoid(orders) && 
+                            <CRow>
+                                <CCol xs="12" lg="12" className="mb-3">
+                                    <CButton color="primary" className="mb-2" href={csvCode} download={`FraisPei-Recap-${ getArchiveDate(dates.start) }-${ getArchiveDate(dates.end) }.csv`} target="_blank">
+                                        <CIcon name="cil-cloud-download" className="mr-2"/>Télécharger (.csv)
+                                    </CButton>
+                                </CCol>
+                            </CRow>
+                        }
+                    </CCardFooter>
                 </CCard>
             </CCol>
         </CRow>

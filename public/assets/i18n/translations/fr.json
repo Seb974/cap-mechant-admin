@@ -37,10 +37,12 @@
     "suppliers.label": "Fournisseurs",
     "management.label": "Gestion",
     "provisions.label": "Réceptions",
-    "sales.label": "Ventes",
+    "summary.label": "Récapitulatif",
     "supply.label": "Achats",
     "partners.label": "Partenaires",
     "zones.label": "Zones",
     "prices.label": "Prix",
-    "profitability.label": "Rentabilité"
+    "profitability.label": "Rentabilité",
+    "ordering.label": "Commander",
+    "sales.label": "Ventes"
 }

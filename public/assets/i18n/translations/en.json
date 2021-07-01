@@ -37,10 +37,12 @@
     "suppliers.label": "Suppliers",
     "management.label": "Management",
     "provisions.label": "Receipts",
-    "sales.label": "Sales",
+    "summary.label": "Summary",
     "supply.label": "Supply",
     "partners.label": "Partners",
     "zones.label": "Areas",
     "prices.label": "Prices",
-    "profitability.label": "Profitability"
+    "profitability.label": "Profitability",
+    "ordering.label": "Ordering",
+    "sales.label": "Sales"
 }
