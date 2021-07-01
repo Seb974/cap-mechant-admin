@@ -41,5 +41,6 @@
     "supply.label": "Supply",
     "partners.label": "Partners",
     "zones.label": "Areas",
-    "prices.label": "Prices"
+    "prices.label": "Prices",
+    "profitability.label": "Profitability"
 }

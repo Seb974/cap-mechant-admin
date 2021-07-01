@@ -16,6 +16,10 @@ export const getStringDate = date => {
     return date.getFullYear() + "-" + getTwoDigits(date.getMonth() + 1) + "-" + getTwoDigits(date.getDate());
 }
 
+export const getArchiveDate = date => {
+    return "" + getTwoDigits(date.getDate()) + getTwoDigits(date.getMonth() + 1) + date.getFullYear();
+}
+
 export const getTwoDigits = number => {
     return number < 10 ? '0' + number : number;
 }

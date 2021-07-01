@@ -14,6 +14,7 @@ const Promotions = React.lazy(() => import('./views/components/promotions/promot
 const Promotion = React.lazy(() => import('./views/components/promotions/promotion'));
 const Sellers = React.lazy(() => import('./views/components/sellers/sellers'));
 const Seller = React.lazy(() => import('./views/components/sellers/seller'));
+const Profitability = React.lazy(() => import('./views/components/prices/profitability'));
 const Prices = React.lazy(() => import('./views/components/prices/prices'));
 const SellerAccount = React.lazy(() => import('./views/components/sellers/sellerAccount'));
 const DelivererAccount = React.lazy(() => import('./views/components/deliverers/delivererAccount'));
@@ -117,6 +118,7 @@ const routes = [
   { path: '/components/promotions', name: 'Promotions', component: Promotions },
   { path: '/components/sellers/:id', name: 'Seller', component: Seller },
   { path: '/components/sellers', name: 'Sellers', component: Sellers },
+  { path: '/components/profitability', name: 'Profitability', component: Profitability },
   { path: '/components/prices', name: 'Prices', component: Prices },
   { path: '/components/account/sellers', name: 'Sellers', component: SellerAccount },
   { path: '/components/account/deliverers', name: 'Sellers', component: DelivererAccount },
