@@ -147,11 +147,12 @@ const TodayStats = () => {
                     { productSales
                         .filter((p, i) => i < productLimit)
                         .sort((a, b) => (a.periodSaleCount > b.periodSaleCount) ? -1 : 1)
-                        .map(product => {
+                        .sort((a, b) => (a.saleCount > b.saleCount) ? -1 : 1)
+                        .map((product, i) => {
                             const totalPeriodCount = productSales.reduce((sum, p) => sum += p.periodSaleCount, 0);
                             const totalCount = productSales.reduce((sum, p) => sum += isDefined(p.saleCount) ? p.saleCount : 0, 0);
                             return (
-                                <div className="progress-group mb-4">
+                                <div key={ i } className="progress-group mb-4">
                                     <div className="progress-group-prepend">
                                     <span className="progress-group-text">{ product.name }</span>
                                     </div>
@@ -218,9 +219,9 @@ const TodayStats = () => {
                     { breaks
                         .filter((b, i) => i < breaksLimit)
                         .sort((a, b) => ( (a.broken/ a.ordered) > (b.broken / b.ordered)) ? -1 : 1)
-                        .map(b => {
+                        .map((b, i) => {
                             return (
-                                <div className="progress-group">
+                                <div key={ i } className="progress-group">
                                     <div className="progress-group-header">
                                     <span className="title">{ b.name }</span>
                                     <span className="ml-auto font-weight-bold">{ b.broken.toFixed(2) + ' ' + b.unit }  <span className="text-muted small">{ (b.broken / b.ordered * 100).toFixed(2) + '%' }</span></span>

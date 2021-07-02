@@ -3,38 +3,40 @@ import { CBadge, CButton, CButtonGroup, CCard, CCardBody, CCardFooter, CCardHead
 import CIcon from '@coreui/icons-react'
 import StatChart from '../charts/StatChart.js'
 import TodayStats from './todayStats.jsx'
+import StockStats from './stockStats.jsx'
 
 const WidgetsDropdown = lazy(() => import('../widgets/WidgetsDropdown.js'))
-const WidgetsBrand = lazy(() => import('../widgets/WidgetsBrand.js'))
 
 const Dashboard = () => {
   return (
     <>
-      <WidgetsDropdown />
+      
+      <CRow>
+        <CCol xs="12" sm="6" lg="3">
+          <CWidgetIcon text="income" header="$1.999,50" color="primary" iconPadding={false}>
+            <CIcon width={24} name="cil-settings"/>
+          </CWidgetIcon>
+        </CCol>
+        <CCol xs="12" sm="6" lg="3">
+          <CWidgetIcon text="income" header="$1.999,50" color="info" iconPadding={false}>
+            <CIcon width={24} name="cil-laptop"/>
+          </CWidgetIcon>
+        </CCol>
+        <CCol xs="12" sm="6" lg="3">
+          <CWidgetIcon text="income" header="$1.999,50" color="warning" iconPadding={false}>
+            <CIcon width={24} name="cil-moon"/>
+          </CWidgetIcon>
+        </CCol>
+        <CCol xs="12" sm="6" lg="3">
+          <CWidgetIcon text="income" header="$1.999,50" color="danger" iconPadding={false}>
+            <CIcon width={24} name="cil-bell"/>
+          </CWidgetIcon>
+        </CCol>
+      </CRow>
       <StatChart style={{height: '300px', marginTop: '40px'}}/>
-        <CRow>
-          <CCol xs="12" sm="6" lg="3">
-            <CWidgetIcon text="income" header="$1.999,50" color="primary" iconPadding={false}>
-              <CIcon width={24} name="cil-settings"/>
-            </CWidgetIcon>
-          </CCol>
-          <CCol xs="12" sm="6" lg="3">
-            <CWidgetIcon text="income" header="$1.999,50" color="info" iconPadding={false}>
-              <CIcon width={24} name="cil-laptop"/>
-            </CWidgetIcon>
-          </CCol>
-          <CCol xs="12" sm="6" lg="3">
-            <CWidgetIcon text="income" header="$1.999,50" color="warning" iconPadding={false}>
-              <CIcon width={24} name="cil-moon"/>
-            </CWidgetIcon>
-          </CCol>
-          <CCol xs="12" sm="6" lg="3">
-            <CWidgetIcon text="income" header="$1.999,50" color="danger" iconPadding={false}>
-              <CIcon width={24} name="cil-bell"/>
-            </CWidgetIcon>
-          </CCol>
-        </CRow>
-        <TodayStats />
+      <WidgetsDropdown />
+      <TodayStats />
+      <StockStats />
       {/* <CRow>
         <CCol>
           <CCard>
