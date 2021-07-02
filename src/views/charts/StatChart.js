@@ -1,17 +1,15 @@
 import React, { useContext, useEffect, useState } from 'react'
 import { CChartLine } from '@coreui/react-chartjs'
-import { getStyle, hexToRgba } from '@coreui/utils'
 import ProvisionActions from 'src/services/ProvisionActions'
 import SellerActions from 'src/services/SellerActions'
 import OrderActions from 'src/services/OrderActions'
+import ZoneActions from 'src/services/ZoneActions';
 import { getActiveStatus } from 'src/helpers/orders'
 import AuthContext from 'src/contexts/AuthContext'
 import { getDateFrom, isDefined, isDefinedAndNotVoid } from 'src/helpers/utils'
 import { getDayName, isSameDate } from 'src/helpers/days'
-
-const brandSuccess = getStyle('success') || '#4dbd74'
-const brandInfo = getStyle('info') || '#20a8d8'
-const brandDanger = getStyle('danger') || '#f86c6b'
+import { CCard, CCardBody, CCardFooter, CCol, CProgress, CRow } from '@coreui/react'
+import { brandDanger, brandInfo, brandSuccess, getFormattedDatas, getOptions, getProgressColor } from 'src/helpers/stats';
 
 const StatChart = attributes => {
 
@@ -26,10 +24,13 @@ const StatChart = attributes => {
   const [sales, setSales] = useState([]);
   const [sellers, setSellers] = useState([]);
   const [provisions, setProvisions] = useState([]);
+  const [zones, setZones] = useState([]);
+  const [viewedZones, setViewedZones] = useState([]);
   const [dataset, setDataset] = useState([]);
 
   useEffect(() => {
       getPeriod();
+      fetchZones();
       fetchSellers();
       fetchSales();
   }, []);
@@ -40,11 +41,18 @@ const StatChart = attributes => {
   }, [sellers]);
 
   useEffect(() => {
-      const provisionList = getFormattedProvisions();
-      console.log(provisions);
-      console.log(provisionList);
-      setDataset(getDatas());
+      const datas = getFormattedDatas([
+          {label: 'Ventes', color: brandSuccess, backgroundColor: brandSuccess, borderWidth: 2, data: getFormattedSales()},
+          {label: 'Achats', color: brandInfo, borderWidth: 2, data: getFormattedProvisions()},
+          {label: 'Objectif de vente', color: brandDanger, borderWidth: 1, dash: [8, 5], data: getFormattedTarget()}
+      ]);
+      setDataset(datas);
   }, [period, sales, provisions]);
+
+  useEffect(() => {
+      if (isDefinedAndNotVoid(zones))
+          setViewedZones(getSalesPerZone())
+  }, [sales, zones]);
 
   const fetchSellers = () => {
       SellerActions
@@ -61,38 +69,33 @@ const StatChart = attributes => {
   const fetchSales = () => {
       OrderActions
           .findStatusBetween(dates, status, currentUser)
-          .then(response => {
-            console.log(response);
-            setSales(response);
-          });
+          .then(response => setSales(response));
   };
 
-  const getFormattedSales = () => {
-      return period.map(date => sales.reduce((sum, s) => sum += isSameDate(date, new Date(s.deliveryDate)) ? s.totalHT : 0, 0));
+  const fetchZones = () => {
+      ZoneActions.findAll()
+          .then(response => setZones(response));
   };
 
-  const getFormattedProvisions = () => {
-      return period.map(date => provisions.reduce((sum, p) => sum += isSameDate(date, new Date(p.provisionDate)) ? getTotalProvision(p.goods) : 0, 0));
-  };
+  const getFormattedSales = () => period.map(d => sales.reduce((sum, s) => sum += isSameDate(d, new Date(s.deliveryDate)) ? s.totalHT : 0, 0));
+  
+  const getFormattedProvisions = () => period.map(d => provisions.reduce((sum, p) => sum += isSameDate(d, new Date(p.provisionDate)) ? getTotalProvision(p.goods) : 0, 0));
+  
+  const getFormattedTarget = () => period.map(date => target);
+  
+  const getTotalProvision = goods => goods.reduce((sum, g) => sum += isDefined(g.received) && isDefined(g.price) ? g.received * g.price : 0, 0);
+  
+  const getDataMax = data => data.reduce((max, d) => max = d > max ? d : max, 0);
 
-  const getFormattedTarget = () => {
-    return period.map(date => target);
-  }
-
-  const getTotalProvision = goods => {
-    return goods.reduce((sum, g) => sum += isDefined(g.received) && isDefined(g.price) ? g.received * g.price : 0, 0);
-  };
-
-  const getDataMax = data => {
-      return data.reduce((max, d) => max = d > max ? d : max, 0);
-  };
+  const getSalesPerZone = () => zones.map(z => {
+    return { name: z.name, total: sales.reduce((sum, s) => sum += z.cities.findIndex(c => c.zipCode === s.metas.zipcode) !== -1 ? s.totalHT : 0, 0) };
+  });
 
   const getMax = () => {
     const salesMax = getDataMax(getFormattedSales());
     const provisionMax = getDataMax(getFormattedProvisions());
     return salesMax < provisionMax ? provisionMax : salesMax;
   };
-  
 
   const getPeriod = () => {
       let datesArray = [];
@@ -104,77 +107,44 @@ const StatChart = attributes => {
       setPeriod(datesArray);
   };
 
-  const getDatas = () => [
-      {
-        label: 'Ventes',
-        backgroundColor: hexToRgba(brandInfo, 10),
-        borderColor: brandInfo,
-        pointHoverBackgroundColor: brandInfo,
-        borderWidth: 2,
-        data: getFormattedSales()
-      },
-      {
-        label: 'Achats',
-        backgroundColor: 'transparent',
-        borderColor: brandSuccess,
-        pointHoverBackgroundColor: brandSuccess,
-        borderWidth: 2,
-        data: getFormattedProvisions()
-      },
-      {
-        label: 'Objectif de vente',
-        backgroundColor: 'transparent',
-        borderColor: brandDanger,
-        pointHoverBackgroundColor: brandDanger,
-        borderWidth: 1,
-        borderDash: [8, 5],
-        data: getFormattedTarget()
-      }
-  ];
-
-  const defaultOptions = (()=> {
-    return {
-        maintainAspectRatio: false,
-        legend: {
-          display: false
-        },
-        scales: {
-          xAxes: [{
-            gridLines: {
-              drawOnChartArea: false
-            }
-          }],
-          yAxes: [{
-            ticks: {
-              beginAtZero: true,
-              maxTicksLimit: 5,
-              stepSize: Math.ceil(getMax() / 5),
-              max: getMax()
-            },
-            gridLines: {
-              display: true
-            }
-          }]
-        },
-        elements: {
-          point: {
-            radius: 0,
-            hitRadius: 10,
-            hoverRadius: 4,
-            hoverBorderWidth: 3
-          }
-        }
-      }
-    }
-  )()
-
   return (
-    <CChartLine
-        { ...attributes }
-        datasets={ dataset }
-        options={ defaultOptions }
-        labels={ period.map(d => getDayName(d)) }
-    />
+    <CCard>
+        <CCardBody>
+          <CRow>
+            <CCol sm="5">
+              <h4 id="traffic" className="card-title mb-0">Activité</h4>
+              <div className="small text-muted">{ (new Date()).toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long', timeZone: 'UTC'}) }</div>
+            </CCol>
+          </CRow>
+          <CChartLine
+              { ...attributes }
+              datasets={ dataset }
+              options={ getOptions(getMax()) }
+              labels={ period.map(d => getDayName(d)) }
+          />
+        </CCardBody>
+        { isDefinedAndNotVoid(viewedZones) && 
+            <CCardFooter>
+              <CRow className="text-center">
+                { viewedZones.map((zone, index) => {
+                    const percent = (zone.total / viewedZones.reduce((sum, z) => sum += z.total, 0) * 100).toFixed(2);
+                    return (
+                        <CCol md sm="12" className="mb-sm-2 mb-0">
+                            <div className="text-muted">{ zone.name }</div>
+                            <strong>{ percent + "%" }</strong>
+                            <CProgress
+                                className="progress-xs mt-2"
+                                precision={ 1 }
+                                color={ getProgressColor(index) }
+                                value={ percent }
+                            />
+                        </CCol>
+                    );
+                })}
+              </CRow>
+            </CCardFooter>
+        }
+      </CCard>
   )
 }
 

@@ -51,6 +51,10 @@ function getDefaultRole() {
     return "ROLE_USER";
 }
 
+function isProfesional(roles) {
+    return roles.find(r => ["ROLE_VIP", "ROLE_GRANDS_COMPTES", "ROLE_CHR", "ROLE_PROFESSIONNELS"].includes(r)) !== undefined;
+}
+
 export default {
     filterRoles,
     getDefaultRole,
@@ -63,5 +67,6 @@ export default {
     isDeliverer,
     isRelaypoint,
     isPicker,
-    isSupervisor
+    isSupervisor,
+    isProfesional
 }
