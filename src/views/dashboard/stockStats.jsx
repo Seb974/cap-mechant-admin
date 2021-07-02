@@ -88,13 +88,13 @@ const StockStats = () => {
             let totalOrdered = 0;
             sales.map(s => {
                 s.items.map(i => {
-                    if (isSameProduct(stock, i))
+                    if (isSameProduct(stock, i) && !isDefined(i.preparedQty))
                         totalOrdered += i.orderedQty;
                 });
             });
             return { ...stock, ordered: totalOrdered };
         });
-        return  brokenStocks.filter(b => b.ordered > 0). length > 0 ?
+        return  brokenStocks.filter(b => b.ordered > 0).length > 5 ?
                 brokenStocks.filter(b => b.ordered > 0) :
                 brokenStocks.filter(b => b.quantity <= b.alert);
     };
