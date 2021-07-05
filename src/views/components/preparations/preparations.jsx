@@ -9,28 +9,34 @@ import RangeDatePicker from 'src/components/forms/RangeDatePicker';
 import { isDefined, isDefinedAndNotVoid } from 'src/helpers/utils';
 import { isSameDate, getDateFrom } from 'src/helpers/days';
 import Spinner from 'react-bootstrap/Spinner'
-import { Button } from 'bootstrap';
 import OrderDetails from 'src/components/preparationPages/orderDetails';
 import DayOffActions from 'src/services/DayOffActions';
 import CIcon from '@coreui/icons-react';
+import { updatePreparations } from 'src/data/dataProvider/eventHandlers/orderEvents';
+import MercureContext from 'src/contexts/MercureContext';
 
 const Preparations = (props) => {
 
     const itemsPerPage = 30;
     const fields = ['name', 'date', 'total', ' '];
-    const { currentUser, seller } = useContext(AuthContext);
+    const { currentUser, seller, supervisor } = useContext(AuthContext);
+    const { updatedOrders, setUpdatedOrders } = useContext(MercureContext);
     const [orders, setOrders] = useState([]);
     const [isAdmin, setIsAdmin] = useState(false);
     const [loading, setLoading] = useState(false);
     const [dates, setDates] = useState({start: new Date(), end: new Date() });
     const [daysOff, setDaysOff] = useState([]);
-
     const [details, setDetails] = useState([])
 
     useEffect(() => {
         setIsAdmin(Roles.hasAdminPrivileges(currentUser));
         fetchDaysOff();
     }, []);
+
+    useEffect(() => {
+        if (isDefinedAndNotVoid(updatedOrders))
+            updatePreparations(updatedOrders, dates, orders, setOrders, currentUser, supervisor);
+    }, [updatedOrders]);
 
     useEffect(() => setIsAdmin(Roles.hasAdminPrivileges(currentUser)), [currentUser]);
     useEffect(() => getOrders(), [dates]);

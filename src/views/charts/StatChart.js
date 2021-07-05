@@ -10,6 +10,8 @@ import { getDateFrom, isDefined, isDefinedAndNotVoid } from 'src/helpers/utils'
 import { getDayName, isSameDate } from 'src/helpers/days'
 import { CCard, CCardBody, CCardFooter, CCol, CProgress, CRow } from '@coreui/react'
 import { brandDanger, brandInfo, brandSuccess, getFormattedDatas, getOptions, getProgressColor } from 'src/helpers/stats';
+import { updateStatusBetween } from 'src/data/dataProvider/eventHandlers/orderEvents';
+import MercureContext from 'src/contexts/MercureContext';
 
 const StatChart = attributes => {
 
@@ -17,7 +19,8 @@ const StatChart = attributes => {
   const target = 60;
   const status = getActiveStatus();
   const now = getDateFrom(new Date(), 0, 0);
-  const { currentUser } = useContext(AuthContext);
+  const { currentUser, supervisor } = useContext(AuthContext);
+  const { updatedOrders, setUpdatedOrders } = useContext(MercureContext);
   const dates = { start: getDateFrom(now, -interval, 0), end: now };
 
   const [period, setPeriod] = useState([]);
@@ -34,6 +37,11 @@ const StatChart = attributes => {
       fetchSellers();
       fetchSales();
   }, []);
+
+  useEffect(() => {
+      if (isDefinedAndNotVoid(updatedOrders))
+          updateStatusBetween(updatedOrders, dates, status, sales, setSales, currentUser, supervisor);
+  }, [updatedOrders]);
 
   useEffect(() => {
       if (isDefinedAndNotVoid(sellers) && !isDefinedAndNotVoid(provisions))
@@ -129,7 +137,7 @@ const StatChart = attributes => {
                 { viewedZones.map((zone, index) => {
                     const percent = (zone.total / viewedZones.reduce((sum, z) => sum += z.total, 0) * 100).toFixed(2);
                     return (
-                        <CCol md sm="12" className="mb-sm-2 mb-0">
+                        <CCol md sm="12" className="mb-sm-2 mb-0" key={ index }>
                             <div className="text-muted">{ zone.name }</div>
                             <strong>{ percent + "%" }</strong>
                             <CProgress

@@ -8,18 +8,26 @@ import { isSameDate } from 'src/helpers/days';
 import RangeDatePicker from 'src/components/forms/RangeDatePicker';
 import ProductsContext from 'src/contexts/ProductsContext';
 import Roles from 'src/config/Roles';
+import { updateStatusBetween } from 'src/data/dataProvider/eventHandlers/orderEvents';
+import MercureContext from 'src/contexts/MercureContext';
 
 const TodayStats = () => {
 
     const productLimit = 8;
     const breaksLimit = 5;
     const status = getActiveStatus();
-    const { currentUser } = useContext(AuthContext);
     const { products } = useContext(ProductsContext);
+    const { currentUser, supervisor } = useContext(AuthContext);
+    const { updatedOrders, setUpdatedOrders } = useContext(MercureContext);
     const [sales, setSales] = useState([]);
     const [dates, setDates] = useState({start: new Date(), end: new Date() });
     const [productSales, setProductSales] = useState([]);
     const [breaks, setBreaks] = useState([]);
+
+    useEffect(() => {
+        if (isDefinedAndNotVoid(updatedOrders))
+            updateStatusBetween(updatedOrders, dates, status, sales, setSales, currentUser, supervisor);
+    }, [updatedOrders]);
 
     useEffect(() => fetchSales(), [dates]);
 

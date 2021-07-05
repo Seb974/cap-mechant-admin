@@ -9,22 +9,20 @@ import { isDefined, isDefinedAndNotVoid } from 'src/helpers/utils';
 import { isSameDate, getDateFrom, getArchiveDate } from 'src/helpers/days';
 import Spinner from 'react-bootstrap/Spinner'
 import OrderDetails from 'src/components/preparationPages/orderDetails';
-// import CIcon from '@coreui/icons-react';
-import TouringActions from 'src/services/TouringActions';
-import Select from 'src/components/forms/Select';
-import { getShop, isSamePosition } from 'src/helpers/checkout';
-// import DelivererActions from 'src/services/DelivererActions';
 import PlatformContext from 'src/contexts/PlatformContext';
 import SelectMultiple from 'src/components/forms/SelectMultiple';
 import { getStatus, getStatusName } from 'src/helpers/orders';
 import CIcon from '@coreui/icons-react';
+import { updateStatusBetween } from 'src/data/dataProvider/eventHandlers/orderEvents';
+import MercureContext from 'src/contexts/MercureContext';
 
 const Orders = (props) => {
 
     const itemsPerPage = 30;
     const fields = ['Client', 'Date', 'Total', 'Statut', ' '];
-    const { currentUser } = useContext(AuthContext);
     const { platform } = useContext(PlatformContext);
+    const { currentUser, supervisor } = useContext(AuthContext);
+    const { updatedOrders, setUpdatedOrders } = useContext(MercureContext);
     const [orders, setOrders] = useState([]);
     const [isAdmin, setIsAdmin] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -40,6 +38,11 @@ const Orders = (props) => {
         setIsAdmin(isUserAdmin);
         getOrders();
     }, []);
+
+    useEffect(() => {
+        if (isDefinedAndNotVoid(updatedOrders))
+            updateStatusBetween(updatedOrders, dates, selectedStatus, orders, setOrders, currentUser, supervisor);
+    }, [updatedOrders]);
 
     useEffect(() => setIsAdmin(Roles.hasAdminPrivileges(currentUser)), [currentUser]);
     useEffect(() => {

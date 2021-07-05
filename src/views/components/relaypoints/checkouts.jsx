@@ -12,12 +12,15 @@ import OrderDetails from 'src/components/preparationPages/orderDetails';
 import Select from 'src/components/forms/Select';
 import RelaypointActions from 'src/services/RelaypointActions';
 import { setOrderStatus } from 'src/helpers/checkout';
+import { updateCheckouts } from 'src/data/dataProvider/eventHandlers/orderEvents';
+import MercureContext from 'src/contexts/MercureContext';
 
 const Checkouts = (props) => {
 
     const itemsPerPage = 30;
     const fields = ['commande', 'date', 'terminer', ' '];
-    const { currentUser } = useContext(AuthContext);
+    const { currentUser, supervisor } = useContext(AuthContext);
+    const { updatedOrders, setUpdatedOrders } = useContext(MercureContext);
     const [orders, setOrders] = useState([]);
     const [relaypoints, setRelaypoints] = useState([]);
     const [isAdmin, setIsAdmin] = useState(false);
@@ -32,6 +35,11 @@ const Checkouts = (props) => {
         setIsAdmin(isUserAdmin);
         fetchRelaypoints();
     }, []);
+
+    useEffect(() => {
+        if (isDefinedAndNotVoid(updatedOrders))
+            updateCheckouts(updatedOrders, dates, orders, setOrders, currentUser, supervisor, selectedRelaypoint);
+    }, [updatedOrders]);
 
     useEffect(() => setIsAdmin(Roles.hasAdminPrivileges(currentUser)), [currentUser]);
 

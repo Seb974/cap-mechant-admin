@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import ProductsContext from '../../contexts/ProductsContext';
-import MercureHub from '../../components/Mercure/MercureHub';
 import AuthContext from '../../contexts/AuthContext';
 import AuthActions from '../../services/AuthActions';
 import ProductActions from 'src/services/ProductActions';
@@ -16,6 +15,7 @@ import SellerActions from 'src/services/SellerActions';
 import PlatformContext from 'src/contexts/PlatformContext';
 import PlatformActions from 'src/services/PlatformActions';
 import SupervisorActions from 'src/services/SupervisorActions';
+import Mercure from 'src/mercure/Mercure';
 
 const DataProvider = ({ children }) => {
 
@@ -48,11 +48,11 @@ const DataProvider = ({ children }) => {
         ProductActions.findAll()
                       .then(response => setProducts(response));
         ContainerActions.findAll()
-                      .then(response => setContainers(response));
+                        .then(response => setContainers(response));
         CatalogActions.findAll()
-                    .then(response => setCatalogs(response));
+                      .then(response => setCatalogs(response));
         RelaypointActions.findAll()
-                     .then(response => setRelaypoints(response));
+                         .then(response => setRelaypoints(response));
     },[]);
 
     useEffect(() => {
@@ -82,15 +82,17 @@ const DataProvider = ({ children }) => {
         }
     }, [catalogs, country]);
 
+    useEffect(() => console.log(supervisor), [supervisor]);
+
     return (
         <PlatformContext.Provider value={ {platform, setPlatform} }>
         <AuthContext.Provider value={ {isAuthenticated, setIsAuthenticated, currentUser, setCurrentUser, eventSource, setEventSource, settings, setSettings, selectedCatalog, setSelectedCatalog, seller, setSeller, supervisor, setSupervisor} }>
         <DeliveryContext.Provider value={ {cities, setCities, relaypoints, setRelaypoints, condition, setCondition, packages, setPackages, totalWeight, setTotalWeight, availableWeight, setAvailableWeight, tourings, setTourings} }>
         <ContainerContext.Provider value={{ containers, setContainers }}>
         <ProductsContext.Provider value={ {products, setProducts} }>
-            <MercureHub>
+            <Mercure>
                 { children }
-            </MercureHub>
+            </Mercure>
         </ProductsContext.Provider>
         </ContainerContext.Provider>
         </DeliveryContext.Provider>
@@ -98,5 +100,5 @@ const DataProvider = ({ children }) => {
         </PlatformContext.Provider>
     );
 }
- 
+
 export default DataProvider;

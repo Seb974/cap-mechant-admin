@@ -9,15 +9,14 @@ import categoryEvents from 'src/data/dataProvider/eventHandlers/categoryEvents';
 import userEvents from 'src/data/dataProvider/eventHandlers/userEvents';
 import DeliveryContext from 'src/contexts/DeliveryContext';
 import ProductsContext from 'src/contexts/ProductsContext';
-
-// import ProductsContext from '../../contexts/ProductsContext';
-// import ProductActions from '../../services/ProductActions';
+import orderEvents from 'src/data/dataProvider/eventHandlers/orderEvents';
+import MercureContext from 'src/contexts/MercureContext';
 
 const MercureHub = ({ children }) => {
     
     const url = new URL(api.MERCURE_DOMAIN + "/.well-known/mercure");
-    // const { products, setProducts } = useContext(ProductsContext);
     const { products, setProducts } = useContext(ProductsContext);
+    const { updatedOrders, setUpdatedOrders } = useContext(MercureContext);
     const { currentUser, eventSource, setEventSource } = useContext(AuthContext);
     const { packages, setPackages, tourings, setTourings } = useContext(DeliveryContext);
 
@@ -29,16 +28,15 @@ const MercureHub = ({ children }) => {
         url.searchParams.append('topic', api.API_DOMAIN + '/api/tourings/{id}');
         url.searchParams.append('topic', api.API_DOMAIN + '/api/users/{id}');
         url.searchParams.append('topic', api.API_DOMAIN + '/api/users/{id}/metas');
+        url.searchParams.append('topic', api.API_DOMAIN + '/api/users/{id}/shipments');
         setEventSource(new EventSourcePolyfill(url, { withCredentials: true }));
     }, [currentUser]);
 
     const closeIfExists = () => {
-        if (eventSource !== undefined && Object.keys(eventSource).find(key => key === 'readyState') !== undefined) {
+        if (eventSource !== undefined && Object.keys(eventSource).find(key => key === 'readyState') !== undefined)
             eventSource.close();
-        }
     };
 
-    // eventSource.onmessage = event => eventHandler.dispatch(event);
     eventSource.onmessage = event => {
         const data = JSON.parse(event.data);
         console.log(data);
@@ -53,27 +51,10 @@ const MercureHub = ({ children }) => {
 
         if (data['@id'].includes('users') || data['@id'].includes('metas'))
             userEvents.update(data);
-        };
-    // {
-
-        // const data = JSON.parse(event.data);
-        // if (data['@id'].includes('products')) {
-        //     console.log(data);
-        // }
-        // if (data['@id'].includes('products')) {
-        //     const newProducts = data['@type'] === 'Product' ?
-        //         ProductActions.updateFromMercure(products, data) :
-        //         ProductActions.deleteFromMercure(products, data['@id'].substring(parseInt(data['@id'].lastIndexOf('/')) + 1));
-        //     setProducts(newProducts);
-        // }
-
-        // if (data['@id'].includes('users') || data['@id'].includes('metas')) {
-        //     console.log(data);
-        // }
-    // };
-
-    // eventSource.onerror = event => console.log(event);
-    // eventSource.onopen = event => console.log(event);
+        if (data['@id'].includes('order_entities') && updatedOrders.findIndex(o => o.id === data.id) === -1)
+            setUpdatedOrders([...updatedOrders, data]);
+        // orderEvents.update(data);
+    };
 
     return <>{ children }</>
 }

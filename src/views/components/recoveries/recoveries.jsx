@@ -13,12 +13,15 @@ import { Button } from 'bootstrap';
 import OrderDetails from 'src/components/preparationPages/orderDetails';
 import DayOffActions from 'src/services/DayOffActions';
 import SellerActions from 'src/services/SellerActions';
+import { updateRecoveries } from 'src/data/dataProvider/eventHandlers/orderEvents';
+import MercureContext from 'src/contexts/MercureContext';
 
 const Recoveries = (props) => {
 
     const itemsPerPage = 30;
     const fields = ['vendeur', 'commande', 'date', 'statut', ' '];
-    const { currentUser, seller } = useContext(AuthContext);
+    const { currentUser, seller, supervisor } = useContext(AuthContext);
+    const { updatedOrders, setUpdatedOrders } = useContext(MercureContext);
     const [orders, setOrders] = useState([]);
     const [isAdmin, setIsAdmin] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -35,6 +38,11 @@ const Recoveries = (props) => {
         fetchSellers();
         getOrders();
     }, []);
+
+    useEffect(() => {
+        if (isDefinedAndNotVoid(updatedOrders))
+            updateRecoveries(updatedOrders, dates, orders, setOrders, currentUser, supervisor);
+    }, [updatedOrders]);
 
     useEffect(() => setIsAdmin(Roles.hasAdminPrivileges(currentUser)), [currentUser]);
     useEffect(() => setCurrentItems(recoveries), [recoveries]);
