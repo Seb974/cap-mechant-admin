@@ -5,13 +5,15 @@ import AuthActions from 'src/services/AuthActions'
 import AuthContext from 'src/contexts/AuthContext'
 
 const TheHeaderDropdown = () => {
-  const { isAuthenticated, setIsAuthenticated, currentUser, setCurrentUser } = useContext(AuthContext);
+  const { isAuthenticated, setIsAuthenticated, currentUser, setCurrentUser, setSupervisor, setSeller } = useContext(AuthContext);
 
   const handleLogout = () => {
     AuthActions.logout()
                .then(response => {
                    setIsAuthenticated(false);
                    setCurrentUser(AuthActions.getCurrentUser());
+                   setSupervisor(null);
+                   setSeller(null);
                   //  history.push("/");
                });
   }

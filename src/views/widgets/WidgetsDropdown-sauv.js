@@ -1,18 +1,15 @@
-import React, { useContext, useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { CWidgetDropdown, CRow, CCol, CDropdown, CDropdownMenu, CDropdownItem, CDropdownToggle } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
 import ChartLineSimple from '../charts/ChartLineSimple'
 import ChartBarSimple from '../charts/ChartBarSimple'
 import { getDateFrom, isDefined, isDefinedAndNotVoid } from 'src/helpers/utils'
 import { isSameDate } from 'src/helpers/days'
-import Roles from 'src/config/Roles'
-import AuthContext from 'src/contexts/AuthContext'
 
 const WidgetsDropdown = ({ sales, interval }) => {
 
   const now = new Date();
   const [period, setPeriod] = useState([]);
-  const { currentUser, supervisor } = useContext(AuthContext);
   const dates = { start: getDateFrom(now, -interval, 0), end: now };
 
   useEffect(() => getPeriod(), []);
@@ -20,20 +17,20 @@ const WidgetsDropdown = ({ sales, interval }) => {
   useEffect(() => console.log(sales), [sales]);
 
   const getTotalOrder = order => order.items.reduce((sum, i) => sum += i.price * (isDefined(i.deliveredQty) ? i.deliveredQty : i.orderedQty), 0);
-
-  const getVolumeOrder = order => order.items.reduce((sum, i) => sum += i.product.weight * (isDefined(i.deliveredQty) ? i.deliveredQty : i.orderedQty), 0);
   
   const getTurnovers = () => period.map(d => sales.reduce((sum, s) => sum += isSameDate(d, new Date(s.deliveryDate)) ? getTotalOrder(s) : 0, 0));
 
   const getOrdersNumber = () => period.map(d => sales.reduce((sum, s) => sum += isSameDate(d, new Date(s.deliveryDate)) ? 1 : 0, 0));
 
-  const getClientsNumber = () => period.map(d => sales.reduce((unique, s) => isSameDate(d, new Date(s.deliveryDate)) && !unique.includes(s.email) ? [...unique, s.email] : unique, []).length);
+  const getTodayTurnover = () => {
+    const turnovers = getTurnovers();
+    return (isDefinedAndNotVoid(turnovers) ? turnovers.slice(-1)[0] : 0).toFixed(2);
+  };
 
-  const getAverageOrders = () => period.map(d => sales.reduce((sum, s) => sum += isSameDate(d, new Date(s.deliveryDate)) && getDayTotalOrder(d) > 0 ? (getTotalOrder(s) / getDayTotalOrder(d)) : 0, 0));
-
-  const getDayTotalOrder = day => sales.reduce((sum, s) => sum += isSameDate(day, new Date(s.deliveryDate)) ? 1 : 0, 0);
-
-  const getVolumes = () => period.map(d => sales.reduce((sum, s) => sum += isSameDate(d, new Date(s.deliveryDate)) ? getVolumeOrder(s) : 0, 0));
+  const getTodayOrdersNumber = () => {
+    const orderNumbers = getOrdersNumber();
+    return (isDefinedAndNotVoid(orderNumbers) ? orderNumbers.slice(-1)[0] : 0).toFixed(2);
+  };
 
   const getLastElement = (elements, precision) => {
       return (isDefinedAndNotVoid(elements) ? elements.slice(-1)[0] : 0).toFixed(precision);
@@ -58,20 +55,28 @@ const WidgetsDropdown = ({ sales, interval }) => {
           header={ getLastElement(getOrdersNumber(), 0) }
           text="Commandes"
           footerSlot={
-              <ChartBarSimple
-                  className="mt-3 mx-3"
-                  style={{height: '70px'}}
-                  backgroundColor="secondary"
-                  dataPoints={ getOrdersNumber() }
-                  label="Members"
-                  labels="months"
-              />
+            <ChartBarSimple
+              className="mt-3 mx-3"
+              style={{height: '70px'}}
+              // backgroundColor="rgb(250, 152, 152)"
+              backgroundColor="secondary"
+              // backgroundColor="rgb(150, 130, 250)"
+              dataPoints={ getOrdersNumber() }
+              label="Members"
+              labels="months"
+            />
           }
         >
           <CDropdown>
             <CDropdownToggle caret={ false } className="text-white" color="transparent">
               <CIcon name="cil-clipboard"/>
             </CDropdownToggle>
+            {/* <CDropdownMenu className="pt-0" placement="bottom-end">
+              <CDropdownItem>Action</CDropdownItem>
+              <CDropdownItem>Another action</CDropdownItem>
+              <CDropdownItem>Something else here...</CDropdownItem>
+              <CDropdownItem disabled>Disabled action</CDropdownItem>
+            </CDropdownMenu> */}
           </CDropdown>
         </CWidgetDropdown>
       </CCol>
@@ -79,31 +84,31 @@ const WidgetsDropdown = ({ sales, interval }) => {
       <CCol sm="6" lg="3">
         <CWidgetDropdown
           color="gradient-info"
-          header={ 
-              // Roles.isSupervisor(currentUser) && isDefined(supervisor) ? getLastElement(getVolumes(), 2) : 
-              getLastElement(getClientsNumber(), 0) 
-          }
-          text="Clients"
+          header="9.823"
+          text="Members online"
           footerSlot={
-              <ChartLineSimple
-                  pointed
-                  className="mt-3 mx-3"
-                  style={{height: '70px'}}
-                  dataPoints={ 
-                      // Roles.isSupervisor(currentUser) && isDefined(supervisor) ? (getVolumes() + " Kg") : 
-                      getClientsNumber() 
-                  }
-                  pointHoverBackgroundColor="info"
-                  options={{ elements: { line: { tension: 0.00001 }}}}
-                  label="Members"
-                  labels="months"
-              />
+            <ChartLineSimple
+              pointed
+              className="mt-3 mx-3"
+              style={{height: '70px'}}
+              dataPoints={[1, 18, 9, 17, 34, 22, 11]}
+              pointHoverBackgroundColor="info"
+              options={{ elements: { line: { tension: 0.00001 }}}}
+              label="Members"
+              labels="months"
+            />
           }
         >
           <CDropdown>
-            <CDropdownToggle caret={ false } color="transparent">
-              <CIcon name="cil-people"/>
+            <CDropdownToggle caret={false} color="transparent">
+              <CIcon name="cil-location-pin"/>
             </CDropdownToggle>
+            <CDropdownMenu className="pt-0" placement="bottom-end">
+              <CDropdownItem>Action</CDropdownItem>
+              <CDropdownItem>Another action</CDropdownItem>
+              <CDropdownItem>Something else here...</CDropdownItem>
+              <CDropdownItem disabled>Disabled action</CDropdownItem>
+            </CDropdownMenu>
           </CDropdown>
         </CWidgetDropdown>
       </CCol>
@@ -111,14 +116,14 @@ const WidgetsDropdown = ({ sales, interval }) => {
       <CCol sm="6" lg="3">
         <CWidgetDropdown
           color="gradient-warning"
-          header={ getLastElement(getAverageOrders(), 2) + " €" }
-          text="Commande moyenne"
+          header="9.823"
+          text="Members online"
           footerSlot={
             <ChartLineSimple
               className="mt-3"
               style={{height: '70px'}}
               backgroundColor="rgba(255,255,255,.2)"
-              dataPoints={ getAverageOrders() }
+              dataPoints={[78, 81, 80, 45, 34, 12, 40]}
               options={{ elements: { line: { borderWidth: 2.5 }}}}
               pointHoverBackgroundColor="warning"
               label="Members"
@@ -127,9 +132,15 @@ const WidgetsDropdown = ({ sales, interval }) => {
           }
         >
           <CDropdown>
-            <CDropdownToggle caret={ false } color="transparent">
-              <CIcon name="cil-chart"/>
+            <CDropdownToggle color="transparent">
+              <CIcon name="cil-settings"/>
             </CDropdownToggle>
+            <CDropdownMenu className="pt-0" placement="bottom-end">
+              <CDropdownItem>Action</CDropdownItem>
+              <CDropdownItem>Another action</CDropdownItem>
+              <CDropdownItem>Something else here...</CDropdownItem>
+              <CDropdownItem disabled>Disabled action</CDropdownItem>
+            </CDropdownMenu>
           </CDropdown>
         </CWidgetDropdown>
       </CCol>
@@ -145,6 +156,7 @@ const WidgetsDropdown = ({ sales, interval }) => {
               className="c-chart-wrapper mt-3 mx-3"
               style={{height: '70px'}}
               dataPoints={ getTurnovers() }
+              // pointHoverBackgroundColor="primary"
               pointHoverBackgroundColor="rgb(250, 152, 152)"
               label="Members"
               labels="months"
@@ -153,8 +165,14 @@ const WidgetsDropdown = ({ sales, interval }) => {
         >
           <CDropdown>
             <CDropdownToggle caret={ false } color="transparent">
-              <CIcon name="cil-money"/>
+              <CIcon name="cil-clipboard"/>
             </CDropdownToggle>
+            {/* <CDropdownMenu className="pt-0" placement="bottom-end">
+              <CDropdownItem>Action</CDropdownItem>
+              <CDropdownItem>Another action</CDropdownItem>
+              <CDropdownItem>Something else here...</CDropdownItem>
+              <CDropdownItem disabled>Disabled action</CDropdownItem>
+            </CDropdownMenu> */}
           </CDropdown>
         </CWidgetDropdown>
       </CCol>

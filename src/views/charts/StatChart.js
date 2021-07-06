@@ -1,30 +1,24 @@
-import React, { useContext, useEffect, useState } from 'react'
-import { CChartLine } from '@coreui/react-chartjs'
-import ProvisionActions from 'src/services/ProvisionActions'
-import SellerActions from 'src/services/SellerActions'
-import OrderActions from 'src/services/OrderActions'
+import React, { useContext, useEffect, useState } from 'react';
+import { CChartLine } from '@coreui/react-chartjs';
+import ProvisionActions from 'src/services/ProvisionActions';
+import SellerActions from 'src/services/SellerActions';
 import ZoneActions from 'src/services/ZoneActions';
-import { getActiveStatus } from 'src/helpers/orders'
-import AuthContext from 'src/contexts/AuthContext'
-import { getDateFrom, isDefined, isDefinedAndNotVoid } from 'src/helpers/utils'
-import { getDayName, isSameDate } from 'src/helpers/days'
-import { CCard, CCardBody, CCardFooter, CCol, CProgress, CRow } from '@coreui/react'
+import AuthContext from 'src/contexts/AuthContext';
+import { getDateFrom, isDefined, isDefinedAndNotVoid } from 'src/helpers/utils';
+import { getDayName, isSameDate } from 'src/helpers/days';
+import { CCard, CCardBody, CCardFooter, CCol, CProgress, CRow, CWidgetIcon } from '@coreui/react';
 import { brandDanger, brandInfo, brandSuccess, getFormattedDatas, getOptions, getProgressColor } from 'src/helpers/stats';
-import { updateStatusBetween } from 'src/data/dataProvider/eventHandlers/orderEvents';
-import MercureContext from 'src/contexts/MercureContext';
+import CIcon from '@coreui/icons-react';
+import Roles from 'src/config/Roles';
 
-const StatChart = attributes => {
+const StatChart = ({ sales, interval, ...attributes }) => {
 
-  const interval = 30;
   const target = 60;
-  const status = getActiveStatus();
-  const now = getDateFrom(new Date(), 0, 0);
+  const now = new Date();
   const { currentUser, supervisor } = useContext(AuthContext);
-  const { updatedOrders, setUpdatedOrders } = useContext(MercureContext);
   const dates = { start: getDateFrom(now, -interval, 0), end: now };
 
   const [period, setPeriod] = useState([]);
-  const [sales, setSales] = useState([]);
   const [sellers, setSellers] = useState([]);
   const [provisions, setProvisions] = useState([]);
   const [zones, setZones] = useState([]);
@@ -35,25 +29,25 @@ const StatChart = attributes => {
       getPeriod();
       fetchZones();
       fetchSellers();
-      fetchSales();
   }, []);
 
   useEffect(() => {
-      if (isDefinedAndNotVoid(updatedOrders))
-          updateStatusBetween(updatedOrders, dates, status, sales, setSales, currentUser, supervisor);
-  }, [updatedOrders]);
-
-  useEffect(() => {
-      if (isDefinedAndNotVoid(sellers) && !isDefinedAndNotVoid(provisions))
+    if (isDefinedAndNotVoid(sellers) && !isDefinedAndNotVoid(provisions) && !isDefined(supervisor))
           fetchProvisions();
   }, [sellers]);
 
   useEffect(() => {
-      const datas = getFormattedDatas([
-          {label: 'Ventes', color: brandSuccess, backgroundColor: brandSuccess, borderWidth: 2, data: getFormattedSales()},
-          {label: 'Achats', color: brandInfo, borderWidth: 2, data: getFormattedProvisions()},
-          {label: 'Objectif de vente', color: brandDanger, borderWidth: 1, dash: [8, 5], data: getFormattedTarget()}
-      ]);
+      const datas = !isDefined(supervisor) ? 
+          getFormattedDatas([
+              {label: 'Ventes', color: brandSuccess, backgroundColor: brandSuccess, borderWidth: 2, data: getFormattedSales()},
+              {label: 'Achats', color: brandInfo, borderWidth: 2, data: getFormattedProvisions()},
+              {label: 'Objectif de vente', color: brandDanger, borderWidth: 1, dash: [8, 5], data: getFormattedTarget()}
+          ])
+          :
+          getFormattedDatas([
+              {label: 'Achats', color: brandSuccess, backgroundColor: brandSuccess, borderWidth: 2, data: getFormattedSales()}
+          ])
+      ;
       setDataset(datas);
   }, [period, sales, provisions]);
 
@@ -70,22 +64,23 @@ const StatChart = attributes => {
 
   const fetchProvisions = () => {
       ProvisionActions
-          .findBetween(dates, sellers)
+          .findBetween(getUTCDates(), sellers)
           .then(response => setProvisions(response));
   };
 
-  const fetchSales = () => {
-      OrderActions
-          .findStatusBetween(dates, status, currentUser)
-          .then(response => setSales(response));
-  };
-
   const fetchZones = () => {
-      ZoneActions.findAll()
+      ZoneActions
+          .findAll()
           .then(response => setZones(response));
   };
 
-  const getFormattedSales = () => period.map(d => sales.reduce((sum, s) => sum += isSameDate(d, new Date(s.deliveryDate)) ? s.totalHT : 0, 0));
+  const getUTCDates = () => {
+      const UTCStart = new Date(dates.start.getFullYear(), dates.start.getMonth(), dates.start.getDate(), 4, 0, 0);
+      const UTCEnd = new Date(dates.end.getFullYear(), dates.end.getMonth(), dates.end.getDate() + 1, 3, 59, 0);
+      return {start: UTCStart, end: UTCEnd};
+  };
+
+  const getFormattedSales = () => period.map(d => sales.reduce((sum, s) => sum += isSameDate(d, new Date(s.deliveryDate)) ? getTotalOrder(s) : 0, 0));     // s.totalHT
   
   const getFormattedProvisions = () => period.map(d => provisions.reduce((sum, p) => sum += isSameDate(d, new Date(p.provisionDate)) ? getTotalProvision(p.goods) : 0, 0));
   
@@ -96,8 +91,36 @@ const StatChart = attributes => {
   const getDataMax = data => data.reduce((max, d) => max = d > max ? d : max, 0);
 
   const getSalesPerZone = () => zones.map(z => {
-    return { name: z.name, total: sales.reduce((sum, s) => sum += z.cities.findIndex(c => c.zipCode === s.metas.zipcode) !== -1 ? s.totalHT : 0, 0) };
+    return { name: z.name, total: sales.reduce((sum, s) => sum += z.cities.findIndex(c => c.zipCode === s.metas.zipcode) !== -1 ? getTotalOrder(s) : 0, 0) };      // s.totalHT
   });
+
+  const getTotalOrder = order => order.items.reduce((sum, i) => sum += i.price * (isDefined(i.deliveredQty) ? i.deliveredQty : i.orderedQty), 0);
+
+  const getClients = () => [...new Set(sales.map(s => s.email))].length;
+
+  const getTurnover = () => {
+    return sales.reduce((tSum, s) => {
+        return tSum += s.items.reduce((sum, i) => {
+            const quantity = isDefined(i.deliveredQty) ? i.deliveredQty : i.orderedQty;
+            return sum += (quantity * i.price);
+        }, 0);
+    }, 0).toFixed(2);
+  };
+
+  const getPlatformPart = () => {
+      return sales.reduce((tSum, s) => {
+          return tSum += s.items.reduce((sum, i) => {
+              const platformPart = i.product.seller.ownerRate / 100;
+              const quantity = isDefined(i.deliveredQty) ? i.deliveredQty : i.orderedQty;
+              return sum += (quantity * i.price * platformPart);
+          }, 0);
+      }, 0).toFixed(2);
+  };
+
+  const getGain = () => {
+    return Roles.hasAdminPrivileges(currentUser) || Roles.isPicker(currentUser) ? 
+        getPlatformPart() : (getTurnover() - getPlatformPart()).toFixed(2);
+  };
 
   const getMax = () => {
     const salesMax = getDataMax(getFormattedSales());
@@ -108,7 +131,8 @@ const StatChart = attributes => {
   const getPeriod = () => {
       let datesArray = [];
       for (let i = 1; i <= interval; i++) {
-          const nextDate = getDateFrom(dates.start, i, 0);
+          const hour = i === interval ? 23 : 0;
+          const nextDate = getDateFrom(dates.start, i, hour);
           if (nextDate.getDay() !== 0)
               datesArray = [...datesArray, nextDate];
       }
@@ -116,43 +140,79 @@ const StatChart = attributes => {
   };
 
   return (
-    <CCard>
-        <CCardBody>
-          <CRow>
-            <CCol sm="5">
-              <h4 id="traffic" className="card-title mb-0">Activité</h4>
-              <div className="small text-muted">{ (new Date()).toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long', timeZone: 'UTC'}) }</div>
+    <>
+        <CRow>
+            <CCol xs="12" sm={ !isDefined(supervisor) ? "6" : "4"} lg={ !isDefined(supervisor) ? "3" : "4"}>
+                <CWidgetIcon text="Commandes" header={ sales.length } color="primary" iconPadding={ false }>
+                    <CIcon width={ 24 } name="cil-clipboard"/>
+                </CWidgetIcon>
             </CCol>
-          </CRow>
-          <CChartLine
-              { ...attributes }
-              datasets={ dataset }
-              options={ getOptions(getMax()) }
-              labels={ period.map(d => getDayName(d)) }
-          />
-        </CCardBody>
-        { isDefinedAndNotVoid(viewedZones) && 
-            <CCardFooter>
-              <CRow className="text-center">
-                { viewedZones.map((zone, index) => {
-                    const percent = (zone.total / viewedZones.reduce((sum, z) => sum += z.total, 0) * 100).toFixed(2);
-                    return (
-                        <CCol md sm="12" className="mb-sm-2 mb-0" key={ index }>
-                            <div className="text-muted">{ zone.name }</div>
-                            <strong>{ percent + "%" }</strong>
-                            <CProgress
-                                className="progress-xs mt-2"
-                                precision={ 1 }
-                                color={ getProgressColor(index) }
-                                value={ percent }
-                            />
-                        </CCol>
-                    );
-                })}
+            { !isDefined(supervisor) && 
+                <CCol xs="12" sm="6" lg="3">
+                    <CWidgetIcon text="Clients" header={ !isDefined(supervisor) ? getClients() : 0 } color="info" iconPadding={ false }>
+                        <CIcon width={ 24 } name="cil-people"/>
+                    </CWidgetIcon>
+                </CCol>
+            }
+            <CCol xs="12" sm={ !isDefined(supervisor) ? "6" : "4"} lg={ !isDefined(supervisor) ? "3" : "4"}>
+                <CWidgetIcon 
+                    text={ !isDefined(supervisor) ? "Chiffre d'affaires" : "Moyenne" }
+                    header={ !isDefined(supervisor) ? getTurnover() : (isDefinedAndNotVoid(sales) ? (getTurnover() / sales.length).toFixed(2) : 0) + " €" }
+                    color="warning"
+                    iconPadding={ false }
+                >
+                    <CIcon width={ 24 } name="cil-chart"/>
+                </CWidgetIcon>
+            </CCol>
+            <CCol xs="12" sm={ !isDefined(supervisor) ? "6" : "4"} lg={ !isDefined(supervisor) ? "3" : "4"}>
+                <CWidgetIcon 
+                    text={ !isDefined(supervisor) ? "Gain" : "Total" }
+                    header={ (!isDefined(supervisor) ? getGain() : getTurnover()) + " €" }
+                    color="danger" 
+                    iconPadding={ false }
+                >
+                    <CIcon width={ 24 } name="cil-money"/>
+                </CWidgetIcon>
+            </CCol>
+        </CRow>
+        <CCard>
+            <CCardBody>
+              <CRow>
+                <CCol sm="5">
+                  <h4 id="traffic" className="card-title mb-0">Activité</h4>
+                  <div className="small text-muted">{ (new Date()).toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long', timeZone: 'UTC'}) }</div>
+                </CCol>
               </CRow>
-            </CCardFooter>
-        }
-      </CCard>
+              <CChartLine
+                  { ...attributes }
+                  datasets={ dataset }
+                  options={ getOptions(getMax()) }
+                  labels={ period.map(d => getDayName(d)) }
+              />
+            </CCardBody>
+            { !isDefined(supervisor) && isDefinedAndNotVoid(viewedZones) && 
+                <CCardFooter>
+                  <CRow className="text-center">
+                    { viewedZones.map((zone, index) => {
+                        const percent = (zone.total / viewedZones.reduce((sum, z) => sum += z.total, 0) * 100).toFixed(2);
+                        return (
+                            <CCol md sm="12" className="mb-sm-2 mb-0" key={ index }>
+                                <div className="text-muted">{ zone.name }</div>
+                                <strong>{ percent + "%" }</strong>
+                                <CProgress
+                                    className="progress-xs mt-2"
+                                    precision={ 1 }
+                                    color={ getProgressColor(index) }
+                                    value={ percent }
+                                />
+                            </CCol>
+                        );
+                    })}
+                  </CRow>
+                </CCardFooter>
+            }
+          </CCard>
+      </>
   )
 }
 

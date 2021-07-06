@@ -3,7 +3,7 @@ import { CBadge, CCard, CCardBody, CCardHeader, CCol, CProgress, CRow, CCallout}
 import OrderActions from 'src/services/OrderActions';
 import { getActiveStatus } from 'src/helpers/orders';
 import AuthContext from 'src/contexts/AuthContext';
-import { isDefined, isDefinedAndNotVoid } from 'src/helpers/utils';
+import { getDateFrom, isDefined, isDefinedAndNotVoid } from 'src/helpers/utils';
 import { isSameDate } from 'src/helpers/days';
 import RangeDatePicker from 'src/components/forms/RangeDatePicker';
 import ProductsContext from 'src/contexts/ProductsContext';
@@ -16,7 +16,7 @@ const StockStats = () => {
 
     const status = getActiveStatus();
     const { products } = useContext(ProductsContext);
-    const { currentUser, supervisor } = useContext(AuthContext);
+    const { currentUser, supervisor, seller } = useContext(AuthContext);
     const { updatedOrders, setUpdatedOrders } = useContext(MercureContext);
     const [sales, setSales] = useState([]);
     const [dates, setDates] = useState({start: new Date(), end: new Date() });
@@ -25,7 +25,7 @@ const StockStats = () => {
 
     useEffect(() => {
         if (isDefinedAndNotVoid(updatedOrders))
-            updateStatusBetween(updatedOrders, dates, status, sales, setSales, currentUser, supervisor);
+            updateStatusBetween(updatedOrders, getUTCDates(dates), status, sales, setSales, currentUser, supervisor);
     }, [updatedOrders]);
 
     useEffect(() => fetchSales(), [dates]);
@@ -36,8 +36,13 @@ const StockStats = () => {
 
     const fetchSales = () => {
         OrderActions
-            .findStatusBetween(dates, status, currentUser)
-            .then(response => setSales(response));
+            .findStatusBetween(getUTCDates(dates), status, currentUser)
+            .then(response => {
+                const ownSales = Roles.isSeller(currentUser) && isDefined(seller) ?
+                                 response.map(o => ({...o, items: o.items.filter(i => i.product.seller.id === seller.id)})) :
+                                 response ;
+                setSales(ownSales.filter(o => isDefinedAndNotVoid(o.items)));
+            });
     };
 
     const handleDateChange = datetime => {
@@ -49,7 +54,8 @@ const StockStats = () => {
     };
 
     const getDateName = () => {
-        const { start, end } = dates;
+        const { end } = dates;
+        const { start } = getUTCDates();
         return  isSameDate(new Date(), start) && isSameDate(new Date(), end) ? "Aujourd'hui" :
                 isSameDate(new Date(), end) ? "Du " + getFormattedDate(start) + " à aujourd'hui" :
                 isSameDate(new Date(), start) ? "D'aujourd'hui au " + getFormattedDate(end) :
@@ -57,6 +63,12 @@ const StockStats = () => {
     };
 
     const getFormattedDate = date => date.toLocaleDateString('fr-FR', { timeZone: 'UTC'});
+
+    const getUTCDates = () => {
+        const UTCStart = new Date(dates.start.getFullYear(), dates.start.getMonth(), dates.start.getDate(), 4, 0, 0);
+        const UTCEnd = new Date(dates.end.getFullYear(), dates.end.getMonth(), dates.end.getDate() + 1, 3, 59, 0);
+        return {start: UTCStart, end: UTCEnd};
+    };
 
     const defineStocks = () => {
         let newStocks = [];
@@ -132,7 +144,7 @@ const StockStats = () => {
         return  percent < 30 ? "success" : 
                 percent >= 30 && percent < 70 ? "info" :
                 percent >= 70 && percent < 100 ? "warning" : "danger";
-    }
+    };
 
     return (
         <CRow>

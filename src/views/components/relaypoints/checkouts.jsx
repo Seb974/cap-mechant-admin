@@ -29,7 +29,6 @@ const Checkouts = (props) => {
     const [dates, setDates] = useState({start: new Date(), end: new Date() });
     const [details, setDetails] = useState([]);
 
-
     useEffect(() => {
         const isUserAdmin = Roles.hasAdminPrivileges(currentUser);
         setIsAdmin(isUserAdmin);
