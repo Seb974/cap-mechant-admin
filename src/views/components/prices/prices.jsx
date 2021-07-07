@@ -5,17 +5,17 @@ import AuthContext from 'src/contexts/AuthContext';
 import Roles from 'src/config/Roles';
 import { isDefined, isDefinedAndNotVoid } from 'src/helpers/utils';
 import Spinner from 'react-bootstrap/Spinner';
-import ProductActions from 'src/services/ProductActions';
 import Select from 'src/components/forms/Select';
 import CIcon from '@coreui/icons-react';
 import { getArchiveDate } from 'src/helpers/days';
+import ProductsContext from 'src/contexts/ProductsContext';
 
 const Prices = (props) => {
 
     const itemsPerPage = 30;
     const { currentUser, selectedCatalog, supervisor } = useContext(AuthContext);
     const [priceGroups, setPriceGroups] = useState([]);
-    const [products, setProducts] = useState([]);
+    const { products } = useContext(ProductsContext);
     const [isAdmin, setIsAdmin] = useState(false);
     const [loading, setLoading] = useState(false);
     const [selectedPriceGroup, setSelectedPriceGroup] = useState(null);
@@ -28,7 +28,6 @@ const Prices = (props) => {
     useEffect(() => {
         setIsAdmin(Roles.hasAdminPrivileges(currentUser));
         fetchPriceGroup();
-        fetchProducts();
     }, []);
 
     useEffect(() => setIsAdmin(Roles.hasAdminPrivileges(currentUser)), [currentUser]);
@@ -53,23 +52,15 @@ const Prices = (props) => {
                 const supervisorRoles = getSupervisorRoles(supervisor.users);
                 const supervisorProducts = getProductGroups(supervisorRoles);
                 setViewedProducts(supervisorProducts);
-            } else {
+            } else
                 setViewedProducts(products);
-            }
-            
         }
     }, [products]);
 
     useEffect(() => {
-        if (isDefinedAndNotVoid(viewedProducts))
+        if (isDefinedAndNotVoid(viewedProducts) && isDefined(selectedPriceGroup))
             setCsvContent(getCsvContent());
-    }, [viewedProducts]);
-
-    const fetchProducts = () => {
-        ProductActions
-            .findAll()
-            .then(response => setProducts(response));
-    };
+    }, [viewedProducts, selectedPriceGroup]);
 
     const fetchPriceGroup = () => {
         PriceGroupActions
@@ -114,7 +105,7 @@ const Prices = (props) => {
 
     const getCsvContent = () => viewedProducts.map(item => [item.name, getPriceHT(item), "euros"].join(',')).join('\n');
 
-    return (
+    return !isDefined(selectedPriceGroup) ? <></> : (
         <CRow>
             <CCol xs="12" lg="12">
                 <CCard>

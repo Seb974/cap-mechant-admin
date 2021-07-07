@@ -13,14 +13,15 @@ import ProductActions from 'src/services/ProductActions';
 import SellerActions from 'src/services/SellerActions';
 import Select from 'src/components/forms/Select';
 import GroupRateModal from 'src/components/pricePages/groupRateModal';
+import ProductsContext from 'src/contexts/ProductsContext';
 
 const Profitability = (props) => {
     const itemsPerPage = 30;
     const fields = ['Vendeur', 'Fournisseur', 'Date', 'Total', ' '];
     const { currentUser } = useContext(AuthContext);
+    const {products, setProducts} = useContext(ProductsContext);
     const [provisions, setProvisions] = useState([]);
     const [priceGroups, setPriceGroups] = useState([]);
-    const [products, setProducts] = useState([]);
     const [sellers, setSellers] = useState([]);
     const [isAdmin, setIsAdmin] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -74,10 +75,7 @@ const Profitability = (props) => {
     const fetchProducts = () => {
         ProductActions
             .findAll()
-            .then(response => {
-                console.log(response);
-                setProducts(response);
-            });
+            .then(response => setProducts(response));
     };
 
     const fetchSellers = () => {

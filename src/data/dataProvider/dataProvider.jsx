@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import ProductsContext from '../../contexts/ProductsContext';
 import AuthContext from '../../contexts/AuthContext';
 import AuthActions from '../../services/AuthActions';
@@ -27,6 +27,7 @@ const DataProvider = ({ children }) => {
     const [eventSource, setEventSource] = useState({});
     const [cities, setCities] = useState([]);
     const [relaypoints, setRelaypoints] = useState([]);
+    const [categories, setCategories] = useState([]);
     const [condition, setCondition] = useState(undefined);
     const [containers, setContainers] = useState([]);
     const [packages, setPackages] = useState([]);
@@ -53,6 +54,8 @@ const DataProvider = ({ children }) => {
                       .then(response => setCatalogs(response));
         RelaypointActions.findAll()
                          .then(response => setRelaypoints(response));
+        CategoryActions.findAll()
+                       .then(response => setCategories(response));
     },[]);
 
     useEffect(() => {
@@ -82,12 +85,14 @@ const DataProvider = ({ children }) => {
         }
     }, [catalogs, country]);
 
+    useEffect(() => console.log(products), [products]);
+
     return (
         <PlatformContext.Provider value={ {platform, setPlatform} }>
         <AuthContext.Provider value={ {isAuthenticated, setIsAuthenticated, currentUser, setCurrentUser, eventSource, setEventSource, settings, setSettings, selectedCatalog, setSelectedCatalog, seller, setSeller, supervisor, setSupervisor} }>
         <DeliveryContext.Provider value={ {cities, setCities, relaypoints, setRelaypoints, condition, setCondition, packages, setPackages, totalWeight, setTotalWeight, availableWeight, setAvailableWeight, tourings, setTourings} }>
         <ContainerContext.Provider value={{ containers, setContainers }}>
-        <ProductsContext.Provider value={ {products, setProducts} }>
+        <ProductsContext.Provider value={ {products, setProducts, categories, setCategories} }>
             <Mercure>
                 { children }
             </Mercure>

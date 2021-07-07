@@ -8,20 +8,20 @@ import AuthContext from 'src/contexts/AuthContext';
 import Roles from 'src/config/Roles';
 import useWindowDimensions from 'src/helpers/screenDimensions';
 import StockActions from 'src/services/StockActions';
+import ProductsContext from 'src/contexts/ProductsContext';
 
 const Stocks = (props) => {
 
     const itemsPerPage = 15;
     const { currentUser } = useContext(AuthContext);
+    const { products, setProducts } = useContext(ProductsContext);
     const fields = ['Nom', 'Sécurité', 'Alerte', 'Niveau'];
     const [stocks, setStocks] = useState([]);
     const { height, width } = useWindowDimensions();
-    // const [isAdmin, setIsAdmin] = useState(false);
-
-    // useEffect(() => setIsAdmin(Roles.hasAdminPrivileges(currentUser)), []);
-    // useEffect(() => setIsAdmin(Roles.hasAdminPrivileges(currentUser)), [currentUser]);
 
     useEffect(() => fetchProducts(), []);
+
+    useEffect(() => setStocks(defineStocks(products)), [products]);
 
     const fetchProducts = () => {
         ProductActions.findAll()

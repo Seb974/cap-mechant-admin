@@ -41,7 +41,7 @@ const Recoveries = (props) => {
 
     useEffect(() => {
         if (isDefinedAndNotVoid(updatedOrders))
-            updateRecoveries(updatedOrders, dates, orders, setOrders, currentUser, supervisor);
+            updateRecoveries(updatedOrders, dates, orders, setOrders, currentUser, supervisor, setUpdatedOrders);
     }, [updatedOrders]);
 
     useEffect(() => setIsAdmin(Roles.hasAdminPrivileges(currentUser)), [currentUser]);

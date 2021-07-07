@@ -24,6 +24,7 @@ const Deliveries = (props) => {
     const { platform } = useContext(PlatformContext);
     const { currentUser, supervisor } = useContext(AuthContext);
     const { updatedOrders, setUpdatedOrders } = useContext(MercureContext);
+    const [mercureOpering, setMercureOpering] = useState(false);
     const [orders, setOrders] = useState([]);
     const [isAdmin, setIsAdmin] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -47,8 +48,11 @@ const Deliveries = (props) => {
     }, []);
 
     useEffect(() => {
-        if (isDefinedAndNotVoid(updatedOrders))
-            updateDeliveries(updatedOrders, dates, orders, setOrders, currentUser, supervisor);
+        if (isDefinedAndNotVoid(updatedOrders) && !mercureOpering) {
+            setMercureOpering(true);
+            updateDeliveries(updatedOrders, dates, orders, setOrders, currentUser, supervisor, setUpdatedOrders)
+                .then(response => setMercureOpering(response));
+        }
     }, [updatedOrders]);
 
     useEffect(() => setIsAdmin(Roles.hasAdminPrivileges(currentUser)), [currentUser]);
@@ -92,7 +96,6 @@ const Deliveries = (props) => {
             const newStart = new Date(datetime[0].getFullYear(), datetime[0].getMonth(), datetime[0].getDate(), 0, 0, 0);
             const newEnd = new Date(datetime[1].getFullYear(), datetime[1].getMonth(), datetime[1].getDate(), 23, 59, 0);
             setDates({start: newStart, end: newEnd});
-
         }
     };
 
@@ -149,10 +152,7 @@ const Deliveries = (props) => {
 
     const handleCreateTrip = () => {
         getOrderedOrders()
-            .then(response => {
-                console.log(response);
-                createTouring(response);
-            });
+            .then(response => createTouring(response));
     }
 
     const getOrderedOrders = () => {
@@ -189,7 +189,6 @@ const Deliveries = (props) => {
         return OrderActions
             .getOptimizedTrip(tripFromShop)
             .then(response => {
-                console.log(response);
                 let optimizedOrders = [];
                 const startIndex = priorizedOrders.length;
                 if (isDefined(response.waypoints)) {

@@ -2,47 +2,63 @@ import Roles from "src/config/Roles";
 import { getActiveStatus } from "src/helpers/orders";
 import { isDefined } from "src/helpers/utils";
 
-export const updateStatusBetween = (data, dates, status, orders, setOrders, user, supervisor) => {
-    const updatedOrders = getOrdersWithUpdates(data, dates, status, orders, user, supervisor);
+export const updateStatusBetween = (data, dates, status, orders, setOrders, user, supervisor, setData) => {
+    const { updatedOrders, newData } = getOrdersWithUpdates(data, dates, status, orders, user, supervisor);
     setOrders(updatedOrders);
+    setData(newData.filter(d => !isDefined(d.treated)));
+    return new Promise((resolve, reject) => resolve(false));
 };
 
-export const updatePreparations = (data, dates, orders, setOrders, user, supervisor) => {
+export const updatePreparations = (data, dates, orders, setOrders, user, supervisor, setData) => {
     const status = [{value: "WAITING"}, {value: "PRE_PREPARED"}];
-    const ordersWithUpdate = getOrdersWithUpdates(data, dates, status, orders, user, supervisor);
-    const updatedOrders = Roles.isSeller(user) ? ordersWithUpdate.filter(o => o.items.findIndex(i => !i.isPrepared) !== -1) : ordersWithUpdate;
-    setOrders(updatedOrders);
+    const { updatedOrders, newData } = getOrdersWithUpdates(data, dates, status, orders, user, supervisor);
+    const ordersWithUpdate = Roles.isSeller(user) ? updatedOrders.filter(o => o.items.findIndex(i => !i.isPrepared) !== -1) : updatedOrders;
+    setOrders(ordersWithUpdate);
+    setData(newData.filter(d => !isDefined(d.treated)));
+    return new Promise((resolve, reject) => resolve(false));
 };
 
-export const updateDeliveries = (data, dates, orders, setOrders, user, supervisor) => {
+export const updateDeliveries = (data, dates, orders, setOrders, user, supervisor, setData) => {
     const status = [{value: "WAITING"}, {value: "PRE_PREPARED"}, {value: "PREPARED"}];
-    const updatedOrders = getOrdersWithUpdates(data, dates, status, orders, user, supervisor);
+    const { updatedOrders, newData } = getOrdersWithUpdates(data, dates, status, orders, user, supervisor);
     setOrders(updatedOrders);
+    setData(newData.filter(d => !isDefined(d.treated)));
+    return new Promise((resolve, reject) => resolve(false));
 };
 
-export const updateRecoveries = (data, dates, orders, setOrders, user, supervisor) => {
+export const updateRecoveries = (data, dates, orders, setOrders, user, supervisor, setData) => {
     const status = [{value: "WAITING"}, {value: "PRE_PREPARED"}];
-    const updatedOrders = getOrdersWithUpdates(data, dates, status, orders, user, supervisor);
+    const { updatedOrders, newData } = getOrdersWithUpdates(data, dates, status, orders, user, supervisor);
     setOrders(updatedOrders);
+    setData(newData.filter(d => !isDefined(d.treated)));
+    return new Promise((resolve, reject) => resolve(false));
 };
 
-export const updateCheckouts = (data, dates, orders, setOrders, user, supervisor, relaypoint) => {
+export const updateCheckouts = (data, dates, orders, setOrders, user, supervisor, relaypoint, setData) => {
     const status = getActiveStatus().filter(s => s.value !== "DELIVERED");
-    const ordersWithUpdate = getOrdersWithUpdates(data, dates, status, orders, user, supervisor);
-    const updatedOrders = ordersWithUpdate.filter(o => o.metas.id === relaypoint.metas.id);
-    setOrders(updatedOrders);
+    const { updatedOrders, newData } = getOrdersWithUpdates(data, dates, status, orders, user, supervisor);
+    const ordersWithUpdate = updatedOrders.filter(o => o.metas.id === relaypoint.metas.id);
+    setOrders(ordersWithUpdate);
+    setData(newData.filter(d => !isDefined(d.treated)));
+    return new Promise((resolve, reject) => resolve(false));
 };
 
 const getOrdersWithUpdates = (data, dates, status, orders, user, supervisor) => {
     let updatedOrders = orders;
     const { start, end } = formatUTC(dates);
-    data.map(order => {
-        const deliveryDate = new Date(order.deliveryDate);
-        const orderToEdit = {...order, items : getFormattedItems(order)};
-        if (deliveryDate >= start && deliveryDate <= end && hasAccess(orderToEdit, user, supervisor))   // && status.findIndex(s => s.value === order.status) !== -1
-            updatedOrders = getUpdatedOrders(orderToEdit, updatedOrders);
+    const newData = data.map(order => {
+        const isDeleted = !isDefined(order.id);
+        if (!isDeleted) {
+            const deliveryDate = new Date(order.deliveryDate);
+            const orderToEdit = {...order, items : getFormattedItems(order)};
+            if (deliveryDate >= start && deliveryDate <= end && hasAccess(orderToEdit, user, supervisor))   // && status.findIndex(s => s.value === order.status) !== -1
+                updatedOrders = getUpdatedOrders(orderToEdit, updatedOrders);
+        } else {
+            updatedOrders = [...updatedOrders].filter(o => o['@id'] !== order['@id']);
+        }
+        return {...order, treated: true};
     });
-    return updatedOrders;
+    return { updatedOrders, newData };
 };
 
 const formatUTC = dates => ({ start: new Date(dates.start.toUTCString()), end: new Date(dates.end.toUTCString()) });

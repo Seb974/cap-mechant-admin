@@ -17,22 +17,20 @@ const WidgetsDropdown = ({ sales, interval }) => {
 
   useEffect(() => getPeriod(), []);
 
-  useEffect(() => console.log(sales), [sales]);
-
   const getTotalOrder = order => order.items.reduce((sum, i) => sum += i.price * (isDefined(i.deliveredQty) ? i.deliveredQty : i.orderedQty), 0);
-
+  
   const getVolumeOrder = order => order.items.reduce((sum, i) => sum += i.product.weight * (isDefined(i.deliveredQty) ? i.deliveredQty : i.orderedQty), 0);
   
   const getTurnovers = () => period.map(d => sales.reduce((sum, s) => sum += isSameDate(d, new Date(s.deliveryDate)) ? getTotalOrder(s) : 0, 0));
-
+  
   const getOrdersNumber = () => period.map(d => sales.reduce((sum, s) => sum += isSameDate(d, new Date(s.deliveryDate)) ? 1 : 0, 0));
-
+  
   const getClientsNumber = () => period.map(d => sales.reduce((unique, s) => isSameDate(d, new Date(s.deliveryDate)) && !unique.includes(s.email) ? [...unique, s.email] : unique, []).length);
-
+  
   const getAverageOrders = () => period.map(d => sales.reduce((sum, s) => sum += isSameDate(d, new Date(s.deliveryDate)) && getDayTotalOrder(d) > 0 ? (getTotalOrder(s) / getDayTotalOrder(d)) : 0, 0));
-
+  
   const getDayTotalOrder = day => sales.reduce((sum, s) => sum += isSameDate(day, new Date(s.deliveryDate)) ? 1 : 0, 0);
-
+  
   const getVolumes = () => period.map(d => sales.reduce((sum, s) => sum += isSameDate(d, new Date(s.deliveryDate)) ? getVolumeOrder(s) : 0, 0));
 
   const getLastElement = (elements, precision) => {
@@ -163,4 +161,4 @@ const WidgetsDropdown = ({ sales, interval }) => {
   )
 }
 
-export default WidgetsDropdown
+export default WidgetsDropdown;

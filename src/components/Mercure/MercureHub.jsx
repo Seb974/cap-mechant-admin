@@ -16,7 +16,7 @@ const MercureHub = ({ children }) => {
     
     const url = new URL(api.MERCURE_DOMAIN + "/.well-known/mercure");
     const { products, setProducts } = useContext(ProductsContext);
-    const { updatedOrders, setUpdatedOrders } = useContext(MercureContext);
+    const { updatedOrders, setUpdatedOrders, updatedProducts, setUpdatedProducts, updatedUsers, setUpdatedUsers, updatedCategories, setUpdatedCategories } = useContext(MercureContext);
     const { currentUser, eventSource, setEventSource } = useContext(AuthContext);
     const { packages, setPackages, tourings, setTourings } = useContext(DeliveryContext);
 
@@ -43,17 +43,17 @@ const MercureHub = ({ children }) => {
         if (data['@id'].includes('tourings'))
             touringEvents.update(data, tourings, setTourings);
 
-        if (data['@id'].includes('products'))
-            productEvents.update(data, products, setProducts);
-
         if (data['@id'].includes('categories'))
-            categoryEvents.update(data);
+            setUpdatedCategories([...updatedCategories, data]);
 
         if (data['@id'].includes('users') || data['@id'].includes('metas'))
-            userEvents.update(data);
+            setUpdatedUsers([...updatedUsers, data]);
+
         if (data['@id'].includes('order_entities') && updatedOrders.findIndex(o => o.id === data.id) === -1)
             setUpdatedOrders([...updatedOrders, data]);
-        // orderEvents.update(data);
+
+        if (data['@id'].includes('products') || data['@id'].includes('prices') || data['@id'].includes('stocks'))
+            setUpdatedProducts([...updatedProducts, data]);
     };
 
     return <>{ children }</>

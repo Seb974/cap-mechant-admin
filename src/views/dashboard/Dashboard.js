@@ -21,13 +21,17 @@ const Dashboard = () => {
     const dates = { start: getDateFrom(now, -interval, 0), end: now };
     const { currentUser, supervisor, seller } = useContext(AuthContext);
     const { updatedOrders, setUpdatedOrders } = useContext(MercureContext);
+    const [mercureOpering, setMercureOpering] = useState(false);
     const [sales, setSales] = useState([]);
 
     useEffect(() => fetchSales(), []);
 
     useEffect(() => {
-        if (isDefinedAndNotVoid(updatedOrders))
-            updateStatusBetween(updatedOrders, getUTCDates(dates), status, sales, setSales, currentUser, supervisor);
+        if (isDefinedAndNotVoid(updatedOrders) && !mercureOpering) {
+            setMercureOpering(true);
+            updateStatusBetween(updatedOrders, getUTCDates(dates), status, sales, setSales, currentUser, supervisor, setUpdatedOrders)
+                .then(response => setMercureOpering(response));
+        }
     }, [updatedOrders]);
 
     const fetchSales = () => {
@@ -49,12 +53,12 @@ const Dashboard = () => {
 
     return (
         <>
-            <StatChart style={{height: '300px', marginTop: '40px'}} sales={ sales } interval={ interval }/>
             <WidgetsDropdown sales={ sales } interval={ widgetInterval }/>
             <SalesStats />
             { !isDefined(supervisor) && <StockStats /> }
+            <StatChart style={{height: '300px', marginTop: '40px'}} sales={ sales } interval={ interval }/>
         </>
     );
 }
 
-export default Dashboard
+export default Dashboard;

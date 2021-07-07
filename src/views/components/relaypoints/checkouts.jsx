@@ -37,7 +37,7 @@ const Checkouts = (props) => {
 
     useEffect(() => {
         if (isDefinedAndNotVoid(updatedOrders))
-            updateCheckouts(updatedOrders, dates, orders, setOrders, currentUser, supervisor, selectedRelaypoint);
+            updateCheckouts(updatedOrders, dates, orders, setOrders, currentUser, supervisor, selectedRelaypoint, setUpdatedOrders);
     }, [updatedOrders]);
 
     useEffect(() => setIsAdmin(Roles.hasAdminPrivileges(currentUser)), [currentUser]);

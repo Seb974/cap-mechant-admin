@@ -19,14 +19,18 @@ const SalesStats = () => {
     const { products } = useContext(ProductsContext);
     const { currentUser, supervisor, seller } = useContext(AuthContext);
     const { updatedOrders, setUpdatedOrders } = useContext(MercureContext);
+    const [mercureOpering, setMercureOpering] = useState(false);
     const [sales, setSales] = useState([]);
     const [dates, setDates] = useState({start: new Date(), end: new Date() });
     const [productSales, setProductSales] = useState([]);
     const [breaks, setBreaks] = useState([]);
 
     useEffect(() => {
-        if (isDefinedAndNotVoid(updatedOrders))
-            updateStatusBetween(updatedOrders, getUTCDates(), status, sales, setSales, currentUser, supervisor);
+        if (isDefinedAndNotVoid(updatedOrders) && !mercureOpering) {
+            setMercureOpering(true);
+            updateStatusBetween(updatedOrders, getUTCDates(), status, sales, setSales, currentUser, supervisor, setUpdatedOrders)
+                .then(response => setMercureOpering(response));
+        }
     }, [updatedOrders]);
 
     useEffect(() => fetchSales(), [dates]);
@@ -36,7 +40,7 @@ const SalesStats = () => {
         const breaksSales = getBreaks();
         setProductSales(selledProducts);
         setBreaks(breaksSales);
-    }, [sales]);
+    }, [sales, products]);
 
     const fetchSales = () => {
         OrderActions

@@ -5,4 +5,8 @@ export default React.createContext({
     setUpdatedOrders: (value) => {},
     updatedProducts: [],
     setUpdatedProducts: (value) => {},
+    updatedUsers: [], 
+    setUpdatedUsers: (value) => {},
+    updatedCategories: [],
+    setUpdatedCategories: (value) => {},
 });

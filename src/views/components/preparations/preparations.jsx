@@ -35,7 +35,7 @@ const Preparations = (props) => {
 
     useEffect(() => {
         if (isDefinedAndNotVoid(updatedOrders))
-            updatePreparations(updatedOrders, dates, orders, setOrders, currentUser, supervisor);
+            updatePreparations(updatedOrders, dates, orders, setOrders, currentUser, supervisor, setUpdatedOrders);
     }, [updatedOrders]);
 
     useEffect(() => setIsAdmin(Roles.hasAdminPrivileges(currentUser)), [currentUser]);

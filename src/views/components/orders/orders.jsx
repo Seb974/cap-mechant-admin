@@ -41,7 +41,7 @@ const Orders = (props) => {
 
     useEffect(() => {
         if (isDefinedAndNotVoid(updatedOrders))
-            updateStatusBetween(updatedOrders, dates, selectedStatus, orders, setOrders, currentUser, supervisor);
+            updateStatusBetween(updatedOrders, dates, selectedStatus, orders, setOrders, currentUser, supervisor, setUpdatedOrders);
     }, [updatedOrders]);
 
     useEffect(() => setIsAdmin(Roles.hasAdminPrivileges(currentUser)), [currentUser]);

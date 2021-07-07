@@ -20,13 +20,13 @@ const Products = (props) => {
     useEffect(() => setIsAdmin(Roles.hasAdminPrivileges(currentUser)), [currentUser]);
 
     useEffect(() => {
-        ProductActions.findAll()
-                .then(response => {
-                    console.log(response);
-                    setDisplayedProducts(response);
-                    setProducts(response);
-                })
-                .catch(error => console.log(error.response));
+        ProductActions
+            .findAll()
+            .then(response => {
+                setDisplayedProducts(response);
+                setProducts(response);
+            })
+            .catch(error => console.log(error.response));
     }, []);
 
     useEffect(() => {
