@@ -14,12 +14,15 @@ import SellerActions from 'src/services/SellerActions';
 import Select from 'src/components/forms/Select';
 import GroupRateModal from 'src/components/pricePages/groupRateModal';
 import ProductsContext from 'src/contexts/ProductsContext';
+import MercureContext from 'src/contexts/MercureContext';
+import { updateBetween } from 'src/data/dataProvider/eventHandlers/provisionEvents';
 
 const Profitability = (props) => {
     const itemsPerPage = 30;
     const fields = ['Vendeur', 'Fournisseur', 'Date', 'Total', ' '];
-    const { currentUser } = useContext(AuthContext);
+    const { currentUser, seller } = useContext(AuthContext);
     const {products, setProducts} = useContext(ProductsContext);
+    const { updatedProvisions, setUpdatedProvisions } = useContext(MercureContext);
     const [provisions, setProvisions] = useState([]);
     const [priceGroups, setPriceGroups] = useState([]);
     const [sellers, setSellers] = useState([]);
@@ -31,6 +34,7 @@ const Profitability = (props) => {
     const [selectedSellers, setSelectedSellers] = useState([]);
     const [viewedProducts, setViewedProducts] = useState([]);
     const [updated, setUpdated] = useState([]);
+    const [mercureOpering, setMercureOpering] = useState(false);
 
     useEffect(() => {
         setIsAdmin(Roles.hasAdminPrivileges(currentUser));
@@ -57,6 +61,14 @@ const Profitability = (props) => {
             setViewedProducts(filteredProducts);
         }
     }, [products, selectedSellers]);
+
+    useEffect(() => {
+        if (isDefinedAndNotVoid(updatedProvisions) && !mercureOpering) {
+            setMercureOpering(true);
+            updateBetween(getUTCDates(), provisions, setProvisions, updatedProvisions, setUpdatedProvisions, currentUser, seller, sellers)
+                .then(response => setMercureOpering(response));
+        }
+    }, [updatedProvisions]);
 
     const fetchProvisions = () => {
         setLoading(true);
@@ -91,7 +103,7 @@ const Profitability = (props) => {
     };
 
     const handleDateChange = datetime => {
-        if (isDefined(datetime[1])){
+        if (isDefined(datetime[1])) {
             const newStart = new Date(datetime[0].getFullYear(), datetime[0].getMonth(), datetime[0].getDate(), 0, 0, 0);
             const newEnd = new Date(datetime[1].getFullYear(), datetime[1].getMonth(), datetime[1].getDate(), 23, 59, 0);
             setDates({start: newStart, end: newEnd});
@@ -257,8 +269,8 @@ const Profitability = (props) => {
     const getGainLevelInformation = (product, price) => {
         const gain = getGain(product, price);
         const group = priceGroups.find(group => group.id === price.priceGroup.id);
-        const minRate = group.rate;
-        const maxRate = (group.rate + 15);
+        const minRate = isDefined(group) ? group.rate : 0;
+        const maxRate = isDefined(group) ? (group.rate + 15) : 15;
         return isNaN(gain) || (gain >= minRate && gain <= maxRate) ? 0 : gain < minRate ? 2 : 1;
     };
 
@@ -297,8 +309,7 @@ const Profitability = (props) => {
                                 </CCol>
                             </CRow>
                         }
-                        
-                        { loading ? 
+                        { loading ?
                             <CRow>
                                 <CCol xs="12" lg="12" className="text-center">
                                     <Spinner animation="border" variant="danger"/>

@@ -85,8 +85,6 @@ const DataProvider = ({ children }) => {
         }
     }, [catalogs, country]);
 
-    useEffect(() => console.log(products), [products]);
-
     return (
         <PlatformContext.Provider value={ {platform, setPlatform} }>
         <AuthContext.Provider value={ {isAuthenticated, setIsAuthenticated, currentUser, setCurrentUser, eventSource, setEventSource, settings, setSettings, selectedCatalog, setSelectedCatalog, seller, setSeller, supervisor, setSupervisor} }>

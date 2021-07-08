@@ -8,15 +8,18 @@ import { getDateFrom, isDefined, isDefinedAndNotVoid } from 'src/helpers/utils';
 import { getDayName, isSameDate } from 'src/helpers/days';
 import { CCard, CCardBody, CCardFooter, CCol, CProgress, CRow, CWidgetIcon } from '@coreui/react';
 import { brandDanger, brandInfo, brandSuccess, getFormattedDatas, getOptions, getProgressColor } from 'src/helpers/stats';
+import MercureContext from 'src/contexts/MercureContext';
 import CIcon from '@coreui/icons-react';
 import Roles from 'src/config/Roles';
+import { updateBetween } from 'src/data/dataProvider/eventHandlers/provisionEvents';
 
 const StatChart = ({ sales, interval, ...attributes }) => {
 
   const target = 60;
   const now = new Date();
-  const { currentUser, supervisor } = useContext(AuthContext);
+  const { currentUser, supervisor, seller } = useContext(AuthContext);
   const dates = { start: getDateFrom(now, -interval, 0), end: now };
+  const { updatedProvisions, setUpdatedProvisions } = useContext(MercureContext);
 
   const [period, setPeriod] = useState([]);
   const [sellers, setSellers] = useState([]);
@@ -24,6 +27,7 @@ const StatChart = ({ sales, interval, ...attributes }) => {
   const [zones, setZones] = useState([]);
   const [viewedZones, setViewedZones] = useState([]);
   const [dataset, setDataset] = useState([]);
+  const [mercureOpering, setMercureOpering] = useState(false);
 
   useEffect(() => {
       getPeriod();
@@ -55,6 +59,14 @@ const StatChart = ({ sales, interval, ...attributes }) => {
       if (isDefinedAndNotVoid(zones))
           setViewedZones(getSalesPerZone())
   }, [sales, zones]);
+
+  useEffect(() => {
+    if (isDefinedAndNotVoid(updatedProvisions) && !mercureOpering) {
+        setMercureOpering(true);
+        updateBetween(getUTCDates(), provisions, setProvisions, updatedProvisions, setUpdatedProvisions, currentUser, seller, sellers)
+            .then(response => setMercureOpering(response));
+    }
+}, [updatedProvisions]);
 
   const fetchSellers = () => {
       SellerActions

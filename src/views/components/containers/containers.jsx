@@ -1,21 +1,20 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import ContainerActions from '../../../services/ContainerActions'
 import { CBadge, CCard, CCardBody, CCardHeader, CCol, CDataTable, CRow, CButton } from '@coreui/react';
 import { DocsLink } from 'src/reusable'
 import { Link } from 'react-router-dom';
+import ContainerContext from 'src/contexts/ContainerContext';
 
 const Containers = (props) => {
 
+    // const [containers, setContainers] = useState([]);
+    const { containers, setContainers } = useContext(ContainerContext);
     const itemsPerPage = 15;
     const fields = ['name', ' '];
-    const [containers, setContainers] = useState([]);
 
     useEffect(() => {
         ContainerActions.findAll()
-            .then(response => {
-              console.log(response);
-              setContainers(response);
-            })
+            .then(response => setContainers(response))
             .catch(error => console.log(error.response));
     }, []);
 

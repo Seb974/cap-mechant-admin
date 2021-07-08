@@ -2,18 +2,16 @@ import Roles from "src/config/Roles";
 import { isDefined, isDefinedAndNotVoid } from "src/helpers/utils";
 
 export const updateCategories = (categories, setCategories, products, setProducts, data, setData) => {
-    
+
     let updatedCategories = categories;
     const newData = data.map(entity => {
         const idFromContext = parseInt(entity['@id'].slice(entity['@id'].lastIndexOf('/') + 1));
         updatedCategories = !isDefined(entity.id) ? 
                             [...updatedCategories].filter(c => c['@id'] !== entity['@id']) :
                             getUpdatedCategories(entity, updatedCategories);
-        console.log(updatedCategories);
         updateLinkedProductsIfNeeded(idFromContext, entity, products, setProducts);
         return {...entity, treated: true};
     });
-
     setCategories(updatedCategories);
     setData(newData.filter(d => !isDefined(d.treated)));
 
@@ -33,7 +31,6 @@ const updateLinkedProductsIfNeeded = (id, entity, products, setProducts) => {
             else 
                 return p;
         });
-        console.log(updatedProducts);
         setProducts(updatedProducts);
     }
 }

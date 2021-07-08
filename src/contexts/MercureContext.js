@@ -9,4 +9,8 @@ export default React.createContext({
     setUpdatedUsers: (value) => {},
     updatedCategories: [],
     setUpdatedCategories: (value) => {},
+    updatedProvisions: [],
+    setUpdatedProvisions: (value) => {},
+    updatedContainers: [],
+    setUpdatedContainers: (value) => {},
 });

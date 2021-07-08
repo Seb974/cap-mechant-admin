@@ -2,21 +2,17 @@ import React, { useEffect, useContext } from 'react';
 import { EventSourcePolyfill } from 'event-source-polyfill';
 import AuthContext from 'src/contexts/AuthContext';
 import api from 'src/config/api';
-import eventHandler from '../../data/dataProvider/eventHandlers/eventHandler';
 import touringEvents from 'src/data/dataProvider/eventHandlers/touringEvents';
-import productEvents from 'src/data/dataProvider/eventHandlers/productEvents';
-import categoryEvents from 'src/data/dataProvider/eventHandlers/categoryEvents';
-import userEvents from 'src/data/dataProvider/eventHandlers/userEvents';
 import DeliveryContext from 'src/contexts/DeliveryContext';
 import ProductsContext from 'src/contexts/ProductsContext';
-import orderEvents from 'src/data/dataProvider/eventHandlers/orderEvents';
 import MercureContext from 'src/contexts/MercureContext';
 
 const MercureHub = ({ children }) => {
     
     const url = new URL(api.MERCURE_DOMAIN + "/.well-known/mercure");
     const { products, setProducts } = useContext(ProductsContext);
-    const { updatedOrders, setUpdatedOrders, updatedProducts, setUpdatedProducts, updatedUsers, setUpdatedUsers, updatedCategories, setUpdatedCategories } = useContext(MercureContext);
+    const { updatedOrders, setUpdatedOrders, updatedProducts, setUpdatedProducts, updatedCategories, setUpdatedCategories } = useContext(MercureContext);
+    const { updatedUsers, setUpdatedUsers, updatedProvisions, setUpdatedProvisions, updatedContainers, setUpdatedContainers } = useContext(MercureContext);
     const { currentUser, eventSource, setEventSource } = useContext(AuthContext);
     const { packages, setPackages, tourings, setTourings } = useContext(DeliveryContext);
 
@@ -24,7 +20,9 @@ const MercureHub = ({ children }) => {
         closeIfExists();
         url.searchParams.append('topic', api.API_DOMAIN + '/api/products/{id}');
         url.searchParams.append('topic', api.API_DOMAIN + '/api/stocks/{id}');
+        url.searchParams.append('topic', api.API_DOMAIN + '/api/provisions/{id}');
         url.searchParams.append('topic', api.API_DOMAIN + '/api/categories/{id}');
+        url.searchParams.append('topic', api.API_DOMAIN + '/api/containers/{id}');
         url.searchParams.append('topic', api.API_DOMAIN + '/api/tourings/{id}');
         url.searchParams.append('topic', api.API_DOMAIN + '/api/users/{id}');
         url.searchParams.append('topic', api.API_DOMAIN + '/api/users/{id}/metas');
@@ -42,6 +40,12 @@ const MercureHub = ({ children }) => {
         console.log(data);
         if (data['@id'].includes('tourings'))
             touringEvents.update(data, tourings, setTourings);
+
+        if (data['@id'].includes('containers'))
+            setUpdatedContainers([...updatedContainers, data]);
+
+        if (data['@id'].includes('provisions'))
+            setUpdatedProvisions([...updatedProvisions, data]);
 
         if (data['@id'].includes('categories'))
             setUpdatedCategories([...updatedCategories, data]);

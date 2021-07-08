@@ -14,12 +14,14 @@ import SupplierActions from 'src/services/SupplierActions';
 import SellerActions from 'src/services/SellerActions';
 import ProvisionModal from 'src/components/provisionPages/provisionModal';
 import CIcon from '@coreui/icons-react';
+import MercureContext from 'src/contexts/MercureContext';
+import { updateSuppliersBetween } from 'src/data/dataProvider/eventHandlers/provisionEvents';
 
 const Provisions = (props) => {
 
     const itemsPerPage = 30;
     const fields = ['Vendeur', 'Fournisseur', 'Date', 'Total', ' '];
-    const { currentUser } = useContext(AuthContext);
+    const { currentUser, seller } = useContext(AuthContext);
     const [provisions, setProvisions] = useState([]);
     const [suppliers, setSuppliers] = useState([]);
     const [sellers, setSellers] = useState([]);
@@ -29,6 +31,8 @@ const Provisions = (props) => {
     const [details, setDetails] = useState([]);
     const [selectedSuppliers, setSelectedSuppliers] = useState([]);
     const [selectedSellers, setSelectedSellers] = useState([]);
+    const { updatedProvisions, setUpdatedProvisions } = useContext(MercureContext);
+    const [mercureOpering, setMercureOpering] = useState(false);
 
     useEffect(() => {
         setIsAdmin(Roles.hasAdminPrivileges(currentUser));
@@ -52,6 +56,14 @@ const Provisions = (props) => {
         if (isDefinedAndNotVoid(selectedSuppliers) && isDefinedAndNotVoid(selectedSellers))
             fetchProvisions()
     }, [dates, selectedSuppliers, selectedSellers]);
+
+    useEffect(() => {
+        if (isDefinedAndNotVoid(updatedProvisions) && !mercureOpering) {
+            setMercureOpering(true);
+            updateSuppliersBetween(getUTCDates(), provisions, setProvisions, updatedProvisions, setUpdatedProvisions, currentUser, seller, sellers, suppliers)
+                .then(response => setMercureOpering(response));
+        }
+    }, [updatedProvisions]);
 
     const fetchProvisions = () => {
         setLoading(true);
