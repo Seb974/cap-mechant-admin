@@ -7,32 +7,32 @@ import OrderActions from 'src/services/OrderActions';
 import { isDefined, isDefinedAndNotVoid } from 'src/helpers/utils';
 import AuthContext from 'src/contexts/AuthContext';
 import Roles from 'src/config/Roles';
+import PackageList from './packageList';
 
 const OrderDetails = ({ orders = null, order, setOrders = null, isDelivery = false, id = order.id }) => {
 
-    const displayedOrder = isDefinedAndNotVoid(orders) ? orders.find(o => o.id === id) : null;
     const { currentUser } = useContext(AuthContext);
     const [isAdmin, setIsAdmin] = useState(false);
     const [viewedOrder, setViewedOrder] = useState(null);
+    const [displayedOrder, setDisplayedOrder] = useState(null);
 
     useEffect(() => setIsAdmin(Roles.hasAdminPrivileges(currentUser)), [currentUser]);
-    
-    useEffect(() => {
-        if (isDefined(displayedOrder))
-            getCurrentOrder();
-    }, [displayedOrder]);
 
-    const getCurrentOrder = () => {
-        const currentOrder = {
-            ...displayedOrder,
-            items: displayedOrder.items.map(item => ({
-                ...item, 
-                preparedQty: (isDefined(item.preparedQty) ? item.preparedQty : ""), 
-                isAdjourned: (isDefined(item.isAdjourned) ? item.isAdjourned : false)
-            }))
-        };
-        setViewedOrder(currentOrder);
-    };
+    useEffect(() => {
+        if (isDefinedAndNotVoid(orders) && JSON.stringify(displayedOrder) !== JSON.stringify(order)) {
+            const newDisplayedOrder = orders.find(o => o.id === id);
+            const currentOrder = {
+                ...newDisplayedOrder,
+                items: newDisplayedOrder.items.map(item => ({
+                    ...item, 
+                    preparedQty: (isDefined(item.preparedQty) ? item.preparedQty : ""), 
+                    isAdjourned: (isDefined(item.isAdjourned) ? item.isAdjourned : false)
+                }))
+            };
+            setDisplayedOrder(newDisplayedOrder);
+            setViewedOrder(currentOrder);
+        }
+    }, [orders]);
 
     const onOrderChange = currentOrder => {
         const newOrders = orders.map(order => order.id === currentOrder.id ? currentOrder : order);
@@ -75,6 +75,23 @@ const OrderDetails = ({ orders = null, order, setOrders = null, isDelivery = fal
                         </CCardBody>
                     );
                 } else return <></>
+            })}
+            { !isDefined(viewedOrder) || !isDefinedAndNotVoid(viewedOrder.packages) ? <></> : viewedOrder.packages.map((_pack, i) => {
+                if (isAdmin || Roles.isPicker(currentUser) || Roles.isSupervisor(currentUser)) {
+                    return(
+                        <CCardBody key={ i }>
+                            <CRow className="text-center mt-0">
+                                <CCol md="1">{""}</CCol>
+                            </CRow>
+                            <CRow>
+                                <CCol md="1">{""}</CCol>
+                                <CCol md="10">
+                                    <PackageList _package={ _pack } total={ viewedOrder.packages.length } index={ i }/>
+                                </CCol>
+                            </CRow>
+                        </CCardBody>
+                    );
+                }
             })}
             <CRow className="text-center mt-0">
                 <CCol md="1">{""}</CCol>

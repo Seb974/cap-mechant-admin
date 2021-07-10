@@ -14,6 +14,7 @@ import DayOffActions from 'src/services/DayOffActions';
 import CIcon from '@coreui/icons-react';
 import { updatePreparations } from 'src/data/dataProvider/eventHandlers/orderEvents';
 import MercureContext from 'src/contexts/MercureContext';
+import { getPackagesPlan } from 'src/helpers/packagePlanner';
 
 const Preparations = (props) => {
 
@@ -21,6 +22,7 @@ const Preparations = (props) => {
     const fields = ['name', 'date', 'total', ' '];
     const { currentUser, seller, supervisor } = useContext(AuthContext);
     const { updatedOrders, setUpdatedOrders } = useContext(MercureContext);
+    const [mercureOpering, setMercureOpering] = useState(false);
     const [orders, setOrders] = useState([]);
     const [isAdmin, setIsAdmin] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -34,8 +36,11 @@ const Preparations = (props) => {
     }, []);
 
     useEffect(() => {
-        if (isDefinedAndNotVoid(updatedOrders))
-            updatePreparations(updatedOrders, dates, orders, setOrders, currentUser, supervisor, setUpdatedOrders);
+        if (isDefinedAndNotVoid(updatedOrders) && !mercureOpering) {
+            setMercureOpering(true);
+            updatePreparations(updatedOrders, getUTCDates(), orders, setOrders, currentUser, supervisor, setUpdatedOrders)
+                .then(response => setMercureOpering(response));
+        }
     }, [updatedOrders]);
 
     useEffect(() => setIsAdmin(Roles.hasAdminPrivileges(currentUser)), [currentUser]);
@@ -242,7 +247,8 @@ const Preparations = (props) => {
                             ,
                             ' ':
                                 item => (
-                                    <td className="mb-3 mb-xl-0 text-center">
+                                    <td className="mb-3 mb-xl-0 text-right">
+                                        { isDefinedAndNotVoid(item.packages) && <CButton color="light" href={"#/components/parcels/" + item.id} target="_blank" className="mx-1 my-1"><i className="fas fa-list-ul"></i></CButton> }
                                         <CButton color="warning" disabled={ !isAdmin } href={ "#/components/orders/" + item.id } className="mx-1 my-1"><i className="fas fa-pen"></i></CButton>
                                         <CButton color="danger" disabled={ !(isAdmin || (item.isRemains && Roles.isPicker(currentUser))) } onClick={ () => handleDelete(item) } className="mx-1 my-1"><i className="fas fa-trash"></i></CButton>
                                     </td>

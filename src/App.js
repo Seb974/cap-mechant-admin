@@ -26,6 +26,7 @@ const Register = React.lazy(() => import('./views/pages/register/Register'));
 const Page404 = React.lazy(() => import('./views/pages/page404/Page404'));
 const Page500 = React.lazy(() => import('./views/pages/page500/Page500'));
 const DeliveryNote = React.lazy(() => import('./views/components/deliveries/deliveryNote'));
+const PackagePlan = React.lazy(() => import('./views/components/preparations/packagePlan'));
 
 const App = () => {
 
@@ -40,6 +41,7 @@ const App = () => {
                         <Route exact path="/500" name="Page 500" component={ Page500 } />
                         <Route path="/apps/email" name="Email App" component={ TheEmailApp } />
                         <AdminRoute path="/components/deliveries/:id" name="DeliveryNote" component={ DeliveryNote } />
+                        <AdminRoute path="/components/parcels/:id" name="PackagePlan" component={ PackagePlan } />
                         <AdminRoute path="/" name="Home" component={ TheLayout } />
                     </Switch>
                 </React.Suspense>

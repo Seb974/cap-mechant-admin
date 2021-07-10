@@ -80,6 +80,7 @@ export const getPreparedOrder = (order, currentUser) => {
                 :
                 item['@id']
         }),
+        packages: !isDefinedAndNotVoid(order.packages) ? [] : order.packages.map(p => ({...p, container: p.container['@id']})),
         isRemains: false
     };
 }
