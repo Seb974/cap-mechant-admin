@@ -26,6 +26,7 @@ const Preparations = (props) => {
     const [orders, setOrders] = useState([]);
     const [isAdmin, setIsAdmin] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [labelLoading, setLabelLoading] = useState(false);
     const [dates, setDates] = useState({start: new Date(), end: new Date() });
     const [daysOff, setDaysOff] = useState([]);
     const [details, setDetails] = useState([])
@@ -156,6 +157,23 @@ const Preparations = (props) => {
         setDetails(newDetails);
     }
 
+    const handleLabel = id => {
+        setLabelLoading(true);
+        OrderActions
+            .getZPLLabel(id)
+            .then(response => {
+                OrderActions
+                    .getPrintableLabel(response.data)
+                    .then(response => {
+                        setLabelLoading(false);
+                        const file = new Blob([response.data], {type: 'application/pdf'});
+                        const fileURL = URL.createObjectURL(file);
+                        window.open(fileURL, '_blank');
+                    });
+            })
+            .catch(error => console.log(error));
+    }
+
     return (
         <CRow>
         <CCol xs="12" lg="12">
@@ -249,6 +267,17 @@ const Preparations = (props) => {
                                 item => (
                                     <td className="mb-3 mb-xl-0 text-right">
                                         { isDefinedAndNotVoid(item.packages) && <CButton color="light" href={"#/components/parcels/" + item.id} target="_blank" className="mx-1 my-1"><i className="fas fa-list-ul"></i></CButton> }
+                                        { isDefinedAndNotVoid(item.reservationNumber) && 
+                                            <CButton color="light" onClick={ () => handleLabel(item.id) } className="mx-1 my-1">
+                                                {!labelLoading ? 
+                                                    <i className="fas fa-barcode"></i> :
+                                                    <>
+                                                        <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true"/>
+                                                        <span className="sr-only">Loading...</span>
+                                                  </>
+                                                }
+                                            </CButton>
+                                        }
                                         <CButton color="warning" disabled={ !isAdmin } href={ "#/components/orders/" + item.id } className="mx-1 my-1"><i className="fas fa-pen"></i></CButton>
                                         <CButton color="danger" disabled={ !(isAdmin || (item.isRemains && Roles.isPicker(currentUser))) } onClick={ () => handleDelete(item) } className="mx-1 my-1"><i className="fas fa-trash"></i></CButton>
                                     </td>

@@ -137,6 +137,27 @@ function create(order) {
     return api.post('/api/order_entities', order);
 }
 
+function getZPLLabel(id) {
+    return api.post('/api/skybills/' + id);
+}
+
+function getPrintableLabel(zpl) {
+    const ticketHeight = 4.02;  //4
+    const ticketWidth = 5.88;   //6
+    return axios.post(
+        `http://api.labelary.com/v1/printers/8dpmm/labels/${ ticketHeight }x${ ticketWidth }/0/`,
+        zpl,
+        {
+            withCredentials: false,
+            headers: {
+                'Accept': 'application/pdf',
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            responseType: 'blob'
+        }
+    );
+}
+
 function formatUTC(dates) {
     return {
         start: new Date(dates.start.toUTCString()), 
@@ -166,5 +187,7 @@ export default {
     find,
     update,
     create,
-    patch
+    patch,
+    getZPLLabel,
+    getPrintableLabel
 }
