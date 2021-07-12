@@ -15,6 +15,8 @@ import CIcon from '@coreui/icons-react';
 import { updatePreparations } from 'src/data/dataProvider/eventHandlers/orderEvents';
 import MercureContext from 'src/contexts/MercureContext';
 import { getPackagesPlan } from 'src/helpers/packagePlanner';
+import api from 'src/config/api';
+
 
 const Preparations = (props) => {
 
@@ -173,7 +175,6 @@ const Preparations = (props) => {
             })
             .catch(error => console.log(error));
     }
-
     return (
         <CRow>
         <CCol xs="12" lg="12">
@@ -270,11 +271,11 @@ const Preparations = (props) => {
                                         { isDefinedAndNotVoid(item.reservationNumber) && 
                                             <CButton color="light" onClick={ () => handleLabel(item.id) } className="mx-1 my-1">
                                                 {!labelLoading ? 
-                                                    <i className="fas fa-barcode"></i> :
+                                                    <i className="fas fa-barcode" style={{ fontSize: '1.2em'}}></i> :
                                                     <>
                                                         <Spinner as="span" animation="border" size="sm" role="status" aria-hidden="true"/>
                                                         <span className="sr-only">Loading...</span>
-                                                  </>
+                                                    </>
                                                 }
                                             </CButton>
                                         }
