@@ -11,13 +11,17 @@ const Categories = (props) => {
     const [categories, setCategories] = useState([]);
 
     useEffect(() => {
+        fetchCategories();
+    }, []);
+
+    const fetchCategories = () => {
         CategoryActions.findAll()
             .then(response => {
               console.log(response);
               setCategories(response);
             })
             .catch(error => console.log(error.response));
-    }, []);
+    };
 
     const handleDelete = (id) => {
         const originalCategories = [...categories];

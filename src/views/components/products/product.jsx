@@ -52,6 +52,7 @@ const ProductPage = ({ match, history }) => {
             let request = ProductActions.find(id);
             request
                 .then(response => {
+                    console.log(response);
                     const formattedProduct = formatProduct(response, defaultStock);
                     setProduct(formattedProduct)
                     setType(defineType(response));
