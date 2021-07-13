@@ -1,23 +1,25 @@
 import React, { useContext, useEffect, useState } from 'react';
 import OrderActions from '../../../services/OrderActions'
-import { CCard, CCardBody, CCardHeader, CCol, CDataTable, CRow, CButton, CCollapse, CFormGroup, CInputCheckbox, CLabel } from '@coreui/react';
+import { CCard, CCardBody, CCardHeader, CCol, CDataTable, CRow, CButton, CCollapse, CFormGroup, CInputCheckbox, CLabel, CSwitch } from '@coreui/react';
 import { Link } from 'react-router-dom';
 import AuthContext from 'src/contexts/AuthContext';
 import Roles from 'src/config/Roles';
 import RangeDatePicker from 'src/components/forms/RangeDatePicker';
 import { isDefined, isDefinedAndNotVoid } from 'src/helpers/utils';
 import { isSameDate, getDateFrom } from 'src/helpers/days';
-import Spinner from 'react-bootstrap/Spinner'
+import Spinner from 'react-bootstrap/Spinner';
 import OrderDetails from 'src/components/preparationPages/orderDetails';
 import Select from 'src/components/forms/Select';
 import RelaypointActions from 'src/services/RelaypointActions';
 import { setOrderStatus } from 'src/helpers/checkout';
-import { updateCheckouts } from 'src/data/dataProvider/eventHandlers/orderEvents';
+import { updateCheckouts, updateStatusBetween } from 'src/data/dataProvider/eventHandlers/orderEvents';
 import MercureContext from 'src/contexts/MercureContext';
+import { getExportStatuses } from 'src/helpers/orders';
 
-const Checkouts = (props) => {
+const Collects = (props) => {
 
     const itemsPerPage = 30;
+    const exportStatuses = getExportStatuses();
     const fields = ['commande', 'date', 'terminer', ' '];
     const { currentUser, supervisor } = useContext(AuthContext);
     const { updatedOrders, setUpdatedOrders } = useContext(MercureContext);
@@ -28,6 +30,8 @@ const Checkouts = (props) => {
     const [selectedRelaypoint, setSelectedRelaypoint] = useState(null);
     const [dates, setDates] = useState({start: new Date(), end: new Date() });
     const [details, setDetails] = useState([]);
+    const [mercureOpering, setMercureOpering] = useState(false);
+    const [relaypointView, setRelaypointView] = useState(true);
 
     useEffect(() => {
         const isUserAdmin = Roles.hasAdminPrivileges(currentUser);
@@ -36,8 +40,13 @@ const Checkouts = (props) => {
     }, []);
 
     useEffect(() => {
-        if (isDefinedAndNotVoid(updatedOrders))
-            updateCheckouts(updatedOrders, dates, orders, setOrders, currentUser, supervisor, selectedRelaypoint, setUpdatedOrders);
+        if (isDefinedAndNotVoid(updatedOrders) && !mercureOpering) {
+            setMercureOpering(true);
+            const update = relaypointView ? 
+                updateCheckouts(updatedOrders, getUTCDates(), orders, setOrders, currentUser, supervisor, selectedRelaypoint, setUpdatedOrders) :
+                updateStatusBetween(updatedOrders, getUTCDates(), exportStatuses, orders, setOrders, currentUser, supervisor, setUpdatedOrders);
+            update.then(response => setMercureOpering(response));
+        }
     }, [updatedOrders]);
 
     useEffect(() => setIsAdmin(Roles.hasAdminPrivileges(currentUser)), [currentUser]);
@@ -47,13 +56,16 @@ const Checkouts = (props) => {
             setSelectedRelaypoint(relaypoints[0]);
     }, [relaypoints]);
 
-    useEffect(() => fetchOrders(), [selectedRelaypoint, dates]);
+    useEffect(() => fetchOrders(), [selectedRelaypoint, dates, relaypointView]);
 
     const fetchOrders = () => {
         setLoading(true);
         const UTCDates = getUTCDates(dates);
-        OrderActions
-            .findCheckouts(UTCDates, selectedRelaypoint)
+        const request = relaypointView ? 
+            OrderActions.findCheckouts(UTCDates, selectedRelaypoint) : 
+            OrderActions.findStatusBetween(UTCDates, exportStatuses, currentUser)
+                        .then(response => response.filter(o => o.catalog.needsParcel));
+        request
             .then(response =>{
                 setOrders(response.map(data => ({...data, selected: false})));
                 setLoading(false);
@@ -95,11 +107,14 @@ const Checkouts = (props) => {
     };
 
     const handleClose = order => {
-        const deliveredOrder = setOrderStatus(order, "DELIVERED");
+        const nextStatus = order.catalog.needsParcel ? "SHIPPED" : "DELIVERED";
+        const deliveredOrder = setOrderStatus(order, nextStatus);
         OrderActions
             .update(order.id, deliveredOrder)
             .then(response => setOrders(orders.filter(o => o.id !== order.id)));
     };
+
+    const handleCheckBoxes = ({ currentTarget }) => setRelaypointView(!relaypointView);
 
     const getUTCDates = () => {
         const UTCStart = new Date(dates.start.getFullYear(), dates.start.getMonth(), dates.start.getDate(), 4, 0, 0);
@@ -137,11 +152,25 @@ const Checkouts = (props) => {
                                     className = "form-control mb-3"
                                 />
                             </CCol>
-                            <CCol xs="12" lg="6">
-                                <Select className="mr-2" name="deliverer" label="Point relais" onChange={ handleRelaypointChange } style={{height: '35px'}}>
-                                    { relaypoints.map(relaypoint => <option value={ relaypoint.id }>{ relaypoint.name }</option>) }
-                                </Select>
-                            </CCol>
+                            { isAdmin &&
+                                <CCol xs="12" md="3" className="mt-4">
+                                    <CFormGroup row className="mb-0 ml-1 d-flex align-items-end">
+                                        <CCol xs="3" sm="2" md="3">
+                                            <CSwitch name="available" className="mr-1" color="dark" shape="pill" variant="opposite" checked={ relaypointView } onChange={ handleCheckBoxes }/>
+                                        </CCol>
+                                        <CCol tag="label" xs="9" sm="10" md="9" className="col-form-label">
+                                            { relaypointView ? "Récupérations Chronopost" : "Récupérations en points relais"}
+                                        </CCol>
+                                    </CFormGroup>
+                                </CCol>
+                            }
+                            { relaypointView &&
+                                <CCol xs="12" lg="6" className="my-3">
+                                    <Select className="mr-2" name="deliverer" label="Point relais" onChange={ handleRelaypointChange } style={{height: '35px'}}>
+                                        { relaypoints.map(relaypoint => <option value={ relaypoint.id }>{ relaypoint.name }</option>) }
+                                    </Select>
+                                </CCol>
+                            }
                         </CRow>
                         { loading ? 
                             <CRow>
@@ -160,7 +189,7 @@ const Checkouts = (props) => {
                                     'commande':
                                         item => <td>
                                                     { isAdmin ? 
-                                                        <Link to="#" onClick={ e => { toggleDetails(item.id, e) }} disabled={ item.status !== "COLLECTABLE" }>
+                                                        <Link to="#" onClick={ e => { toggleDetails(item.id, e) }} disabled={ item.status !== "COLLECTABLE" && item.status !== "READY" }>
                                                             { item.name }<br/>
                                                             <small><i>{ "N°" + item.id.toString().padStart(10, "0") }</i></small>
                                                         </Link>
@@ -173,7 +202,7 @@ const Checkouts = (props) => {
                                                 </td>
                                     ,
                                     'date':
-                                        item => <td style={{color: item.status !== "COLLECTABLE" ? "dimgray" : "black"}}>
+                                        item => <td style={{color: item.status !== "COLLECTABLE" && item.status !== "READY" ? "dimgray" : "black"}}>
                                                     { isSameDate(new Date(item.deliveryDate), new Date()) ? "Aujourd'hui" : 
                                                     isSameDate(new Date(item.deliveryDate), getDateFrom(new Date(), 1)) ? "Demain" :
                                                     (new Date(item.deliveryDate)).toLocaleDateString('fr-FR', { timeZone: 'UTC'})
@@ -181,15 +210,15 @@ const Checkouts = (props) => {
                                                 </td>
                                     ,
                                     'terminer':
-                                        item => <td style={{color: item.status !== "COLLECTABLE" ? "dimgray" : "black"}}>
-                                                    <CButton color="success" disabled={ item.status !== "COLLECTABLE" } onClick={ () => handleClose(item) } className="mx-1 my-1">
+                                        item => <td style={{color: item.status !== "COLLECTABLE" && item.status !== "READY" ? "dimgray" : "black"}}>
+                                                    <CButton color="success" disabled={ item.status !== "COLLECTABLE" && item.status !== "READY" } onClick={ () => handleClose(item) } className="mx-1 my-1">
                                                         <i className="fas fa-check"></i>
                                                     </CButton>
                                                 </td>
                                     ,
                                     ' ':
                                         item => (
-                                            <td className="mb-3 mb-xl-0 text-center" style={{color: item.status !== "COLLECTABLE" ? "dimgray" : "black"}}>
+                                            <td className="mb-3 mb-xl-0 text-center" style={{color: item.status !== "COLLECTABLE" && item.status !== "READY" ? "dimgray" : "black"}}>
                                                 <CButton color="warning" disabled={ !isAdmin } href={ "#/components/orders/" + item.id } className="mx-1 my-1"><i className="fas fa-pen"></i></CButton>
                                                 <CButton color="danger" disabled={ !isAdmin } onClick={ () => handleDelete(item) } className="mx-1 my-1"><i className="fas fa-trash"></i></CButton>
                                             </td>
@@ -209,4 +238,4 @@ const Checkouts = (props) => {
     );
 }
 
-export default Checkouts;
+export default Collects;

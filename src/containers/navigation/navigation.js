@@ -87,7 +87,7 @@ function getNav(translation, currentUser)
         {
           _tag: 'CSidebarNavItem',
           name: translation("checkouts.label"),
-          to: '/components/checkouts',
+          to: '/components/collects',
           icon: <CIcon name="cil-task" customClasses="c-sidebar-nav-icon"/>,
         },
     !["ADMIN", "PICKER", "SELLER"].includes(mainRole) ? voidValue : 

@@ -41,7 +41,8 @@ export const getOrderToWrite = (order, user, informations, productCart, date, ob
             isPrepared: false
         })),
         isRemains: false,
-        status: !isDefined(order.status) ? "WAITING" : order.status
+        status: !isDefined(order.status) ? "WAITING" : order.status,
+        packages: !isDefinedAndNotVoid(order.packages) ? [] : order.packages.map(p => ({...p, container: p.container['@id']})),
     };
 };
 
@@ -56,6 +57,7 @@ export const setOrderStatus = (order, status) => {
         appliedCondition: isDefined(appliedCondition) ? (typeof appliedCondition === 'object' ? appliedCondition['@id'] : appliedCondition) : null,
         promotion: isDefined(promotion) ? (typeof promotion === 'object' ? promotion['@id'] : promotion) : null,
         items: items.map(item => item['@id']),
+        packages: !isDefinedAndNotVoid(order.packages) ? [] : order.packages.map(p => ({...p, container: p.container['@id']})),
     }
 };
 
@@ -101,6 +103,7 @@ export const getDeliveredOrder = order => {
             size: isDefined(item.size) ? (typeof item.size === 'object' ? item.size['@id'] : item.size) : null,
             deliveredQty: getFloat(item.deliveredQty),
         })),
+        packages: !isDefinedAndNotVoid(order.packages) ? [] : order.packages.map(p => ({...p, container: p.container['@id']})),
         status: isDefined(metas.isRelaypoint) && metas.isRelaypoint ? "COLLECTABLE" : "DELIVERED"
     };
 }
