@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { CCol, CFormGroup, CInput, CInvalidFeedback, CLabel, CRow, CTextarea } from '@coreui/react';
+import { CCol, CFormGroup, CInput, CInvalidFeedback, CLabel, CRow, CSelect, CTextarea } from '@coreui/react';
 import Select from 'src/components/forms/Select';
 import SelectMultiple from 'src/components/forms/SelectMultiple';
 import Image from './image';
@@ -123,8 +123,17 @@ const Characteristics = ({ product, categories, type, setProduct, errors, histor
                 </CCol>
             </CRow>
             <CRow className="mb-3">
-                <CCol xs="12" sm="12">
+                <CCol xs="12" sm="6">
                     <SelectMultiple name="categories" label="Catégories" value={ product.categories } error={ errors.categories } onChange={ handleCategoriesChange } data={ categories.map(category => ({value: category.id, label: category.name, isFixed: false})) }/>
+                </CCol>
+                <CCol xs="12" sm="6">
+                    <CLabel htmlFor="select">Durée de vie</CLabel>
+                    <CSelect custom name="productGroup" id="productGroup" value={ product.productGroup } onChange={ handleChange }>
+                        <option value="J + 1">J + 1</option>
+                        <option value="J + 3">J + 3</option>
+                        <option value="J + 6">J + 6</option>
+                        <option value="J + 10">J + 10</option>
+                    </CSelect>
                 </CCol>
             </CRow>
             { isAdmin &&

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { CCol, CFormGroup, CInput, CLabel, CSelect, CSwitch } from '@coreui/react';
+import { CCol, CFormGroup, CInput, CInputGroup, CInputGroupAppend, CInputGroupText, CLabel, CSelect, CSwitch } from '@coreui/react';
 import TaxActions from '../../services/TaxActions';
 import PriceGroupActions from '../../services/PriceGroupActions';
 
@@ -78,14 +78,19 @@ const Price = ({product, setProduct, history }) => {
                 </CCol>
                 <CCol xs="12" md="4">
                     <CLabel htmlFor="select">{ product.uniquePrice ? "Prix" : "Prix de base"}</CLabel>
-                    <CInput
-                        type="number"
-                        name={ product.prices.length <=0 ? "price" : product.prices[0].priceGroup.name }
-                        id={ product.prices.length <=0 ? "price" : product.prices[0].priceGroup.name }
-                        value={ product.prices.length <=0 ? "" : product.prices[0].amount }
-                        onChange={ handlePriceChange } 
-                        placeholder={ product.uniquePrice ? "Prix HT" : "Prix de base HT"}
-                    />
+                    <CInputGroup>
+                        <CInput
+                            type="number"
+                            name={ product.prices.length <=0 ? "price" : product.prices[0].priceGroup.name }
+                            id={ product.prices.length <=0 ? "price" : product.prices[0].priceGroup.name }
+                            value={ product.prices.length <=0 ? "" : product.prices[0].amount }
+                            onChange={ handlePriceChange } 
+                            placeholder={ product.uniquePrice ? "Prix HT" : "Prix de base HT"}
+                        />
+                        <CInputGroupAppend>
+                            <CInputGroupText>€</CInputGroupText>
+                        </CInputGroupAppend>
+                    </CInputGroup>
                 </CCol>
                 <CFormGroup row className="mt-4 mb-0 ml-1 d-flex align-items-end">
                     <CCol xs="3" sm="3">
@@ -103,14 +108,19 @@ const Price = ({product, setProduct, history }) => {
                             return (
                                 <CCol key={index} xs="12" md="4" className="mt-4">
                                     <CLabel htmlFor="select">{ "Prix " + price.priceGroup.name }</CLabel>
-                                    <CInput
-                                        type="number"
-                                        name={price.priceGroup.name}
-                                        id={price.priceGroup.name}
-                                        value={ price.amount }
-                                        onChange={ handlePriceChange } 
-                                        placeholder={ "Prix " + price.priceGroup.name + " HT"}
-                                    />
+                                    <CInputGroup>
+                                        <CInput
+                                            type="number"
+                                            name={price.priceGroup.name}
+                                            id={price.priceGroup.name}
+                                            value={ price.amount }
+                                            onChange={ handlePriceChange } 
+                                            placeholder={ "Prix " + price.priceGroup.name + " HT"}
+                                        />
+                                        <CInputGroupAppend>
+                                            <CInputGroupText>€</CInputGroupText>
+                                        </CInputGroupAppend>
+                                     </CInputGroup>
                                 </CCol>
                             )}
                         })

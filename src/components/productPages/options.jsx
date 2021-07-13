@@ -17,7 +17,7 @@ const Options = ({ product, setProduct }) => {
         <>
             <hr className="mt-5 mb-5"/>
             <CFormGroup row>
-                <CCol xs="12" md="4" className="mt-4">
+                <CCol xs="12" md="3" className="mt-4">
                     <CFormGroup row className="mb-0 ml-1 d-flex align-items-end">
                         <CCol xs="3" sm="2" md="3">
                             <CSwitch name="available" className="mr-1" color="dark" shape="pill" variant="opposite" checked={ product.available } onChange={ handleCheckBoxes } disabled={ !isAdmin }/>
@@ -27,7 +27,7 @@ const Options = ({ product, setProduct }) => {
                         </CCol>
                     </CFormGroup>
                 </CCol>
-                <CCol xs="12" md="4" className="mt-4">
+                <CCol xs="12" md="3" className="mt-4">
                     <CFormGroup row className="mb-0 ml-1 d-flex align-items-end">
                         <CCol xs="3" sm="2" md="3">
                             <CSwitch name="new" className="mr-1" color="dark" shape="pill" variant="opposite" checked={ product.new } onChange={ handleCheckBoxes }/>
@@ -37,7 +37,17 @@ const Options = ({ product, setProduct }) => {
                         </CCol>
                     </CFormGroup>
                 </CCol>
-                <CCol xs="12" md="4" className="mt-4">
+                <CCol xs="12" md="3" className="mt-4">
+                    <CFormGroup row className="mb-0 ml-1 d-flex align-items-end">
+                        <CCol xs="3" sm="2" md="3">
+                            <CSwitch name="requireDeclaration" className="mr-1" color="dark" shape="pill" variant="opposite" checked={ product.requireDeclaration } onChange={ handleCheckBoxes }/>
+                        </CCol>
+                        <CCol tag="label" xs="9" sm="10" md="9" className="col-form-label">
+                            Déclaration aux douanes
+                        </CCol>
+                    </CFormGroup>
+                </CCol>
+                <CCol xs="12" md="3" className="mt-4">
                     <CFormGroup row className="mb-0 ml-1 d-flex align-items-end">
                         <CCol xs="3" sm="2" md="3">
                             <CSwitch name="requireLegalAge" className="mr-1" color="danger" shape="pill" checked={ product.requireLegalAge } onChange={ handleCheckBoxes }/>

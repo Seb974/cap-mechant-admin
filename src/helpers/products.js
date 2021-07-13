@@ -46,6 +46,15 @@ export const getTotalWeight = (components) => {
     return totalWeight;
 };
 
+export const getTotalContentWeight = (components) => {
+    let totalContentWeight = 0;
+    components.map((component) => {
+        let unitWeight = !isDefined(component.product.contentWeight) ? 1 : component.product.contentWeight;
+        totalContentWeight += unitWeight * component.quantity;
+    });
+    return totalContentWeight;
+};
+
 export const getProductToWrite = (product, type, categories, variations, adaptedComponents, components) => {
     const {image, stock, userGroups, catalogs, ...noImgProduct} = product;
     return {
@@ -61,6 +70,7 @@ export const getProductToWrite = (product, type, categories, variations, adapted
         unit: type === "mixed" ? "U" : noImgProduct.unit,
         fullDescription: type === "mixed" ? createDescription(product, components) : noImgProduct.fullDescription,
         weight: type === "mixed" ? getTotalWeight(components) : product.unit === "Kg" ? 1 : noImgProduct.weight.length <= 0 ? 1 : parseFloat(noImgProduct.weight),
+        contentWeight: type === "mixed" ? getTotalContentWeight(components) : product.unit === "Kg" || noImgProduct.contentWeight.length <= 0 ? 1 : parseFloat(noImgProduct.contentWeight),
         prices: product.prices.map(price => {
             return ({...price, amount: parseFloat(price.amount), priceGroup: price.priceGroup['@id']})
         }),
