@@ -3,13 +3,13 @@ import { CButton, CCol, CFormGroup, CInput, CInputGroup, CInputGroupAppend, CInp
 import { getFloat, isDefined, isDefinedAndNotVoid } from 'src/helpers/utils';
 import ContainerContext from 'src/contexts/ContainerContext';
 
-const PackageList = ({ _package, total, index }) => {
+const PackageList = ({ _package, total, index, orderView = false }) => {
 
     const { containers } = useContext(ContainerContext);
 
     return !isDefined(_package) ? <></> : (
         <CRow>
-            <CCol xs="12" sm="3">
+            <CCol xs="12" sm={orderView ? "4" : "3"}>
                 <CFormGroup>
                     <CLabel htmlFor="name" style={{ color: 'darkgoldenrod' }}>{"Colis " + (total > 1 ? index + 1 : "")}
                     </CLabel>

@@ -32,11 +32,11 @@ export const getOrderToWrite = (order, user, informations, productCart, date, ob
             variation: isDefined(item.variation) ? item.variation['@id'] : null,
             size: isDefined(item.size) ? item.size['@id'] : null,
             orderedQty: getFloat(item.orderedQty),
-            preparedQty: isDefined(item.preparedQty) ? getFloat(item.preparedQty) : null,
-            deliveredQty: isDefined(item.deliveredQty) ? getFloat(item.deliveredQty) : null,
+            preparedQty: isDefined(item.preparedQty) ? !isNaN(getFloat(item.preparedQty)) ? getFloat(item.preparedQty) : null : null,
+            deliveredQty: isDefined(item.deliveredQty) ? !isNaN(getFloat(item.deliveredQty)) ?getFloat(item.deliveredQty) : null : null,
             price: getFloat(item.price),
             unit: item.unit,
-            taxRate: !settings.subjectToTaxes ? 0 : item.product.tax.catalogTaxes.find(catalogTax => catalogTax.catalog.id === selectedCatalog.id).percent,
+            taxRate: item.product.tax.catalogTaxes.find(catalogTax => catalogTax.catalog.id === selectedCatalog.id).percent,   // !settings.subjectToTaxes ? 0 : 
             isAdjourned: false,
             isPrepared: false
         })),

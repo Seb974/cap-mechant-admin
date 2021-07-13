@@ -16,6 +16,7 @@ import PlatformContext from 'src/contexts/PlatformContext';
 import PlatformActions from 'src/services/PlatformActions';
 import SupervisorActions from 'src/services/SupervisorActions';
 import Mercure from 'src/mercure/Mercure';
+import CatalogContext from 'src/contexts/CatalogContext';
 
 const DataProvider = ({ children }) => {
 
@@ -87,6 +88,7 @@ const DataProvider = ({ children }) => {
 
     return (
         <PlatformContext.Provider value={ {platform, setPlatform} }>
+        <CatalogContext.Provider value={ {catalogs, setCatalogs} }>
         <AuthContext.Provider value={ {isAuthenticated, setIsAuthenticated, currentUser, setCurrentUser, eventSource, setEventSource, settings, setSettings, selectedCatalog, setSelectedCatalog, seller, setSeller, supervisor, setSupervisor} }>
         <DeliveryContext.Provider value={ {cities, setCities, relaypoints, setRelaypoints, condition, setCondition, packages, setPackages, totalWeight, setTotalWeight, availableWeight, setAvailableWeight, tourings, setTourings} }>
         <ContainerContext.Provider value={{ containers, setContainers }}>
@@ -98,6 +100,7 @@ const DataProvider = ({ children }) => {
         </ContainerContext.Provider>
         </DeliveryContext.Provider>
         </AuthContext.Provider>
+        </CatalogContext.Provider>
         </PlatformContext.Provider>
     );
 }
