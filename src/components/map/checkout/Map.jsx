@@ -32,7 +32,6 @@ const Map = ({ informations, setInformations, displayedRelaypoints, setDiscount,
     // 'mapbox://styles/mapbox/light-v8'
 
     useEffect(() => {
-        console.log(catalog);
         setCurrentCatalog(isDefined(catalog) ? catalog : selectedCatalog);
     }, [selectedCatalog, catalog]);
 

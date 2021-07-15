@@ -82,17 +82,14 @@ const Order = ({ match, history }) => {
     }, [user, groups]);
 
     useEffect(() => {
-        console.log(catalog);
         if (isDefined(catalog))
             setInformations({...informations, position: catalog.center })
     },[catalog]);
 
     useEffect(() => {
         if (isDefined(catalog) && catalog.needsParcel) {
-            console.log(items);
             const itemsToPack = items.filter(i => (typeof i.orderedQty === 'string' && i.orderedQty.length > 0) || typeof i.orderedQty === 'number').map(i => ({...i, quantity: getFloat(i.orderedQty)}));
             const newPackages = getPackages(itemsToPack, containers);
-            console.log(newPackages);
             setPackages(newPackages);
         } else if (packages.length > 0) {
             setPackages([]);
@@ -104,7 +101,6 @@ const Order = ({ match, history }) => {
             setEditing(true);
             OrderActions.find(id)
                 .then(response => {
-                    console.log(response);
                     setOrder({...response, name: response.name, email: response.email, deliveryDate: new Date(response.deliveryDate)});
                     setItems(response.items.map((item, key) => ({...item, product: products.find(product => item.product.id === product.id), count: key})));
                     setInformations(response.metas);
@@ -181,7 +177,6 @@ const Order = ({ match, history }) => {
             setErrors({...errors, ...newErrors});
         } else {
             const orderToWrite = getOrderToWrite(order, user, informations, items, order.deliveryDate, objectDiscount, catalog, condition, settings);
-            console.log(orderToWrite);
             const request = !editing ? OrderActions.create(orderToWrite) : OrderActions.patch(id, orderToWrite);
             request.then(response => {
                 setErrors(defaultErrors);

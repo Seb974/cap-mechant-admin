@@ -35,6 +35,7 @@ const Recoveries = React.lazy(() => import('./views/components/recoveries/recove
 const Deliveries = React.lazy(() => import('./views/components/deliveries/deliveries'));
 const Tourings = React.lazy(() => import('./views/components/tourings/tourings'));
 const Collects = React.lazy(() => import('./views/components/collects/collects'));
+const Accounting = React.lazy(() => import('./views/components/accounting/accounting'));
 const MapVisualization = React.lazy(() => import('./views/components/tourings/mapVisualization'));
 const Order = React.lazy(() => import('./views/components/orders/order'));
 const Orders = React.lazy(() => import('./views/components/orders/orders'));
@@ -145,6 +146,7 @@ const routes = [
   { path: '/components/tourings/visualization', name: 'MapVisualization', component: MapVisualization },
   { path: '/components/tourings', name: 'Tourings', component: Tourings },
   { path: '/components/collects', name: 'Collects', component: Collects },
+  { path: '/components/accounting', name: 'Accounting', component: Accounting },
   { path: '/components/users/:id', exact: true, name: 'User Details', component: User },
   { path: '/components/users', name: 'Users', component: Users },
   { path: '/components/taxes/:id', name: 'Tax', component: Tax },

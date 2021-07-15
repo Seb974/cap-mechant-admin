@@ -1,4 +1,5 @@
 import api from 'src/config/api';
+import { isDefined } from 'src/helpers/utils';
 
 function register(user) {
     const { name, email, password } = user;
@@ -41,6 +42,12 @@ function findDeliverers() {
             .then(response => response.data['hydra:member']);
 }
 
+function getAccountingId(order) {
+    return isDefined(order.user) && isDefined(order.user.accountingId) ? new Promise((resolve, reject) => resolve(order.user.accountingId)) :
+         api.post('/api/accounting/user/' + order.id)
+            .then(response => response.data)
+}
+
 export default {
     register,
     findAll,
@@ -49,5 +56,6 @@ export default {
     update, 
     create,
     findUser,
-    findDeliverers
+    findDeliverers,
+    getAccountingId
 }

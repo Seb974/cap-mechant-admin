@@ -143,7 +143,7 @@ const Collects = (props) => {
                     </CCardHeader>
                     <CCardBody>
                         <CRow>
-                            <CCol xs="12" lg="6">
+                            <CCol xs="12" md="6" lg="6">
                                 <RangeDatePicker
                                     minDate={ dates.start }
                                     maxDate={ dates.end }
@@ -153,12 +153,12 @@ const Collects = (props) => {
                                 />
                             </CCol>
                             { isAdmin &&
-                                <CCol xs="12" md="3" className="mt-4">
+                                <CCol xs="12" md="6" className="mt-4">
                                     <CFormGroup row className="mb-0 ml-1 d-flex align-items-end">
-                                        <CCol xs="3" sm="2" md="3">
+                                        <CCol xs="1" sm="1" md="1">
                                             <CSwitch name="available" className="mr-1" color="dark" shape="pill" variant="opposite" checked={ relaypointView } onChange={ handleCheckBoxes }/>
                                         </CCol>
-                                        <CCol tag="label" xs="9" sm="10" md="9" className="col-form-label">
+                                        <CCol tag="label" xs="10" sm="10" md="10" className="col-form-label ml-2">
                                             { relaypointView ? "Récupérations Chronopost" : "Récupérations en points relais"}
                                         </CCol>
                                     </CFormGroup>

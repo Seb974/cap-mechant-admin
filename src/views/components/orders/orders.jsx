@@ -23,6 +23,7 @@ const Orders = (props) => {
     const { platform } = useContext(PlatformContext);
     const { currentUser, supervisor } = useContext(AuthContext);
     const { updatedOrders, setUpdatedOrders } = useContext(MercureContext);
+    const [mercureOpering, setMercureOpering] = useState(false);
     const [orders, setOrders] = useState([]);
     const [isAdmin, setIsAdmin] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -40,8 +41,11 @@ const Orders = (props) => {
     }, []);
 
     useEffect(() => {
-        if (isDefinedAndNotVoid(updatedOrders))
-            updateStatusBetween(updatedOrders, dates, selectedStatus, orders, setOrders, currentUser, supervisor, setUpdatedOrders);
+        if (isDefinedAndNotVoid(updatedOrders)&& !mercureOpering) {
+            setMercureOpering(true);
+            updateStatusBetween(updatedOrders, dates, selectedStatus, orders, setOrders, currentUser, supervisor, setUpdatedOrders)
+                .then(response => setMercureOpering(response));
+        }
     }, [updatedOrders]);
 
     useEffect(() => setIsAdmin(Roles.hasAdminPrivileges(currentUser)), [currentUser]);

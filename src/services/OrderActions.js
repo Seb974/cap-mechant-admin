@@ -76,7 +76,8 @@ function findDeliveries(dates, user) {
                     return order.items.find(item => {
                         return item.product.seller.users.find(u => u.id === user.id) !== undefined}) !==undefined;
                 });
-            return data.sort((a, b) => (new Date(a.deliveryDate) < new Date(b.deliveryDate)) ? -1 : 1)
+            return data.filter(d => !d.catalog.needsParcel)
+                       .sort((a, b) => (new Date(a.deliveryDate) < new Date(b.deliveryDate)) ? -1 : 1)
         });
 };
 
@@ -172,6 +173,10 @@ function getStatusList(status) {
         statusList += "status[]=" + s.value + separator;
     });
     return statusList;
+}
+
+function sendToAxonaut(order) {
+    return api.post();
 }
 
 export default {

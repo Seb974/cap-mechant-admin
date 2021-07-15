@@ -108,7 +108,6 @@ function getNav(translation, currentUser)
         name: translation("provisions.label"),
         to: '/components/provisions',
         icon: <CIcon name="cib-azure-artifacts" customClasses="c-sidebar-nav-icon"/>,
-        // icon: <CIcon name="cil-cart" customClasses="c-sidebar-nav-icon"/>,
       },
     !["ADMIN", "PICKER", "SELLER"].includes(mainRole) ? voidValue :  
         {
@@ -157,11 +156,23 @@ function getNav(translation, currentUser)
         to: '/components/account/deliverers',
         icon: <CIcon name="cil-car-alt" customClasses="c-sidebar-nav-icon"/>,
       },
+    !["ADMIN"].includes(mainRole) ? voidValue :
+      {
+        _tag: 'CSidebarNavTitle',
+        _children: [translation("accounting.label")]
+      },
+      !["ADMIN"].includes(mainRole) ? voidValue :  
+        {
+          _tag: 'CSidebarNavItem',
+          name: translation("billing.label"),
+          to: '/components/accounting',
+          icon: <CIcon name="cil-description" customClasses="c-sidebar-nav-icon"/>,
+        },
     !["ADMIN", "PICKER", "DELIVERER", "SELLER", "RELAYPOINT"].includes(mainRole) ? voidValue :
-    {
-      _tag: 'CSidebarNavTitle',
-      _children: [translation("component.label")]
-    },
+      {
+        _tag: 'CSidebarNavTitle',
+        _children: [translation("component.label")]
+      },
     !["ADMIN"].includes(mainRole) ? voidValue :  
         {
           _tag: 'CSidebarNavItem',
@@ -182,7 +193,6 @@ function getNav(translation, currentUser)
           name: translation("promotions.label"),
           to: '/components/promotions',
           icon: <CIcon name="cib-allocine" customClasses="c-sidebar-nav-icon"/>,
-          // icon: <CIcon name="cil-gift" customClasses="c-sidebar-nav-icon"/>,
         },
     !(["ADMIN", "RELAYPOINT"].includes(mainRole) || currentUser.isRelaypoint) ? voidValue :  
       {

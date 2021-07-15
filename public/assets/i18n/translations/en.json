@@ -44,5 +44,7 @@
     "prices.label": "Prices",
     "profitability.label": "Profitability",
     "ordering.label": "Ordering",
-    "sales.label": "Sales"
+    "sales.label": "Sales",
+    "accounting.label": "Accounting",
+    "billing.label": "Biling"
 }
