@@ -16,7 +16,7 @@ import UserActions from 'src/services/UserActions';
 const Accounting = (props) => {
 
     const itemsPerPage = 30;
-    const fields = ['name', 'date', 'total', 'selection', ' '];
+    const fields = ['name', 'date', 'CodePaiement', 'Etat', 'selection', ' '];
     const deliveredStatus = getDeliveredStatus();
     const { currentUser, supervisor } = useContext(AuthContext);
     const { updatedOrders, setUpdatedOrders } = useContext(MercureContext);
@@ -24,8 +24,8 @@ const Accounting = (props) => {
     const [orders, setOrders] = useState([]);
     const [isAdmin, setIsAdmin] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [billingLoading, setBillingLoading] = useState(false);
     const [dates, setDates] = useState({start: new Date(), end: new Date() });
-    const [tripLoading, setTripLoading] = useState(false);
     const [selectAll, setSelectAll] = useState(false);
 
     useEffect(() => {
@@ -81,7 +81,7 @@ const Accounting = (props) => {
         let newValue = null;
         const newOrders = orders.map(element => {
             newValue = !element.selected;
-            return element.id === item.id ? {...element, selected: !element.selected} : element;
+            return element.id === item.id && !element.invoiced ? {...element, selected: !element.selected} : element;
         });
         setOrders(newOrders);
         if (!newValue && selectAll)
@@ -90,7 +90,7 @@ const Accounting = (props) => {
 
     const handleSelectAll = () => {
         const newSelection = !selectAll;
-        const newOrders = orders.map(element => ({...element, selected: newSelection}));
+        const newOrders = orders.map(element => element.invoiced ? element : ({...element, selected: newSelection}));
         setSelectAll(newSelection);
         setOrders(newOrders);
     };
@@ -101,32 +101,37 @@ const Accounting = (props) => {
         return {start: UTCStart, end: UTCEnd};
     }
 
-    const sendToAxonaut = order => {
-        UserActions
-            .getAccountingId(order)
-            .then(accountingId => {
-                console.log(accountingId);
-            });
-    }
-
     const handleSubmit = () => {
+        setBillingLoading(true);
         getInvoices()
-        .then(response => {
-            console.log(response);
-            OrderActions.sendToAxonaut(response)
-                        .then(r => console.log(r));
-        });
-
-        // OrderActions.sendToAxonaut(invoices)
-        //             
+            .then(response => {
+                console.log(response);
+                OrderActions.sendToAxonaut(response)
+                            .then(r => {
+                                const updatedOrders = orders.map(o => o.selected ? {...o, invoiced: true, selected: false} : o);
+                                setOrders(updatedOrders);
+                                setBillingLoading(false);
+                            })
+                            .catch(error => {
+                                setBillingLoading(false);
+                                console.log(error);
+                            })
+            })
+            .catch(error => {
+                setBillingLoading(false);
+                console.log(error);
+            });
+        // const ordersToBill = getGroupedOrders();
+        // OrderActions.sendToAxonaut(ordersToBill)
+        //             .then(r => console.log(r));
     };
 
     const getGroupedOrders = () => {
         const filteredOrders = orders.filter(o => o.selected);
         const associatedUsers = filteredOrders.map(o => o.email);
         return [...new Set(associatedUsers)].map(u => {
-            const userOrder = filteredOrders.filter(o => o.email === u);
-            return { orders: userOrder, metas: userOrder[0].metas };
+            const userOrders = filteredOrders.filter(o => o.email === u);
+            return { orders: userOrders, metas: userOrders[0].metas };
         })
     }
 
@@ -134,7 +139,7 @@ const Accounting = (props) => {
         const ordersToBill = getGroupedOrders();
         const invoices = await Promise.all(ordersToBill.map( async order => {
             return await UserActions.getAccountingId(order.orders[0])
-                                    .then(accountingId => ({...order, customer: accountingId}));
+                                    .then(accountingId => ({...order, orders: order.orders.map(o => o.id), customer: accountingId}));
         }));
         return invoices;
     };
@@ -203,9 +208,14 @@ const Accounting = (props) => {
                                                     }
                                                 </td>
                                     ,
-                                    'total':
+                                    'CodePaiement':
                                         item => <td>
-                                                    { isDefined(item.totalHT) ? item.totalHT.toFixed(2) + " €" : " "}
+                                                    { isDefined(item.paymentId) ? item.paymentId : "-"}
+                                                </td>
+                                    ,
+                                    'Etat':
+                                        item => <td>
+                                                    { isDefined(item.invoiced) && item.invoiced ? "Facturé" : "A facturer"}
                                                 </td>
                                     ,
                                     'selection':
@@ -216,7 +226,7 @@ const Accounting = (props) => {
                                                         name="inline-checkbox"
                                                         checked={ item.selected }
                                                         onClick={ () => handleSelect(item) }
-                                                        disabled={ item.status === "WAITING" }
+                                                        disabled={ item.invoiced }
                                                         style={{zoom: 2.3}}
                                                     />
                                                 </td>
@@ -234,7 +244,7 @@ const Accounting = (props) => {
                         { orders.length > 0 &&
                             <CRow className="mt-4 d-flex justify-content-center align-items-start">
                                 <CButton size="sm" color="success" onClick={ handleSubmit } className={ "ml-2" } style={{width: '140px', height: '35px'}} disabled={ orders.findIndex(o => o.selected) === -1 }>
-                                    { tripLoading ?
+                                    { billingLoading ?
                                         <Spinner
                                             as="span"
                                             animation="border"

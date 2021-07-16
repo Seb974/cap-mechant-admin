@@ -175,8 +175,8 @@ function getStatusList(status) {
     return statusList;
 }
 
-function sendToAxonaut(order) {
-    return api.post();
+function sendToAxonaut(orders) {
+    return api.post('/api/accounting/invoices', orders);
 }
 
 export default {
@@ -194,5 +194,6 @@ export default {
     create,
     patch,
     getZPLLabel,
-    getPrintableLabel
+    getPrintableLabel,
+    sendToAxonaut
 }
