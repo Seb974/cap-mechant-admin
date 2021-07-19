@@ -179,6 +179,12 @@ function sendToAxonaut(orders) {
     return api.post('/api/accounting/invoices', orders);
 }
 
+function getInvoices(user, dates) {
+    const UTCDates = formatUTC(dates);
+    return api.post('/api/accounting/' + user.id + '/invoices', {from: UTCDates.start, to: UTCDates.end})
+              .then(response => response.data);
+}
+
 export default {
     findAll,
     findDeliveries,
@@ -195,5 +201,6 @@ export default {
     patch,
     getZPLLabel,
     getPrintableLabel,
-    sendToAxonaut
+    sendToAxonaut,
+    getInvoices
 }

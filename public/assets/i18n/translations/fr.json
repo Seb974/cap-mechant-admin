@@ -46,5 +46,6 @@
     "ordering.label": "Commander",
     "sales.label": "Ventes",
     "accounting.label": "Comptabilité",
-    "billing.label": "Facturation"
+    "billing.label": "Facturation",
+    "bills.label": "Factures"
 }

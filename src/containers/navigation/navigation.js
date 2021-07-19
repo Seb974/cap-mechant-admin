@@ -168,6 +168,13 @@ function getNav(translation, currentUser)
           to: '/components/accounting',
           icon: <CIcon name="cil-description" customClasses="c-sidebar-nav-icon"/>,
         },
+      !["ADMIN", "SUPERVISOR"].includes(mainRole) ? voidValue :  
+        {
+          _tag: 'CSidebarNavItem',
+          name: translation("bills.label"),
+          to: '/components/bills',
+          icon: <CIcon name="cil-featured-playlist" customClasses="c-sidebar-nav-icon"/>,
+        },
     !["ADMIN", "PICKER", "DELIVERER", "SELLER", "RELAYPOINT"].includes(mainRole) ? voidValue :
       {
         _tag: 'CSidebarNavTitle',
