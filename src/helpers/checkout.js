@@ -11,6 +11,31 @@ export const shop = {
     city: "Saint-Pierre"
 };
 
+export const cardStyle = {
+    style: {
+        base: {
+            fontSize: "16px",
+            color: "#424770",
+            letterSpacing: "0.025em",
+            fontFamily: "Source Code Pro, monospace",
+            "::placeholder": {
+            color: "#aab7c4"
+            }
+        },
+        invalid: {
+            color: "#9e2146"
+        }
+    }
+};
+
+export const updateError = "Votre paiement a bien été reçu.\n" +
+    "Toutefois, une erreur est survenue lors du changement de statut des factures acquittées.\n" +
+    "Nous vous invitons à contacter nos services sur les horaires d'ouverture, " +
+    "afin que nous puissions mettre à jour les factures concernées.";
+
+export const paymentConnexionError = "Une erreur est survenue lors de la connexion à la plateforme de paiement. " +
+                                     "Vérifier l'état de votre connexion internet et rafraichissez la page pour réessayer.";
+
 export const getShop = platform => {
     const { id, name, metas } = platform;
     const { position, address, zipcode, city } = metas;

@@ -8,6 +8,7 @@ import { isDefined } from 'src/helpers/utils';
 import Spinner from 'react-bootstrap/Spinner'
 import Select from 'src/components/forms/Select';
 import { isSameDate } from 'src/helpers/days';
+import PaymentForm from 'src/components/payment/PaymentForm';
 
 const Bills = (props) => {
 
@@ -45,6 +46,7 @@ const Bills = (props) => {
         OrderActions
             .getInvoices(user, UTCDates)
             .then(response => {
+                console.log(response);
                 setOrders(response.map(data => ({...data, selected: false})));
                 setLoading(false);
             })
@@ -180,19 +182,7 @@ const Bills = (props) => {
                         }
                         { orders.length > 0 &&
                             <CRow className="mt-4 d-flex justify-content-center align-items-start">
-                                <CButton size="sm" color="success" onClick={ handleSubmit } className={ "ml-2" } style={{width: '140px', height: '35px'}} disabled={ orders.findIndex(o => o.selected) === -1 }>
-                                    { billingLoading ?
-                                        <Spinner
-                                            as="span"
-                                            animation="border"
-                                            size="sm"
-                                            role="status"
-                                            aria-hidden="true"
-                                            />
-                                        : 
-                                        <>Régler</>
-                                    }
-                                    </CButton>
+                                <PaymentForm name={ "Paiement" } available={ orders.findIndex(o => o.selected) !== -1 } bills={ orders.filter(b => b.selected) } orders={ orders } setOrders={ setOrders }/>
                             </CRow>
                         }
                     </CCardBody>

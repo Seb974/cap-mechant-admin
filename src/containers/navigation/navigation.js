@@ -28,22 +28,26 @@ function getNav(translation, currentUser)
         text: 'NEW',
       }
     },
-    {
-      _tag: 'CSidebarNavTitle',
-      _children: ['Theme']
-    },
-    {
-      _tag: 'CSidebarNavItem',
-      name: translation("colors.label"),
-      to: '/theme/colors',
-      icon: 'cil-drop',
-    },
-    {
-      _tag: 'CSidebarNavItem',
-      name: translation("typography.label"),
-      to: '/theme/typography',
-      icon: 'cil-pencil',
-    },
+    !["ADMIN"].includes(mainRole) ? voidValue : 
+      {
+        _tag: 'CSidebarNavTitle',
+        _children: ['Theme']
+      },
+    !["ADMIN"].includes(mainRole) ? voidValue : 
+      {
+        _tag: 'CSidebarNavItem',
+        name: translation("colors.label"),
+        to: '/theme/colors',
+        icon: 'cil-drop',
+      },
+    !["ADMIN"].includes(mainRole) ? voidValue : 
+      {
+        _tag: 'CSidebarNavItem',
+        name: translation("typography.label"),
+        to: '/theme/typography',
+        icon: 'cil-pencil',
+      },
+    !["ADMIN", "PICKER", "SELLER", "DELIVERER", "RELAYPOINT"].includes(mainRole) ? voidValue : 
     {
       _tag: 'CSidebarNavTitle',
       _children: [translation("orders.label")]
