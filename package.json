@@ -70,6 +70,7 @@
   },
   "devDependencies": {
     "auto-changelog": "2.2.0",
+    "gulp-sass": "^5.0.0",
     "mutationobserver-shim": "^0.3.7",
     "react-scripts": "^4.0.1"
   },
