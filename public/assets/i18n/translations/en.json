@@ -47,5 +47,6 @@
     "sales.label": "Sales",
     "accounting.label": "Accounting",
     "billing.label": "Biling",
-    "bills.label": "Bills"
+    "bills.label": "Bills",
+    "articles.label": "Articles"
 }

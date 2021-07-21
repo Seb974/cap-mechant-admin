@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import { CCol, CFormGroup, CInput, CInvalidFeedback, CLabel, CRow, CSelect, CTextarea } from '@coreui/react';
 import Select from 'src/components/forms/Select';
 import SelectMultiple from 'src/components/forms/SelectMultiple';
-import Image from './image';
+import Image from '../forms/image';
 import GroupActions from 'src/services/GroupActions';
 import CatalogActions from 'src/services/CatalogActions';
 import { isDefined, isDefinedAndNotVoid } from 'src/helpers/utils';
@@ -114,7 +114,7 @@ const Characteristics = ({ product, categories, type, setProduct, errors, histor
                     </CFormGroup>
                 </CCol>
             </CRow>
-            <Image product={product} setProduct={setProduct} />
+            <Image entity={ product } setEntity={ setProduct } />
             <CRow className="mb-3">
                 <CCol xs="12" sm="12">
                     <Select name="seller" label="Vendeur" value={ isDefined(product.seller) ? product.seller.id : 0 } error={ errors.seller } onChange={ handleSellerChange } required={ true }>

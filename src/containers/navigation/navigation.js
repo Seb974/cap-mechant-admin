@@ -47,6 +47,21 @@ function getNav(translation, currentUser)
         to: '/theme/typography',
         icon: 'cil-pencil',
       },
+
+      !["ADMIN"].includes(mainRole) ? voidValue : 
+      {
+        _tag: 'CSidebarNavTitle',
+        _children: ['Blog']
+      },
+    !["ADMIN"].includes(mainRole) ? voidValue : 
+      {
+        _tag: 'CSidebarNavItem',
+        name: translation("articles.label"),
+        to: '/components/articles',
+        icon: <CIcon name="cil-newspaper" customClasses="c-sidebar-nav-icon"/>,
+      },
+
+
     !["ADMIN", "PICKER", "SELLER", "DELIVERER", "RELAYPOINT"].includes(mainRole) ? voidValue : 
     {
       _tag: 'CSidebarNavTitle',

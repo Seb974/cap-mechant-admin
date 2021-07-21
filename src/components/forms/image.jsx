@@ -1,9 +1,9 @@
 import React from 'react';
 import { CCol, CFormGroup, CInputFile, CLabel } from '@coreui/react';
 
-const Image = ({ product, setProduct }) => {
+const Image = ({ entity, setEntity }) => {
 
-    const handleImageChange = ({ currentTarget }) => setProduct({...product, image: currentTarget.files[0]});
+    const handleImageChange = ({ currentTarget }) => setEntity({...entity, image: currentTarget.files[0]});
 
     return (
         <>
@@ -15,11 +15,11 @@ const Image = ({ product, setProduct }) => {
                     <CLabel>Image</CLabel>
                     <CInputFile name="image" custom id="custom-file-input" onChange={ handleImageChange }/>
                     <CLabel htmlFor="custom-file-input" variant="custom-file">
-                        { product.image === null || product.image === undefined ?
+                        { entity.image === null || entity.image === undefined ?
                             "Choose file..." :
-                            product.image.filePath !== undefined ? 
-                                product.image.filePath :
-                                product.image.name 
+                            entity.image.filePath !== undefined ? 
+                                entity.image.filePath :
+                                entity.image.name 
                         }
                     </CLabel>
                 </CCol>

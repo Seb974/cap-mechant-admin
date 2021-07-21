@@ -52,6 +52,8 @@ const Supervisors = React.lazy(() => import('./views/components/supervisors/supe
 const Supervisor = React.lazy(() => import('./views/components/supervisors/supervisor'));
 const Suppliers = React.lazy(() => import('./views/components/suppliers/suppliers'));
 const Supplier = React.lazy(() => import('./views/components/suppliers/supplier'));
+const Articles = React.lazy(() => import('./views/components/articles/articles'));
+const Article = React.lazy(() => import('./views/components/articles/article'));
 const Platform = React.lazy(() => import('./views/components/platform/platform'));
 const CodeEditors = React.lazy(() => import('./views/editors/code-editors/CodeEditors'));
 const TextEditors = React.lazy(() => import('./views/editors/text-editors/TextEditors'));
@@ -158,6 +160,8 @@ const routes = [
   { path: '/components/supervisors', name: 'Supervisors', component: Supervisors },
   { path: '/components/suppliers/:id', name: 'Supplier', component: Supplier },
   { path: '/components/suppliers', name: 'Suppliers', component: Suppliers },
+  { path: '/components/articles/:id', name: 'Article', component: Article },
+  { path: '/components/articles', name: 'Articles', component: Articles },
   { path: '/components/platform', name: 'Platform', component: Platform },
   { path: '/dashboard', name: 'Dashboard', component: Dashboard },
   { path: '/theme', name: 'Theme', component: Colors, exact: true },

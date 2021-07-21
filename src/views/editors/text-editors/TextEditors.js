@@ -1,8 +1,9 @@
-import React from 'react'
-import ReactQuill from 'react-quill'
-import { CCard, CCardHeader, CCardBody } from '@coreui/react'
-import { ProBadge, DocsLink } from 'src/reusable'
-import './TextEditors.scss'
+import React, { useMemo, useRef, useState } from 'react';
+import ReactQuill from 'react-quill';
+import { CCard, CCardHeader, CCardBody, CButton } from '@coreui/react';
+import { ProBadge, DocsLink } from 'src/reusable';
+import './TextEditors.scss';
+import api from 'src/config/api';
 
 const initialText = `<p><b>Bootstrap</b> is a <a href="/wiki/Free_and_open-source_software" title="Free and open-source software">free and open-source</a> front-end <a href="/wiki/Web_framework" title="Web framework">web framework</a> for designing <a href="/wiki/Website" title="Website">websites</a> and <a href="/wiki/Web_application" title="Web application">web applications</a>. 
                       It contains <a href="/wiki/HTML" title="HTML">HTML</a>- and <a href="/wiki/CSS" class="mw-redirect" title="CSS">CSS</a>-based design templates for <a href="/wiki/Typography" title="Typography">typography</a>, forms, buttons, navigation and other interface components, as well as optional <a href="/wiki/JavaScript" title="JavaScript">JavaScript</a> extensions. 
@@ -20,26 +21,65 @@ const initialText = `<p><b>Bootstrap</b> is a <a href="/wiki/Free_and_open-sourc
 
 const TextEditors = () => {
 
-  const modules = {
-    toolbar: [
-      ['bold', 'italic', 'underline', 'strike'],        // toggled buttons
-      ['blockquote', 'code-block'],
-      [{ 'header': 1 }, { 'header': 2 }],               // custom button values
-      [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-      [{ 'script': 'sub'}, { 'script': 'super' }],      // superscript/subscript
-      [{ 'indent': '-1'}, { 'indent': '+1' }],          // outdent/indent
-      [{ 'direction': 'rtl' }],                         // text direction
-      [{ 'size': ['small', false, 'large', 'huge'] }],  // custom dropdown
-      [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
-      [{ 'color': [] }, { 'background': [] }],          // dropdown with defaults from theme
-      [{ 'font': [] }],
-      [{ 'align': [] }],
-      ['link', 'image'],
-      ['clean']                                         // remove formatting button
-    ]
+  const quill = useRef(null);
+  const [text, setText] = useState(initialText);
+
+  const imageHandler = () => {
+      const input = document.createElement('input');
+      input.setAttribute('type', 'file');
+      input.setAttribute('accept', 'image/*');
+      input.click();
+
+      input.onchange = async () => {
+          const file = input.files[0];
+          const formData = new FormData();
+          formData.append('file', file);
+
+          // Save current cursor state
+          const range = quill.current.getEditor().getSelection();
+
+          // Insert temporary loading placeholder image
+          // quill.current.editor.insertEmbed(range.index, 'image', `${ api.API_DOMAIN }/images/loaders/placeholder.gif`);
+
+          // Move cursor to right side of image (easier to continue typing)
+          quill.current.editor.setSelection(range.index + 1);
+          const res = await api.post('/api/pictures', formData, {headers: {'Content-type': 'multipart/form-data'}});
+
+          // Remove placeholder image
+          // quill.current.editor.deleteText(range.index, 1);
+
+          // Insert uploaded image
+          quill.current.editor.insertEmbed(range.index, 'image', `${ api.API_DOMAIN }${ res.data.contentUrl }`);
+      };
   }
 
-  const [text, setText] = React.useState(initialText)
+  const modules = useMemo(() => ({
+    toolbar: {
+      container: [
+          ['bold', 'italic', 'underline', 'strike'],        // toggled buttons
+          ['blockquote', 'code-block'],
+          [{ 'header': 1 }, { 'header': 2 }],               // custom button values
+          [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+          [{ 'script': 'sub'}, { 'script': 'super' }],      // superscript/subscript
+          [{ 'indent': '-1'}, { 'indent': '+1' }],          // outdent/indent
+          [{ 'direction': 'rtl' }],                         // text direction
+          [{ 'size': ['small', false, 'large', 'huge'] }],  // custom dropdown
+          [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+          [{ 'color': [] }, { 'background': [] }],          // dropdown with defaults from theme
+          [{ 'font': [] }],
+          [{ 'align': [] }],
+          ['link', 'image'],
+          ['clean']
+      ],
+      handlers: {
+          image: imageHandler
+      }
+    }
+  }), [])
+
+  const handleShow = () => {
+      console.log(text);
+  }
 
   return (
     <CCard>
@@ -49,8 +89,9 @@ const TextEditors = () => {
         <DocsLink href="https://zenoamaro.github.io/react-quill/"/>
       </CCardHeader>
       <CCardBody>
-        <ReactQuill value={ text } modules={ modules } onChange={ setText } theme="snow"/>
+        <ReactQuill value={ text } modules={ modules } onChange={ setText } theme="snow" ref={ quill } style={{ minHeight: '300px' }}/>
       </CCardBody>
+      <CButton type="button" color="success" onClick={ handleShow } style={{ width: '240px', margin: 'auto' }}><i className="fas fa-save mr-2"></i>Sauvegarder</CButton>
     </CCard>
   )
 }
