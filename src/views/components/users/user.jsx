@@ -122,7 +122,7 @@ const UserPage = ({ history, match }) => {
                     <CCardBody>
                         <CForm onSubmit={ handleSubmit }>
                             <ContactPanel user={ user } phone={ informations.phone } onUserChange={ onUserInputChange } onPhoneChange={ onPhoneChange } errors={ errors }/>
-                            { Roles.hasAllPrivileges(currentUser) && 
+                            { Roles.hasAllPrivileges(currentUser) || Roles.isSeller(currentUser) && 
                                 <AdminSection user={ user } onUserChange={ onUserInputChange } errors={ errors } />
                             }
                             <hr/>

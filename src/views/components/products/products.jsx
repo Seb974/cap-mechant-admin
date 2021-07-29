@@ -68,7 +68,14 @@ const Products = (props) => {
                 ' ':
                   item => (
                       <td className="mb-3 mb-xl-0 text-center">
-                          <CButton block color="danger" disabled={ !isAdmin && item.seller.users.find(user => user.id === currentUser.id) === undefined } onClick={ () => handleDelete(item.id) }>Supprimer</CButton>
+                          <CButton 
+                              block 
+                              color="danger" 
+                              disabled={ !isAdmin && !Roles.isSeller(currentUser) }     // { !isAdmin && item.seller.users.find(user => user.id === currentUser.id) === undefined } 
+                              onClick={ () => handleDelete(item.id) }
+                          >
+                              Supprimer
+                          </CButton>
                       </td>
                   )
               }}

@@ -42,7 +42,7 @@ const Order = ({ match, history }) => {
     const [errors, setErrors] = useState(defaultErrors);
     const defaultVariantSize = defaultVariant !== null && products[0].variations[0].sizes && products[0].variations[0].sizes.length > 0 ? products[0].variations[0].sizes[0] : null;
     const defaultProduct = {product: products[0], variation: defaultVariant, size: defaultVariantSize};
-    const defaultItem = {...defaultProduct, count: 0, orderedQty: "", preparedQty: "", deliveredQty: "", price: defaultProduct.product.prices[0].amount, unit: defaultProduct.product.unit};
+    const defaultItem = {...defaultProduct, count: 0, orderedQty: "", preparedQty: "", deliveredQty: "", stock: 0, price: defaultProduct.product.prices[0].amount, unit: defaultProduct.product.unit};
     const [objectDiscount, setObjectDiscount] = useState(null);
     const [groups, setGroups] = useState([]);
     const [items, setItems] = useState([defaultItem]);
@@ -53,6 +53,7 @@ const Order = ({ match, history }) => {
     const [selectedUser, setSelectedUser] = useState(null);
     const [catalog, setCatalog] = useState(selectedCatalog);     //catalogs.find(c => c.isDefault));
     const [packages, setPackages] = useState([]);
+    const [users, setUsers] = useState([]);
     const statuses = getStatus();
 
     useEffect(() => {
@@ -60,6 +61,9 @@ const Order = ({ match, history }) => {
         fetchCities();
         fetchGroups();
         fetchOrder(id);
+        if (Roles.isSeller(currentUser)) {
+            fetchUsers();
+        }
     }, []);
 
     useEffect(() => fetchOrder(id), [id]);
@@ -138,6 +142,15 @@ const Order = ({ match, history }) => {
             .then(response => setUser(response));
     }
 
+    const fetchUsers = () => {
+        UserActions
+            .findAll()
+            .then(response => {
+                const consumers = response.filter(u => !u.roles.includes("ROLE_SUPER_ADMIN"))       //  && !u.roles.includes("ROLE_ADMIN")
+                setUsers(consumers);
+            });
+    }
+
     const setUserInformations = () => {
         if (isDefined(user)) {
             setOrder({...order, name: user.name, email: user.email});
@@ -172,29 +185,29 @@ const Order = ({ match, history }) => {
     };
 
     const handleSubmit = () => {
-        const newErrors = validateForm(order, informations, (isDefined(order.calalog) ? order.catalog : catalog), condition, relaypoints);
-        if (isDefined(newErrors) && Object.keys(newErrors).length > 0) {
-            setErrors({...errors, ...newErrors});
-        } else {
-            const orderToWrite = getOrderToWrite(order, user, informations, items, order.deliveryDate, objectDiscount, catalog, condition, settings);
-            const request = !editing ? OrderActions.create(orderToWrite) : OrderActions.patch(id, orderToWrite);
-            request.then(response => {
-                setErrors(defaultErrors);
-                //TODO : Flash notification de succès
-                history.replace("/components/preparations");
-            })
-            .catch( ({ response }) => {
-                const { violations } = response.data;
-                if (violations) {
-                    const apiErrors = {};
-                    violations.forEach(({propertyPath, message}) => {
-                        apiErrors[propertyPath] = message;
-                    });
-                    setErrors(apiErrors);
-                }
-                //TODO : Flash notification d'erreur
-            });
-        }
+        // const newErrors = validateForm(order, informations, (isDefined(order.calalog) ? order.catalog : catalog), condition, relaypoints);
+        // if (isDefined(newErrors) && Object.keys(newErrors).length > 0) {
+        //     setErrors({...errors, ...newErrors});
+        // } else {
+        const orderToWrite = getOrderToWrite(order, user, informations, items, order.deliveryDate, objectDiscount, catalog, condition, settings);
+        const request = !editing ? OrderActions.create(orderToWrite) : OrderActions.patch(id, orderToWrite);
+        request.then(response => {
+            setErrors(defaultErrors);
+            //TODO : Flash notification de succès
+            history.replace("/components/preparations");
+        })
+        .catch( ({ response }) => {
+            const { violations } = response.data;
+            if (violations) {
+                const apiErrors = {};
+                violations.forEach(({propertyPath, message}) => {
+                    apiErrors[propertyPath] = message;
+                });
+                setErrors(apiErrors);
+            }
+            //TODO : Flash notification d'erreur
+        });
+        // }
     };
 
     const getUserGroup = () => {
@@ -239,10 +252,11 @@ const Order = ({ match, history }) => {
                                             <CInvalidFeedback>{ errors.deliveryDate }</CInvalidFeedback>
                                         </CFormGroup>
                                     </CCol>
-                                    { !(isAdmin || Roles.isPicker(currentUser)) && isDefined(supervisor) ?
+                                    {/* { !(isAdmin || Roles.isPicker(currentUser)) && isDefined(supervisor) ? */}
+                                    { !(isAdmin || Roles.isPicker(currentUser)) && Roles.isSeller(currentUser) ?
                                         <CCol xs="12" sm="12" md="6" className="mt-4">
                                             <Select className="mr-2" name="selectedUser" label="Pour le compte de" onChange={ handleSupervisorUserChange } value={ isDefined(user) ? user.id : 0 }>
-                                                { supervisor.users.map(user => <option value={ user.id }>{ user.name + " - " + user.email }</option>) }
+                                                { users.map(user => <option value={ user.id }>{ user.name + " - " + user.email }</option>) }
                                             </Select>
                                         </CCol>
                                      : (isAdmin || Roles.isPicker(currentUser)) && id !== "new" ?
@@ -270,7 +284,7 @@ const Order = ({ match, history }) => {
                                 <Items items={ items } setItems={ setItems } defaultItem={ defaultItem } editing={ editing } packages={ packages }/>
 
                             </Tab>
-                            {/* { (isAdmin || Roles.isPicker(currentUser)) && */}
+                            { (isAdmin || Roles.isPicker(currentUser)) &&
                                 <Tab eventKey="metas" title="Client">
                                     <ClientPart
                                         user={ order }
@@ -285,7 +299,7 @@ const Order = ({ match, history }) => {
                                         catalog={ catalog }
                                     />
                                 </Tab>
-                            {/* } */}
+                            }
                         </Tabs>
                         <hr className="mt-5 mb-5"/>
                         <CRow className="mt-4 d-flex justify-content-center">

@@ -3,7 +3,7 @@ import api from 'src/config/api';
 function findAll() {
     return api
         .get('/api/suppliers')
-        .then(response => response.data['hydra:member'].sort((a, b) => (a.seller.name > b.seller.name) ? 1 : -1));
+        .then(response => response.data['hydra:member'].sort((a, b) => (a.seller.name > b.seller.name) ? -1 : 1));
 }
 
 function deleteSupplier(id) {

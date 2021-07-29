@@ -275,7 +275,8 @@ const Supplying = (props) => {
         });
         const evolutedSales = sales * (1 + evolution / 100);
         const suppliedQty = getSuppliedQty(element);
-        const qty = (evolutedSales + security - quantity - suppliedQty) >= 0 ? (evolutedSales + security - quantity - suppliedQty) : 0;
+        // const qty = (evolutedSales + security - quantity - suppliedQty) >= 0 ? (evolutedSales + security - quantity - suppliedQty) : 0;
+        const qty = (evolutedSales - suppliedQty) >= 0 ? (evolutedSales - suppliedQty) : 0;
         return {...element, id: index, quantity: qty > 0 ? Math.ceil(qty) : 0, sales: evolutedSales.toFixed(2) };
     };
 
@@ -319,22 +320,23 @@ const Supplying = (props) => {
 
     const getSignPostName = item => {
         return (
-            item.stock.quantity <= item.stock.security ?
-                <span  className={ width >= 576 ? "" : "text-danger" }>
-                    { width >= 576 ? <i className="fas fa-exclamation-triangle mr-1 text-danger"></i> : ""} 
-                     { getProductName(item.product, item.variation, item.size) }
-                </span>
-            : item.stock.quantity <= item.sales ?
-                <span  className={ width >= 576 ? "" : "text-warning" }>
-                    { width >= 576 ? <i className="fas fa-info-circle mr-1 text-warning"></i>  : ""} 
-                     { getProductName(item.product, item.variation, item.size) }
-                </span>
-            : item.stock.quantity <= item.stock.alert ? 
-                <span  className={ width >= 576 ? "" : "text-primary" }>
-                    { width >= 576 ? <i className="fas fa-info-circle mr-1 text-primary"></i>  : ""} 
-                     { getProductName(item.product, item.variation, item.size) }
-                </span>
-            : getProductName(item.product, item.variation, item.size)
+            // item.stock.quantity <= item.stock.security ?
+            //     <span  className={ width >= 576 ? "" : "text-danger" }>
+            //         { width >= 576 ? <i className="fas fa-exclamation-triangle mr-1 text-danger"></i> : ""} 
+            //          { getProductName(item.product, item.variation, item.size) }
+            //     </span>
+            // : item.stock.quantity <= item.sales ?
+            //     <span  className={ width >= 576 ? "" : "text-warning" }>
+            //         { width >= 576 ? <i className="fas fa-info-circle mr-1 text-warning"></i>  : ""} 
+            //          { getProductName(item.product, item.variation, item.size) }
+            //     </span>
+            // : item.stock.quantity <= item.stock.alert ? 
+            //     <span  className={ width >= 576 ? "" : "text-primary" }>
+            //         { width >= 576 ? <i className="fas fa-info-circle mr-1 text-primary"></i>  : ""} 
+            //          { getProductName(item.product, item.variation, item.size) }
+            //     </span>
+            // : 
+            getProductName(item.product, item.variation, item.size)
         );
     };
 
@@ -352,11 +354,13 @@ const Supplying = (props) => {
                             </CCol>
                         </CRow>
                         <CRow>
-                            <CCol xs="12" sm="5" md="5">
+                            { (isAdmin || Roles.isPicker(currentUser)) && 
+                                <CCol xs="12" sm="5" md="5">
                                     <Select className="mr-2" name="seller" label="Vendeur" onChange={ handleSellerChange } value={ isDefined(selectedSeller) ? selectedSeller.id : 0 }>
                                         { sellers.map(seller => <option key={ seller.id } value={ seller.id }>{ seller.name }</option>) }
                                     </Select>
-                            </CCol>
+                                </CCol>
+                            }
                             <CCol xs="12" lg="7">
                                 <RangeDatePicker
                                     minDate={ dates.start }
@@ -366,31 +370,49 @@ const Supplying = (props) => {
                                     className = "form-control mb-3"
                                 />
                             </CCol>
+                            { !(isAdmin || Roles.isPicker(currentUser)) && 
+                                <CCol xs="12" lg="2" className="mt-4 d-flex align-items-center justify-content-center pr-5">
+                                    <CFormGroup row variant="custom-checkbox" inline className="d-flex align-items-center">
+                                        <input
+                                            className="mx-1 my-2"
+                                            type="checkbox"
+                                            name="inline-checkbox"
+                                            checked={ selectAll }
+                                            onClick={ handleSelectAll }
+                                            disabled={ displayedProducts.length === 0 }
+                                            style={{zoom: 2.3}}
+                                        />
+                                        <label variant="custom-checkbox" htmlFor="inline-checkbox1" className="my-1">Tous</label>
+                                    </CFormGroup>
+                                </CCol>
+                            }
                         </CRow>
-                        <CRow className="mb-4">
-                            <CCol xs="12" lg="5" className="mt-4">
-                                <SelectMultiple name="productGroups" label="Groupes de produits" value={ productGroups } onChange={ handleGroupChange } data={ getProductGroups() }/>
-                            </CCol>
-                            <CCol xs="12" lg="5" className="mt-4">
-                                <Select className="mr-2" name="supplier" label="Evolution des besoins" value={ evolution } onChange={ handleEvolutionChange } style={{ height: '39px'}}>
-                                    { rates.map(rate => <option key={ rate.value } value={ rate.value }>{ rate.label }</option>) }
-                                </Select>
-                            </CCol>
-                            <CCol xs="12" lg="2" className="mt-4 d-flex align-items-center justify-content-end pr-5">
-                                <CFormGroup row variant="custom-checkbox" inline className="d-flex align-items-center">
-                                    <input
-                                        className="mx-1 my-2"
-                                        type="checkbox"
-                                        name="inline-checkbox"
-                                        checked={ selectAll }
-                                        onClick={ handleSelectAll }
-                                        disabled={ displayedProducts.length === 0 }
-                                        style={{zoom: 2.3}}
-                                    />
-                                    <label variant="custom-checkbox" htmlFor="inline-checkbox1" className="my-1">Tous</label>
-                                </CFormGroup>
-                            </CCol>
-                        </CRow>
+                        { (isAdmin || Roles.isPicker(currentUser)) && 
+                            <CRow className="mb-4">
+                                <CCol xs="12" lg="5" className="mt-4">
+                                    <SelectMultiple name="productGroups" label="Groupes de produits" value={ productGroups } onChange={ handleGroupChange } data={ getProductGroups() }/>
+                                </CCol>
+                                <CCol xs="12" lg="5" className="mt-4">
+                                    <Select className="mr-2" name="supplier" label="Evolution des besoins" value={ evolution } onChange={ handleEvolutionChange } style={{ height: '39px'}}>
+                                        { rates.map(rate => <option key={ rate.value } value={ rate.value }>{ rate.label }</option>) }
+                                    </Select>
+                                </CCol>
+                                <CCol xs="12" lg="2" className="mt-4 d-flex align-items-center justify-content-end pr-5">
+                                    <CFormGroup row variant="custom-checkbox" inline className="d-flex align-items-center">
+                                        <input
+                                            className="mx-1 my-2"
+                                            type="checkbox"
+                                            name="inline-checkbox"
+                                            checked={ selectAll }
+                                            onClick={ handleSelectAll }
+                                            disabled={ displayedProducts.length === 0 }
+                                            style={{zoom: 2.3}}
+                                        />
+                                        <label variant="custom-checkbox" htmlFor="inline-checkbox1" className="my-1">Tous</label>
+                                    </CFormGroup>
+                                </CCol>
+                            </CRow>
+                        }
                         { loading ?
                             <CRow>
                                 <CCol xs="12" lg="12" className="text-center">
@@ -400,7 +422,7 @@ const Supplying = (props) => {
                             :
                             <CDataTable
                                 items={ displayedProducts }
-                                fields={ width < 576 ? ['Produit', 'Commande', 'Sélection'] : fields }
+                                fields={ width < 576 ? ['Produit', 'Commande', 'Sélection'] : (isAdmin || Roles.isPicker(currentUser)) ? fields : ['Produit', 'Besoin', 'Commande', 'Sélection'] }
                                 bordered
                                 itemsPerPage={ itemsPerPage }
                                 pagination

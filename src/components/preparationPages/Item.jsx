@@ -64,7 +64,7 @@ const Item = ({ item, handleChange, handleDelete, total, index, editing }) => {
     return !isDefined(item) || !isDefined(item.product) ? <></> : (
         <>
         <CRow>
-            <CCol xs="12" sm="4">
+            <CCol xs="12" sm={ (isAdmin || Roles.isPicker(currentUser)) ? "4" : "3"}>
                 <CFormGroup>
                     <CLabel htmlFor="name">{"Produit " + (total > 1 ? index + 1 : "")}
                     </CLabel>
@@ -73,34 +73,82 @@ const Item = ({ item, handleChange, handleDelete, total, index, editing }) => {
                     </CSelect>
                 </CFormGroup>
             </CCol>
-            <CCol xs="12" sm="4">
-                <CFormGroup>
-                    <CLabel htmlFor="name">{"Variante"}
-                    </CLabel>
-                    <CSelect custom name="variant" id="variant" disabled={ !variants || variants.length <= 0 } onChange={ onVariantChange } value={ isDefined(item.variation) && isDefined(item.size) ? item.variation.id + "-" + item.size.id : "0"}>
-                        { !isDefinedAndNotVoid(variants) ? <option key="0" value="0">-</option> : 
-                            variants.map((variant, index) => {
-                                return variant.sizes.map((size, i) => <option key={ (index + "" + i) } value={variant.id + "-" + size.id}>{ getVariantName(variant.color, size.name) }</option>);
-                            })
-                        }
-                    </CSelect>
-                </CFormGroup>
-            </CCol>
+            { (isAdmin || Roles.isPicker(currentUser)) ?
+                <CCol xs="12" sm="4">
+                    <CFormGroup>
+                        <CLabel htmlFor="name">{"Variante"}
+                        </CLabel>
+                        <CSelect custom name="variant" id="variant" disabled={ !variants || variants.length <= 0 } onChange={ onVariantChange } value={ isDefined(item.variation) && isDefined(item.size) ? item.variation.id + "-" + item.size.id : "0"}>
+                            { !isDefinedAndNotVoid(variants) ? <option key="0" value="0">-</option> : 
+                                variants.map((variant, index) => {
+                                    return variant.sizes.map((size, i) => <option key={ (index + "" + i) } value={variant.id + "-" + size.id}>{ getVariantName(variant.color, size.name) }</option>);
+                                })
+                            }
+                        </CSelect>
+                    </CFormGroup>
+                </CCol>
+                :
+                <CCol xs="12" sm="2">
+                    <Select name={ item.count } id="unit" value={ item.unit } label="U commande" onChange={ onChange }>
+                        <option value="U">U</option>
+                        <option value="Kg">Kg</option>
+                    </Select>
+                </CCol>
+            }
+            { (isAdmin || Roles.isPicker(currentUser)) ?
+                <CCol xs="12" sm="3">
+                    <CFormGroup>
+                        <CLabel htmlFor="name">Prix
+                        </CLabel>
+                        <CInputGroup>
+                            <CInput
+                                id="price"
+                                type="number"
+                                name={ item.count }
+                                value={ item.price }
+                                onChange={ onChange }
+                                disabled={ !isAdmin }
+                            />
+                            <CInputGroupAppend>
+                                <CInputGroupText>€</CInputGroupText>
+                            </CInputGroupAppend>
+                        </CInputGroup>
+                    </CFormGroup>
+                </CCol>
+                :
+                <CCol xs="12" sm="3">
+                    <CFormGroup>
+                        <CLabel htmlFor="name">Quantité
+                        </CLabel>
+                        <CInputGroup>
+                            <CInput
+                                id="orderedQty"
+                                type="number"
+                                name={ item.count }
+                                value={ item.orderedQty }
+                                onChange={ onChange }
+                            />
+                            <CInputGroupAppend>
+                                <CInputGroupText>{ item.unit }</CInputGroupText>
+                            </CInputGroupAppend>
+                        </CInputGroup>
+                    </CFormGroup>
+                </CCol>
+            }
             <CCol xs="12" sm="3">
                 <CFormGroup>
-                    <CLabel htmlFor="name">Prix
+                    <CLabel htmlFor="name">Stock actuel
                     </CLabel>
                     <CInputGroup>
                         <CInput
-                            id="price"
+                            id="stock"
                             type="number"
                             name={ item.count }
-                            value={ item.price }
+                            value={ item.stock }
                             onChange={ onChange }
-                            disabled={ !isAdmin }
                         />
                         <CInputGroupAppend>
-                            <CInputGroupText>€</CInputGroupText>
+                            <CInputGroupText>{ item.unit }</CInputGroupText>
                         </CInputGroupAppend>
                     </CInputGroup>
                 </CFormGroup>
@@ -117,72 +165,74 @@ const Item = ({ item, handleChange, handleDelete, total, index, editing }) => {
                 </CButton>
             </CCol>
         </CRow>
-        <CRow>
-            <CCol xs="12" sm="3">
-                <Select name={ item.count } id="unit" value={ item.unit } label="U commande" onChange={ onChange }>
-                    <option value="U">U</option>
-                    <option value="Kg">Kg</option>
-                </Select>
-            </CCol>
-            <CCol xs="12" sm="3">
-                <CFormGroup>
-                    <CLabel htmlFor="name">Quantité
-                    </CLabel>
-                    <CInputGroup>
-                        <CInput
-                            id="orderedQty"
-                            type="number"
-                            name={ item.count }
-                            value={ item.orderedQty }
-                            onChange={ onChange }
-                        />
-                        <CInputGroupAppend>
-                            <CInputGroupText>{ item.unit }</CInputGroupText>
-                        </CInputGroupAppend>
-                    </CInputGroup>
-                </CFormGroup>
-            </CCol>
-            { editing &&
-                <>
-                    <CCol xs="12" sm="3">
-                        <CFormGroup>
-                            <CLabel htmlFor="name">Préparé
-                            </CLabel>
-                            <CInputGroup>
-                                <CInput
-                                    id="preparedQty"
-                                    type="number"
-                                    name={ item.count }
-                                    value={ item.preparedQty }
-                                    onChange={ onChange }
-                                />
-                                <CInputGroupAppend>
-                                    <CInputGroupText>{ item.product.unit }</CInputGroupText>
-                                </CInputGroupAppend>
-                            </CInputGroup>
-                        </CFormGroup>
-                    </CCol>
-                    <CCol xs="12" sm="3">
-                        <CFormGroup>
-                            <CLabel htmlFor="name">Livré
-                            </CLabel>
-                            <CInputGroup>
-                                <CInput
-                                    id="deliveredQty"
-                                    type="number"
-                                    name={ item.count }
-                                    value={ item.deliveredQty }
-                                    onChange={ onChange }
-                                />
-                                <CInputGroupAppend>
-                                    <CInputGroupText>{ item.product.unit }</CInputGroupText>
-                                </CInputGroupAppend>
-                            </CInputGroup>
-                        </CFormGroup>
-                    </CCol>
-                </>
-            }
-        </CRow>
+        { (isAdmin || Roles.isPicker(currentUser)) &&
+            <CRow>
+                <CCol xs="12" sm="3">
+                    <Select name={ item.count } id="unit" value={ item.unit } label="U commande" onChange={ onChange }>
+                        <option value="U">U</option>
+                        <option value="Kg">Kg</option>
+                    </Select>
+                </CCol>
+                <CCol xs="12" sm="3">
+                    <CFormGroup>
+                        <CLabel htmlFor="name">Quantité
+                        </CLabel>
+                        <CInputGroup>
+                            <CInput
+                                id="orderedQty"
+                                type="number"
+                                name={ item.count }
+                                value={ item.orderedQty }
+                                onChange={ onChange }
+                            />
+                            <CInputGroupAppend>
+                                <CInputGroupText>{ item.unit }</CInputGroupText>
+                            </CInputGroupAppend>
+                        </CInputGroup>
+                    </CFormGroup>
+                </CCol>
+                { editing &&
+                    <>
+                        <CCol xs="12" sm="3">
+                            <CFormGroup>
+                                <CLabel htmlFor="name">Préparé
+                                </CLabel>
+                                <CInputGroup>
+                                    <CInput
+                                        id="preparedQty"
+                                        type="number"
+                                        name={ item.count }
+                                        value={ item.preparedQty }
+                                        onChange={ onChange }
+                                    />
+                                    <CInputGroupAppend>
+                                        <CInputGroupText>{ item.product.unit }</CInputGroupText>
+                                    </CInputGroupAppend>
+                                </CInputGroup>
+                            </CFormGroup>
+                        </CCol>
+                        <CCol xs="12" sm="3">
+                            <CFormGroup>
+                                <CLabel htmlFor="name">Livré
+                                </CLabel>
+                                <CInputGroup>
+                                    <CInput
+                                        id="deliveredQty"
+                                        type="number"
+                                        name={ item.count }
+                                        value={ item.deliveredQty }
+                                        onChange={ onChange }
+                                    />
+                                    <CInputGroupAppend>
+                                        <CInputGroupText>{ item.product.unit }</CInputGroupText>
+                                    </CInputGroupAppend>
+                                </CInputGroup>
+                            </CFormGroup>
+                        </CCol>
+                    </>
+                }
+            </CRow>
+        }
         </>
     );
 }

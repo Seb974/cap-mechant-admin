@@ -54,7 +54,6 @@ const Seller = ({ match, history }) => {
         e.preventDefault();
         if (!seller.needsRecovery || (seller.needsRecovery && delaysConsistency())) {
             const sellerToWrite = getSellerToWrite();
-            console.log(sellerToWrite);
             const request = !editing ? SellerActions.create(sellerToWrite) : SellerActions.update(id, sellerToWrite);
             request.then(response => {
                         setErrors(defaultSeller);
@@ -114,7 +113,7 @@ const Seller = ({ match, history }) => {
             <CCol xs="12" sm="12">
                 <CCard>
                     <CCardHeader>
-                        <h3>Créer un vendeur</h3>
+                        <h3>{ isAdmin ? (id === "new" ? "Créer un vendeur" : "Modifier le vendeur " + seller.name) : "Gérer les administrateurs"}</h3>
                     </CCardHeader>
                     <CCardBody>
                         <CForm onSubmit={ handleSubmit }>
@@ -128,22 +127,25 @@ const Seller = ({ match, history }) => {
                                             value={ seller.name }
                                             onChange={ handleChange }
                                             placeholder="Nom du vendeur"
-                                            invalid={ errors.name.length > 0 } 
+                                            invalid={ errors.name.length > 0 }
+                                            disabled={ !isAdmin }
                                         />
                                         <CInvalidFeedback>{ errors.name }</CInvalidFeedback>
                                     </CFormGroup>
                                 </CCol>
-                                <CCol xs="12" md="6" className="mt-4">
-                                    <CFormGroup row className="mb-0 ml-1 d-flex align-items-end">
-                                        <CCol xs="3" sm="2" md="3">
-                                            <CSwitch name="needsRecovery" className="mr-1" color="dark" shape="pill" variant="opposite" checked={ seller.needsRecovery } onChange={ handleRecovery }/>
-                                        </CCol>
-                                        <CCol tag="label" xs="9" sm="10" md="9" className="col-form-label">Récupération des produits</CCol>
-                                    </CFormGroup>
-                                </CCol>
+                                { isAdmin && 
+                                    <CCol xs="12" md="6" className="mt-4">
+                                        <CFormGroup row className="mb-0 ml-1 d-flex align-items-end">
+                                            <CCol xs="3" sm="2" md="3">
+                                                <CSwitch name="needsRecovery" className="mr-1" color="dark" shape="pill" variant="opposite" checked={ seller.needsRecovery } onChange={ handleRecovery }/>
+                                            </CCol>
+                                            <CCol tag="label" xs="9" sm="10" md="9" className="col-form-label">Récupération des produits</CCol>
+                                        </CFormGroup>
+                                    </CCol>
+                                }
                             </CRow>
 
-                            { seller.needsRecovery &&
+                            { isAdmin && seller.needsRecovery &&
                                 <CRow className="mt-3">
                                     <CCol xs="12" md="6" className="mt-4">
                                         <CFormGroup row className="mb-0 ml-1 d-flex align-items-end">
@@ -174,52 +176,51 @@ const Seller = ({ match, history }) => {
                                         </CFormGroup>
                                     </CCol>
                                 </CRow>
-                        }
-
-                            <CRow className="mt-4">
-                                { isAdmin && 
-                                    <CCol xs="12" sm="12" md="6">
-                                        <CFormGroup>
-                                            <CLabel htmlFor="name">Rétribution sur vente</CLabel>
+                            }
+                            { isAdmin && 
+                                <CRow className="mt-4">
+                                        <CCol xs="12" sm="12" md="6">
+                                            <CFormGroup>
+                                                <CLabel htmlFor="name">Rétribution sur vente</CLabel>
+                                                <CInputGroup>
+                                                    <CInput
+                                                        id="ownerRate"
+                                                        name="ownerRate"
+                                                        type="number"
+                                                        value={ seller.ownerRate }
+                                                        onChange={ handleChange }
+                                                        placeholder="Marge par vente"
+                                                        invalid={ errors.ownerRate.length > 0 } 
+                                                    />
+                                                    <CInputGroupAppend>
+                                                        <CInputGroupText>%</CInputGroupText>
+                                                    </CInputGroupAppend>
+                                                </CInputGroup>
+                                                <CInvalidFeedback>{ errors.ownerRate }</CInvalidFeedback>
+                                            </CFormGroup>
+                                        </CCol>
+                                    <CCol xs="12" md={isAdmin ? "6" : "12"}>
+                                    <CFormGroup>
+                                            <CLabel htmlFor="name">Délais entre réception et livraison</CLabel>
                                             <CInputGroup>
                                                 <CInput
-                                                    id="ownerRate"
-                                                    name="ownerRate"
+                                                    id="delay"
+                                                    name="delay"
                                                     type="number"
-                                                    value={ seller.ownerRate }
+                                                    value={ seller.delay }
                                                     onChange={ handleChange }
-                                                    placeholder="Marge par vente"
-                                                    invalid={ errors.ownerRate.length > 0 } 
+                                                    placeholder=" "
+                                                    invalid={ errors.delay.length > 0 } 
                                                 />
                                                 <CInputGroupAppend>
-                                                    <CInputGroupText>%</CInputGroupText>
+                                                    <CInputGroupText>Jour(s)</CInputGroupText>
                                                 </CInputGroupAppend>
+                                                <CInvalidFeedback>{ errors.delay }</CInvalidFeedback>
                                             </CInputGroup>
-                                            <CInvalidFeedback>{ errors.ownerRate }</CInvalidFeedback>
                                         </CFormGroup>
                                     </CCol>
-                                }
-                                <CCol xs="12" md={isAdmin ? "6" : "12"}>
-                                <CFormGroup>
-                                        <CLabel htmlFor="name">Délais entre réception et livraison</CLabel>
-                                        <CInputGroup>
-                                            <CInput
-                                                id="delay"
-                                                name="delay"
-                                                type="number"
-                                                value={ seller.delay }
-                                                onChange={ handleChange }
-                                                placeholder=" "
-                                                invalid={ errors.delay.length > 0 } 
-                                            />
-                                            <CInputGroupAppend>
-                                                <CInputGroupText>Jour(s)</CInputGroupText>
-                                            </CInputGroupAppend>
-                                            <CInvalidFeedback>{ errors.delay }</CInvalidFeedback>
-                                        </CInputGroup>
-                                    </CFormGroup>
-                                </CCol>
-                            </CRow>
+                                </CRow>
+                            }
                             <UserSearchMultiple users={ users } setUsers={ setUsers }/>
                             <CRow className="mt-4 d-flex justify-content-center">
                                 <CButton type="submit" size="sm" color="success"><CIcon name="cil-save"/> Enregistrer</CButton>

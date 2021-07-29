@@ -1,8 +1,9 @@
 import React from 'react';
 import CIcon from '@coreui/icons-react';
 import Roles from 'src/config/Roles';
+import { isDefined } from 'src/helpers/utils';
 
-function getNav(translation, currentUser)
+function getNav(translation, currentUser, seller = null)
 {
   const defineUserRole = () => {
     const mainRole = Roles.hasAdminPrivileges(currentUser) ? "ADMIN" : 
@@ -128,7 +129,7 @@ function getNav(translation, currentUser)
         to: '/components/provisions',
         icon: <CIcon name="cib-azure-artifacts" customClasses="c-sidebar-nav-icon"/>,
       },
-    !["ADMIN", "PICKER", "SELLER"].includes(mainRole) ? voidValue :  
+    !["ADMIN", "PICKER"].includes(mainRole) ? voidValue :           // !["ADMIN", "PICKER", "SELLER"]
         {
           _tag: 'CSidebarNavItem',
           name: translation("stocks.label"),
@@ -149,7 +150,7 @@ function getNav(translation, currentUser)
         to: '/components/prices',
         icon: <CIcon name="cil-money" customClasses="c-sidebar-nav-icon"/>,
       },
-    !["ADMIN", "SUPERVISOR"].includes(mainRole) ? voidValue :  
+    !["ADMIN", "SUPERVISOR"].includes(mainRole) ? voidValue :     // !["ADMIN", "SUPERVISOR"]
       {
         _tag: 'CSidebarNavItem',
         name: translation("summary.label"),
@@ -199,7 +200,7 @@ function getNav(translation, currentUser)
         _tag: 'CSidebarNavTitle',
         _children: [translation("component.label")]
       },
-    !["ADMIN"].includes(mainRole) ? voidValue :  
+    !["ADMIN", "SELLER"].includes(mainRole) ? voidValue :       // !["ADMIN"]
         {
           _tag: 'CSidebarNavItem',
           name: translation("categories.label"),
@@ -228,7 +229,7 @@ function getNav(translation, currentUser)
         icon: <CIcon name="cib-everplaces" customClasses="c-sidebar-nav-icon"/>,
         // icon: <CIcon name="cib-zingat" customClasses="c-sidebar-nav-icon"/>,
       },
-    !["ADMIN", "SELLER"].includes(mainRole) ? voidValue :  
+    !["ADMIN"].includes(mainRole) ? voidValue :  
         {
           _tag: 'CSidebarNavItem',
           name: translation("sellers.label"),
@@ -257,7 +258,14 @@ function getNav(translation, currentUser)
           to: '/components/supervisors',
           icon: <CIcon name="cil-shield-alt" customClasses="c-sidebar-nav-icon"/>,
         },
-    !["ADMIN", "SUPERVISOR"].includes(mainRole) ? voidValue :
+    !(["SELLER"].includes(mainRole) && isDefined(seller)) ? voidValue :  
+      {
+        _tag: 'CSidebarNavItem',
+        name: translation("administrators.label"),
+        to: '/components/sellers/' + seller.id,
+        icon: <CIcon name="cilUserFollow" customClasses="c-sidebar-nav-icon"/>,
+      },
+    !["ADMIN", "SUPERVISOR", "SELLER"].includes(mainRole) ? voidValue :         // !["ADMIN", "SUPERVISOR"]
         {
           _tag: 'CSidebarNavItem',
           name: translation("users.label"),

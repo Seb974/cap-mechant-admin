@@ -16,9 +16,8 @@ const Characteristics = ({ product, categories, type, setProduct, errors, histor
     const [groups, setGroups] = useState([]);
     const [sellers, setSellers] = useState([]);
     const [catalogs, setCatalogs] = useState([]);
-    const [isAdmin, setIsAdmin] = useState(false);
+    const [isAdmin, setIsAdmin] = useState(Roles.hasAdminPrivileges(currentUser));
 
-    useEffect(() => setIsAdmin(Roles.hasAdminPrivileges(currentUser)), []);
     useEffect(() => setIsAdmin(Roles.hasAdminPrivileges(currentUser)), [currentUser]);
 
     useEffect(() => {
@@ -46,9 +45,9 @@ const Characteristics = ({ product, categories, type, setProduct, errors, histor
 
     const handleUsersChange = userGroups => setProduct(product => ({...product, userGroups}));
     const handleCatalogsChange = catalogs => setProduct(product => ({...product, catalogs}));
-    const handleCategoriesChange = categories => setProduct(product => ({...product, categories}));
     const handleChange = ({ currentTarget }) => setProduct({...product, [currentTarget.name]: currentTarget.value});
-    const handleSellerChange = ({ currentTarget }) => setProduct({...product, seller : sellers.find(seller => seller.id === parseInt(currentTarget.value))});
+    const handleSellerChange = ({ currentTarget }) => setProduct({...product, seller: sellers.find(seller => seller.id === parseInt(currentTarget.value))});
+    const handleCategoriesChange = ({ currentTarget }) => setProduct({...product, categories: categories.find(seller => seller['@id'] === currentTarget.value)});
 
     const fetchGroups = () => {
         GroupActions.findAll()
@@ -85,7 +84,7 @@ const Characteristics = ({ product, categories, type, setProduct, errors, histor
 
     return (
         <>
-            <CRow>
+            <CRow className="mb-3">
                 <CCol xs="12" sm="6">
                     <CFormGroup>
                         <CLabel htmlFor="name">Nom</CLabel>
@@ -114,27 +113,36 @@ const Characteristics = ({ product, categories, type, setProduct, errors, histor
                     </CFormGroup>
                 </CCol>
             </CRow>
-            <Image entity={ product } setEntity={ setProduct } />
+            { isAdmin &&
+                <>
+                    <Image entity={ product } setEntity={ setProduct } />
+                    <CRow className="mb-3">
+                        <CCol xs="12" sm="12">
+                            <Select name="seller" label="Vendeur" value={ isDefined(product.seller) ? product.seller.id : 0 } error={ errors.seller } onChange={ handleSellerChange } required={ true }>
+                                { sellers.map(seller => <option value={ seller.id }>{ seller.name }</option>) }
+                            </Select>
+                        </CCol>
+                    </CRow>
+                </>
+            }
             <CRow className="mb-3">
-                <CCol xs="12" sm="12">
-                    <Select name="seller" label="Vendeur" value={ isDefined(product.seller) ? product.seller.id : 0 } error={ errors.seller } onChange={ handleSellerChange } required={ true }>
-                        { sellers.map(seller => <option value={ seller.id }>{ seller.name }</option>) }
+                <CCol xs="12" sm={ isAdmin ? "6" : "12"}>
+                    <Select custom name="categories" id="categories" value={ isDefined(product.categories) ? product.categories['@id'] : 0 } onChange={ handleCategoriesChange }>
+                        { categories.map(c => <option key={ c.id } value={ c['@id'] }>{ c.name }</option>) }
                     </Select>
+                    {/* <SelectMultiple name="categories" label="Catégories" value={ product.categories } error={ errors.categories } onChange={ handleCategoriesChange } data={ categories.map(category => ({value: category.id, label: category.name, isFixed: false})) }/> */}
                 </CCol>
-            </CRow>
-            <CRow className="mb-3">
-                <CCol xs="12" sm="6">
-                    <SelectMultiple name="categories" label="Catégories" value={ product.categories } error={ errors.categories } onChange={ handleCategoriesChange } data={ categories.map(category => ({value: category.id, label: category.name, isFixed: false})) }/>
-                </CCol>
-                <CCol xs="12" sm="6">
-                    <CLabel htmlFor="select">Durée de vie</CLabel>
-                    <CSelect custom name="productGroup" id="productGroup" value={ product.productGroup } onChange={ handleChange }>
-                        <option value="J + 1">J + 1</option>
-                        <option value="J + 3">J + 3</option>
-                        <option value="J + 6">J + 6</option>
-                        <option value="J + 10">J + 10</option>
-                    </CSelect>
-                </CCol>
+                { isAdmin &&
+                    <CCol xs="12" sm="6">
+                        <CLabel htmlFor="select">Durée de vie</CLabel>
+                        <CSelect custom name="productGroup" id="productGroup" value={ product.productGroup } onChange={ handleChange }>
+                            <option value="J + 1">J + 1</option>
+                            <option value="J + 3">J + 3</option>
+                            <option value="J + 6">J + 6</option>
+                            <option value="J + 10">J + 10</option>
+                        </CSelect>
+                    </CCol>
+                }
             </CRow>
             { isAdmin &&
                 <>
@@ -148,14 +156,14 @@ const Characteristics = ({ product, categories, type, setProduct, errors, histor
                             <SelectMultiple name="catalogs" label="Sur les catalogues" value={ product.catalogs } error={ errors.catalogs } onChange={ handleCatalogsChange } data={ catalogs }/>
                         </CCol>
                     </CRow>
+                    <CFormGroup row className="mb-4">
+                        <CCol xs="12" md="12">
+                            <CLabel htmlFor="textarea-input">Description</CLabel>
+                            <CTextarea name="fullDescription" id="fullDescription" rows="9" placeholder="Content..." onChange={ handleChange } value={ product.fullDescription } disabled={type === "mixed"}/>
+                        </CCol>
+                    </CFormGroup>
                 </>
             }
-            <CFormGroup row className="mb-4">
-                <CCol xs="12" md="12">
-                    <CLabel htmlFor="textarea-input">Description</CLabel>
-                    <CTextarea name="fullDescription" id="fullDescription" rows="9" placeholder="Content..." onChange={ handleChange } value={ product.fullDescription } disabled={type === "mixed"}/>
-                </CCol>
-            </CFormGroup>
         </>
     );
 }

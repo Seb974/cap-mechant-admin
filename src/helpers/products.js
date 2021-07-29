@@ -1,5 +1,5 @@
 export const getFormattedVariations = (variations, defaultVariation) => {
-    if (variations && variations.length > 0) {
+    if (isDefinedAndNotVoid(variations)) {
         return variations.map((variation, index) => {
             return {
                 ...variation,
@@ -15,7 +15,7 @@ export const getFormattedVariations = (variations, defaultVariation) => {
 };
 
 export const getFormattedComponents = (components, defaultComponent) => {
-    if (components && components.length > 0) {
+    if (isDefinedAndNotVoid(components)) {
         return components.map((component, index) => ({...component, count: index}))
     }
     return [defaultComponent];
@@ -65,7 +65,7 @@ export const getProductToWrite = (product, type, categories, variations, adapted
         productGroup: type === "mixed" ? null : product.productGroup,
         tax: product.tax['@id'],
         seller: noImgProduct.seller['@id'],
-        categories: product.categories.map(category => categories.find(element => element.id === category.value)['@id']),
+        categories: [product.categories['@id']],             //product.categories.map(category => categories.find(element => element.id === category.value)['@id']),
         stockManaged: type === "mixed" ? null : noImgProduct.stockManaged,
         unit: type === "mixed" ? "U" : noImgProduct.unit,
         fullDescription: type === "mixed" ? createDescription(product, components) : noImgProduct.fullDescription,
@@ -108,7 +108,7 @@ export const getVariationToWrite = (variation, product) => {
 };
 
 export const defineType = (product) => {
-    return product.isMixed ? "mixed" : product.variations && product.variations.length > 0 ? "with-variations" : "simple";
+    return product.isMixed ? "mixed" : isDefinedAndNotVoid(product.variations) ? "with-variations" : "simple";
 };
 
 export const formatProduct = (product, defaultStock) => {
@@ -118,7 +118,7 @@ export const formatProduct = (product, defaultStock) => {
         ...product, 
         userGroups: isDefinedAndNotVoid(product.userGroups) ? isDefined(product.userGroups[0].label) ? product.userGroups : product.userGroups.map(group => ({value: group})) : [],
         catalogs: isDefinedAndNotVoid(product.catalogs) ? isDefined(product.catalogs[0].label) ? product.catalogs : product.catalogs.map(catalog => ({...catalog, value: catalog.id, label: catalog.name, isFixed: false})) : [],
-        categories: categories.map(category => ({value: category.id, label: category.name, isFixed: false})),
+        categories: categories[0], //categories.map(category => ({value: category.id, label: category.name, isFixed: false})),
         uniquePrice: isDefinedAndNotVoid(prices) ? prices.every(price => price.amount === basePrice) : true,
         stock: isDefined(stock) ? stock : isDefinedAndNotVoid(variations) ? variations[0].sizes[0].stock : defaultStock
     };

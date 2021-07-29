@@ -9,10 +9,12 @@ import Stock from 'src/components/productPages/stock';
 import Price from 'src/components/productPages/price';
 import Options from 'src/components/productPages/options';
 import Characteristics from 'src/components/productPages/characteristics';
+import SellerOptions from 'src/components/productPages/sellerOptions';
 import ProductsContext from 'src/contexts/ProductsContext';
 import Type from 'src/components/productPages/type';
 import AuthContext from 'src/contexts/AuthContext';
 import Roles from 'src/config/Roles';
+import { isDefinedAndNotVoid } from 'src/helpers/utils';
 
 const ProductPage = ({ match, history }) => {
 
@@ -27,10 +29,10 @@ const ProductPage = ({ match, history }) => {
     const defaultVariantSize = defaultVariant !== null && products[0].variations[0].sizes && products[0].variations[0].sizes.length > 0 ? products[0].variations[0].sizes[0] : null;
     const defaultProduct = {product: products[0], variation: defaultVariant, size: defaultVariantSize};
     const defaultComponent = {...defaultProduct, count: 0, quantity: ""};
-    const defaultStock = {quantity: 0, alert: "", security:""};
+    const defaultStock = {quantity: 0, alert: 0, security:0};
     const defaultVariation = {count: 0, name: "", image: null, sizes: [defaultSize]};
-    const [product, setProduct] = useState({name: "", weight:"", contentWeight:"", seller: {id: -1, name: ""}, userGroups: [], catalogs: [], image: null, unit: "Kg", productGroup: "J + 1", fullDescription: "", stock: defaultStock, stockManaged: true, tax: "-1", uniquePrice: true, prices: [], available: true, requireLegalAge: false, requireDeclaration: true, new: true, isMixed: false, categories: []});
-    const [errors, setErrors] = useState({name: "", weight: "", contentWeight:"", seller: "", userGroups: "", catalogs: [], image: "", unit: "", productGroup: "", fullDescription: "", stock: {alert: "", security:""}, stockManaged: "", tax: "", uniquePrice: "", prices: [{name: 'BASE', price:""}, {name: 'USER_VIP', price:""}, {name: 'PRO_CHR', price:""}, {name: 'PRO_GC', price:""}, {name: 'PRO_VIP', price:""}], available: "", requireLegalAge: "", new: "", isMixed: "", categories: ""});
+    const [product, setProduct] = useState({name: "", weight:0, contentWeight:0, seller: {id: -1, name: ""}, userGroups: [], catalogs: [], image: null, supplier: null, unit: "Kg", productGroup: "J + 1", fullDescription: "", stock: defaultStock, stockManaged: false, tax: "-1", uniquePrice: true, prices: [], available: true, requireLegalAge: false, requireDeclaration: false, new: false, isMixed: false, categories: []});
+    const [errors, setErrors] = useState({name: "", weight: "", contentWeight:"", seller: "", userGroups: "", catalogs: [], image: "", supplier: "", unit: "", productGroup: "", fullDescription: "", stock: {alert: "", security:""}, stockManaged: "", tax: "", uniquePrice: "", prices: [{name: 'BASE', price:""}, {name: 'USER_VIP', price:""}, {name: 'PRO_CHR', price:""}, {name: 'PRO_GC', price:""}, {name: 'PRO_VIP', price:""}], available: "", requireLegalAge: "", new: "", isMixed: "", categories: ""});
     const [variations, setVariations] = useState([defaultVariation]);
     const [components, setComponents] = useState([defaultComponent]);
     const [type, setType] = useState("simple");
@@ -44,7 +46,10 @@ const ProductPage = ({ match, history }) => {
     useEffect(() => fetchProduct(id), [id]);
     useEffect(() => setIsAdmin(Roles.hasAdminPrivileges(currentUser)), [currentUser]);
 
-    useEffect(() => setProduct({...product, available: isAdmin }), [isAdmin]);
+    useEffect(() => {
+        if (!isDefinedAndNotVoid(product.categories) && isDefinedAndNotVoid(categories))
+            setProduct({...product, categories: categories[0]});
+    }, [product, categories])
 
     const fetchProduct = id => {
         if (id !== "new") {
@@ -52,7 +57,6 @@ const ProductPage = ({ match, history }) => {
             let request = ProductActions.find(id);
             request
                 .then(response => {
-                    console.log(response);
                     const formattedProduct = formatProduct(response, defaultStock);
                     setProduct(formattedProduct)
                     setType(defineType(response));
@@ -154,26 +158,31 @@ const ProductPage = ({ match, history }) => {
                                 errors={errors}
                                 setProduct={setProduct}
                             />
-                            <Type
-                                type={ type }
-                                product={product}
-                                components={ components }
-                                variations={ variations }
-                                defaultSize={ defaultSize }
-                                defaultVariation={ defaultVariation }
-                                defaultComponent={ defaultComponent }
-                                setType={ setType }
-                                setProduct={ setProduct }
-                                setComponents={ setComponents }
-                                setVariations={ setVariations }
-                            />
-                            <Price product={product} setProduct={setProduct}/>
-
-                            { type !== "mixed" && 
-                                <Stock product={product} setProduct={setProduct}/> 
+                            { isAdmin && 
+                                <Type
+                                    type={ type }
+                                    product={product}
+                                    components={ components }
+                                    variations={ variations }
+                                    defaultSize={ defaultSize }
+                                    defaultVariation={ defaultVariation }
+                                    defaultComponent={ defaultComponent }
+                                    setType={ setType }
+                                    setProduct={ setProduct }
+                                    setComponents={ setComponents }
+                                    setVariations={ setVariations }
+                                />
                             }
 
-                            <Options product={product} setProduct={setProduct}/>
+                            { !isAdmin ? <SellerOptions product={product} setProduct={setProduct}/> :
+                                <>
+                                    <Price product={product} setProduct={setProduct}/>
+                                    { type !== "mixed" && 
+                                        <Stock product={product} setProduct={setProduct}/> 
+                                    }
+                                    <Options product={product} setProduct={setProduct}/>
+                                </>
+                            }
 
                             <hr className="mt-5 mb-5"/>
                             <CRow className="mt-4 d-flex justify-content-center">

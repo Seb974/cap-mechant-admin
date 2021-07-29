@@ -13,12 +13,12 @@ import Select from 'src/components/forms/Select';
 const Supplier = ({ match, history }) => {
 
     const { id = "new" } = match.params;
-    const [isAdmin, setIsAdmin] = useState([]);
+    const [isAdmin, setIsAdmin] = useState(false);
     const [editing, setEditing] = useState(false);
     const { currentUser } = useContext(AuthContext);
-    const [supplier, setSupplier] = useState({ name: "", seller: null, email: "", phone: "" });
+    const [supplier, setSupplier] = useState({ name: "", seller: null, email: "", phone: "", isIntern: false });
     const [sellers, setSellers] = useState([]);
-    const [errors, setErrors] = useState({ name: "", seller: "", email: "", phone: "" });
+    const [errors, setErrors] = useState({ name: "", seller: "", email: "", phone: "", isIntern: "" });
 
     useEffect(() => {
         fetchSellers();
@@ -61,13 +61,14 @@ const Supplier = ({ match, history }) => {
         setSupplier({...supplier, seller: newSeller });
     };
 
+    const handleIsIntern = () => setSupplier({...supplier, isIntern: !supplier.isIntern});
+
     const handleSubmit = (e) => {
         e.preventDefault();
         const formattedSupplier = {...supplier, seller: supplier.seller['@id']};
-        console.log(formattedSupplier);
         const request = !editing ? SupplierActions.create(formattedSupplier) : SupplierActions.update(id, formattedSupplier);
         request.then(response => {
-                    setErrors({ name: "", seller: "", email: "", phone: "" });
+                    setErrors({ name: "", seller: "", email: "", phone: "", isIntern: "" });
                     //TODO : Flash notification de succès
                     history.replace("/components/suppliers");
                 })
@@ -112,11 +113,21 @@ const Supplier = ({ match, history }) => {
                                         <CInvalidFeedback>{ errors.name }</CInvalidFeedback>
                                     </CFormGroup>
                                 </CCol>
-                                { isDefined(supplier.seller) && 
-                                    <CCol xs="12" sm="6">
-                                        <Select name="seller" label="Vendeur" value={ supplier.seller.id } onChange={ handleSellerChange }>
-                                            { sellers.map(seller => <option key={seller.id} value={ seller.id }>{ seller.name }</option>) }
-                                        </Select>
+                                { isAdmin ? 
+                                    isDefined(supplier.seller) && 
+                                        <CCol xs="12" sm="6">
+                                            <Select name="seller" label="Vendeur" value={ supplier.seller.id } onChange={ handleSellerChange }>
+                                                { sellers.map(seller => <option key={seller.id} value={ seller.id }>{ seller.name }</option>) }
+                                            </Select>
+                                        </CCol>
+                                    :
+                                    <CCol xs="12" md="6" className="mt-4">
+                                        <CFormGroup row className="mb-0 ml-1 d-flex align-items-end">
+                                            <CCol xs="3" sm="2" md="3">
+                                                <CSwitch name="isIntern" className="mr-1" color="dark" shape="pill" variant="opposite" checked={ supplier.isIntern } onChange={ handleIsIntern }/>
+                                            </CCol>
+                                            <CCol tag="label" xs="9" sm="10" md="9" className="col-form-label">Fournisseur interne</CCol>
+                                        </CFormGroup>
                                     </CCol>
                                 }
                             </CRow>
@@ -151,6 +162,18 @@ const Supplier = ({ match, history }) => {
                                     </CFormGroup>
                                 </CCol>
                             </CRow>
+                            { isAdmin &&
+                                <CRow>
+                                    <CCol xs="12" md="6" className="mt-4">
+                                        <CFormGroup row className="mb-0 ml-1 d-flex align-items-end">
+                                            <CCol xs="3" sm="2" md="3">
+                                                <CSwitch name="isIntern" className="mr-1" color="dark" shape="pill" variant="opposite" checked={ supplier.isIntern } onChange={ handleIsIntern }/>
+                                            </CCol>
+                                            <CCol tag="label" xs="9" sm="10" md="9" className="col-form-label">Fournisseur interne</CCol>
+                                        </CFormGroup>
+                                    </CCol>
+                                </CRow>
+                            }
                             <CRow className="mt-4 d-flex justify-content-center">
                                 <CButton type="submit" size="sm" color="success"><CIcon name="cil-save"/> Enregistrer</CButton>
                             </CRow>

@@ -48,5 +48,6 @@
     "accounting.label": "Accounting",
     "billing.label": "Biling",
     "bills.label": "Bills",
-    "articles.label": "Articles"
+    "articles.label": "Articles",
+    "administrators.label": "Administrators"
 }

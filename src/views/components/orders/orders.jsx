@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import OrderActions from '../../../services/OrderActions'
 import { CCard, CCardBody, CCardHeader, CCol, CDataTable, CRow, CButton, CCollapse, CFormGroup, CInputCheckbox, CLabel, CWidgetIcon, CCardFooter } from '@coreui/react';
-import { Link } from 'react-router-dom';
+import { Link, Redirect } from 'react-router-dom';
 import AuthContext from 'src/contexts/AuthContext';
 import Roles from 'src/config/Roles';
 import RangeDatePicker from 'src/components/forms/RangeDatePicker';
@@ -125,7 +125,7 @@ const Orders = (props) => {
         ].join(',')
     ).join('\n');
 
-    return (
+    return !(isAdmin || Roles.isPicker(currentUser)) ? <Redirect to="/"/> : (
         <CRow>
             <CCol xs="12" lg="12">
                 <CCard>

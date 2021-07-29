@@ -1,14 +1,18 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import SupplierActions from '../../../services/SupplierActions'
 import { CBadge, CCard, CCardBody, CCardHeader, CCol, CDataTable, CRow, CButton } from '@coreui/react';
 import { DocsLink } from 'src/reusable'
 import { Link } from 'react-router-dom';
 import { isDefined } from 'src/helpers/utils';
+import Roles from 'src/config/Roles';
+import AuthContext from 'src/contexts/AuthContext';
 
 const Suppliers = (props) => {
 
     const itemsPerPage = 15;
     const fields = ['Vendeur', 'Nom', ' '];
+    const { currentUser } = useContext(AuthContext);
+    const [isAdmin, setIsAdmin] = useState(Roles.hasAdminPrivileges(currentUser));
     const [suppliers, setSuppliers] = useState([]);
 
     useEffect(() => {
@@ -19,6 +23,8 @@ const Suppliers = (props) => {
             })
             .catch(error => console.log(error.response));
     }, []);
+
+    useEffect(() => setIsAdmin(Roles.hasAdminPrivileges(currentUser)), [currentUser]);
 
     const handleDelete = (id) => {
         const originalSuppliers = [...suppliers];
@@ -43,7 +49,7 @@ const Suppliers = (props) => {
             <CCardBody>
             <CDataTable
               items={ suppliers }
-              fields={ fields }
+              fields={ isAdmin ? fields : fields.filter(f => f !== 'Vendeur') }
               bordered
               itemsPerPage={ itemsPerPage }
               pagination

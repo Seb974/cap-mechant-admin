@@ -39,12 +39,14 @@ const Platform = ({ history, match }) => {
         PlatformActions
             .find()
             .then(response => {
-                const {metas, pickers, ...mainPlatform} = response;
-                setPlatform(mainPlatform);
-                if (isDefinedAndNotVoid(metas))
-                    setInformations(metas);
-                if (isDefinedAndNotVoid(pickers))
-                    setPickers(pickers);
+                if (isDefined(response)) {
+                    const {metas, pickers, ...mainPlatform} = response;
+                    setPlatform(mainPlatform);
+                    if (isDefinedAndNotVoid(metas))
+                        setInformations(metas);
+                    if (isDefinedAndNotVoid(pickers))
+                        setPickers(pickers);
+                }
             })
             .catch(error => {
                 console.log(error);

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { Link } from 'react-router-dom';
 import CategoryActions from 'src/services/CategoryActions';
 import { CButton, CCard, CCardBody, CCardFooter, CCardHeader, CCol, CForm, CFormGroup, CInput, CInputFile, CInputGroup, CInputGroupAppend, CInputGroupText, CInvalidFeedback, CLabel, CRow, CSelect, CSwitch, CTextarea } from '@coreui/react';
@@ -8,14 +8,18 @@ import GroupActions from 'src/services/GroupActions';
 import CatalogActions from 'src/services/CatalogActions';
 import { getFloat, isDefined, isDefinedAndNotVoid } from 'src/helpers/utils';
 import Restriction from 'src/components/restrictions/restriction';
+import Roles from 'src/config/Roles';
+import AuthContext from 'src/contexts/AuthContext';
 
 
 const CategoryPage = ({ match, history }) => {
 
     const { id = "new" } = match.params;
+    const { currentUser } = useContext(AuthContext);
     const [groups, setGroups] = useState([]);
     const [catalogs, setCatalogs] = useState([]);
     const [editing, setEditing] = useState(false);
+    const [isAdmin, setIsAdmin] = useState(Roles.hasAdminPrivileges(currentUser));
     const [category, setCategory] = useState({ name: "", userGroups: [], catalogs: [], restrictions: [] });
     const [errors, setErrors] = useState({ name: "", userGroups: "", catalogs: "", restrictions: "" });
 
@@ -26,6 +30,7 @@ const CategoryPage = ({ match, history }) => {
     }, []);
 
     useEffect(() => fetchCategory(id), [id]);
+    useEffect(() => setIsAdmin(Roles.hasAdminPrivileges(currentUser)), [currentUser]);
 
     useEffect(() => {
         if (category.userGroups.length === 0 && groups.length > 0)
@@ -33,6 +38,11 @@ const CategoryPage = ({ match, history }) => {
         if (category.userGroups.length > 0 && !Object.keys(category.userGroups[0]).includes('label') && groups.length > 0)
             setCategory({...category, userGroups: category.userGroups.map(userGroup => groups.find(group => group['@id'] === userGroup))});
     }, [category, groups]);
+
+    useEffect(() => {
+        if (!isDefinedAndNotVoid(category.catalogs) && isDefinedAndNotVoid(catalogs))
+            setCategory({...category, catalogs});
+    }, [category, catalogs])
 
     const fetchGroups = () => {
         GroupActions
@@ -91,8 +101,6 @@ const CategoryPage = ({ match, history }) => {
     const handleSubmit = (e) => {
         e.preventDefault();
         const formattedCategory = getFormattedCategory();
-        console.log(formattedCategory);
-
         const request = !editing ? CategoryActions.create(formattedCategory) : CategoryActions.update(id, formattedCategory);
         request.then(response => {
                     setErrors({name: "", });
@@ -164,37 +172,41 @@ const CategoryPage = ({ match, history }) => {
                                     </CFormGroup>
                                 </CCol>
                             </CRow>
-                            <CRow className="mb-3">
-                                <CCol xs="12" sm="12">
-                                    <SelectMultiple name="catalogs" label="Disponible sur les catalogues" value={ category.catalogs } error={ errors.catalogs } onChange={ handleCatalogsChange } data={ catalogs }/>
-                                </CCol>
-                            </CRow>
-                            <CRow className="mb-3">
-                                <CCol xs="12" sm="12">
-                                    <SelectMultiple name="userGroups" label="Pour les utilisateurs" value={ category.userGroups } error={ errors.userGroups } onChange={ handleUsersChange } data={ groups }/>
-                                </CCol>
-                            </CRow>
-                            { category.restrictions.map((restriction, index) => {
-                                return <Restriction
-                                            key={ index }
-                                            entity={ category }
-                                            restriction={ restriction } 
-                                            catalogs={ category.catalogs.filter(c => category.restrictions.findIndex(r => r.count !== restriction.count && r.catalog.id === c.id) === -1) }
-                                            setEntity={ setCategory }
-                                            handleDeleteRule={ handleDeleteRule }
-                                            errors={ errors }
-                                            total={ category.catalogs.length }
-                                            index={ index }
-                                        />
-                            })}
-                            <>
-                                <hr className="mt-5"/>
-                                <CRow className="mt-4">
-                                    <CCol xs="12" sm="12">
-                                        <CButton size="sm" color="warning" onClick={ handleAddRule } disabled={ category.restrictions.length >= category.catalogs.length }><CIcon name="cil-plus"/> Ajouter une restriction</CButton>
-                                    </CCol>
-                                </CRow>
-                            </>
+                            { isAdmin &&
+                                <>
+                                    <CRow className="mb-3">
+                                        <CCol xs="12" sm="12">
+                                            <SelectMultiple name="catalogs" label="Disponible sur les catalogues" value={ category.catalogs } error={ errors.catalogs } onChange={ handleCatalogsChange } data={ catalogs }/>
+                                        </CCol>
+                                    </CRow>
+                                    <CRow className="mb-3">
+                                        <CCol xs="12" sm="12">
+                                            <SelectMultiple name="userGroups" label="Pour les utilisateurs" value={ category.userGroups } error={ errors.userGroups } onChange={ handleUsersChange } data={ groups }/>
+                                        </CCol>
+                                    </CRow>
+                                    { category.restrictions.map((restriction, index) => {
+                                        return <Restriction
+                                                    key={ index }
+                                                    entity={ category }
+                                                    restriction={ restriction } 
+                                                    catalogs={ category.catalogs.filter(c => category.restrictions.findIndex(r => r.count !== restriction.count && r.catalog.id === c.id) === -1) }
+                                                    setEntity={ setCategory }
+                                                    handleDeleteRule={ handleDeleteRule }
+                                                    errors={ errors }
+                                                    total={ category.catalogs.length }
+                                                    index={ index }
+                                                />
+                                    })}
+                                    <>
+                                        <hr className="mt-5"/>
+                                        <CRow className="mt-4">
+                                            <CCol xs="12" sm="12">
+                                                <CButton size="sm" color="warning" onClick={ handleAddRule } disabled={ category.restrictions.length >= category.catalogs.length }><CIcon name="cil-plus"/> Ajouter une restriction</CButton>
+                                            </CCol>
+                                        </CRow>
+                                    </>
+                                </>
+                            }
                             <CRow className="mt-4 d-flex justify-content-center">
                                 <CButton type="submit" size="sm" color="success"><CIcon name="cil-save"/> Enregistrer</CButton>
                             </CRow>

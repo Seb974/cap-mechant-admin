@@ -23,7 +23,7 @@ import { isDefined } from 'src/helpers/utils'
 
 const TheSidebar = () => {
   const dispatch = useDispatch();
-  const { currentUser } = useContext(AuthContext);
+  const { currentUser, seller } = useContext(AuthContext);
   const show = useSelector(state => state.sidebarShow);
   const { t, i18n } = useTranslation();
   const [nav, setNav] = useState([]);
@@ -34,11 +34,11 @@ const TheSidebar = () => {
 
   useEffect(() => {
       setAppropriateNavigation()
-  }, [currentUser]);
+  }, [currentUser, seller]);
 
   const setAppropriateNavigation = () => {
     // if (isDefined(navigation))
-        setNav(navigation.getNav(t, currentUser));
+        setNav(navigation.getNav(t, currentUser, seller));
   };
 
   return !isDefined(nav) ? <></> : (
