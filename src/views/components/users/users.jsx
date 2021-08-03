@@ -1,46 +1,44 @@
-import React, { useEffect, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import UserActions from '../../../services/UserActions'
 import Roles from '../../../config/Roles'
 import { CBadge, CCard, CCardBody, CCardHeader, CCol, CDataTable, CRow, CButton } from '@coreui/react';
 import { Link } from 'react-router-dom';
+import AuthContext from 'src/contexts/AuthContext';
 
 const Users = (props) => {
 
-
     const itemsPerPage = 15;
+    const { currentUser } = useContext(AuthContext);
     const fields = ['name', 'email', 'roles', ' '];
     const [users, setUsers] = useState([]);
+    const [isAdmin, setIsAdmin] = useState(Roles.hasAdminPrivileges(currentUser));
 
     const getBadge = role => {
-      switch (role) {
-        case 'ROLE_PRO':
-        case 'ROLE_CHR':
-        case 'ROLE_GC':
-        case 'ROLE_VIP': return 'success'
-        case 'ROLE_USER_EXT':
-        case 'ROLE_USER_EXT_VIP': return 'secondary'
-        case 'ROLE_TEAM': return 'warning'
-        case 'ROLE_ADMIN':
-        case 'ROLE_SUPER_ADMIN': return 'danger'
-        default: return 'secondary'
-      }
+      const name = role.toUpperCase();
+      return name.includes('ADMIN') ? 'danger' :
+             name.includes('VIP') ? 'warning' :
+             name.includes('USER') ? 'secondary' : 'success';
     }
 
-    useEffect(() => {
+    useEffect(() => fetchUsers(), []);
+
+    const fetchUsers = () => {
         UserActions.findAll()
-                   .then(response => setUsers(response))
-                   .catch(error => console.log(error.response));
-    }, []);
+          .then(response => {
+              const newUsers = !isAdmin ? response.filter(u => !Roles.hasAdminPrivileges({...u, roles: Roles.filterRoles(u.roles)})) : response;
+              setUsers(newUsers);
+          })
+          .catch(error => console.log(error.response));
+    };
 
     const handleDelete = (id) => {
       const originalUsers = [...users];
       setUsers(users.filter(user => user.id !== id));
-      console.log("Supprimé");
-      // UserActions.delete(id)
-      //            .catch(error => {
-      //                 setUsers(originalUsers);
-      //                 console.log(error.response);
-      //            });
+      UserActions.delete(id)
+                 .catch(error => {
+                      setUsers(originalUsers);
+                      console.log(error.response);
+                 });
   }
 
     return (
@@ -49,11 +47,14 @@ const Users = (props) => {
           <CCard>
             <CCardHeader>
               Liste des utilisateurs
+                <CCol col="6" sm="4" md="2" className="ml-auto">
+                    <Link role="button" to="/components/users/new" block variant="outline" color="success">CRÉER</Link>
+                </CCol>
             </CCardHeader>
             <CCardBody>
             <CDataTable
               items={ users }
-              fields={ fields }
+              fields={ isAdmin ? fields : fields.filter(f => f !== 'roles') }
               bordered
               itemsPerPage={ itemsPerPage }
               pagination
@@ -65,7 +66,7 @@ const Users = (props) => {
                   item => (
                     <td>
                         <CBadge color={ getBadge(Roles.filterRoles(item.roles)) }>
-                            { Roles.getRoleLabel(item.roles) }
+                            { (Roles.filterRoles(item.roles)).substring(5).replace('_', ' ',) }
                         </CBadge>
                     </td>
                 ),

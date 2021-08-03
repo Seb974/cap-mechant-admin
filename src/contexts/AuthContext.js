@@ -6,5 +6,11 @@ export default React.createContext({
     currentUser: {},
     setCurrentUser: (value) => {},
     eventSource: {},
-    setEventSource: (value) => {}
+    setEventSource: (value) => {},
+    settings: {},
+    setSettings: (value) => {},
+    seller: {},
+    setSeller: (value) => {},
+    supervisor: {},
+    setSupervisor: (value) => {}
 });

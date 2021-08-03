@@ -2,53 +2,63 @@ import React, { useEffect, useContext } from 'react';
 import { EventSourcePolyfill } from 'event-source-polyfill';
 import AuthContext from 'src/contexts/AuthContext';
 import api from 'src/config/api';
-
-// import ProductsContext from '../../contexts/ProductsContext';
-// import ProductActions from '../../services/ProductActions';
+import touringEvents from 'src/data/dataProvider/eventHandlers/touringEvents';
+import DeliveryContext from 'src/contexts/DeliveryContext';
+import ProductsContext from 'src/contexts/ProductsContext';
+import MercureContext from 'src/contexts/MercureContext';
 
 const MercureHub = ({ children }) => {
     
     const url = new URL(api.MERCURE_DOMAIN + "/.well-known/mercure");
-    // const { products, setProducts } = useContext(ProductsContext);
+    const { products, setProducts } = useContext(ProductsContext);
+    const { updatedOrders, setUpdatedOrders, updatedProducts, setUpdatedProducts, updatedCategories, setUpdatedCategories } = useContext(MercureContext);
+    const { updatedUsers, setUpdatedUsers, updatedProvisions, setUpdatedProvisions, updatedContainers, setUpdatedContainers } = useContext(MercureContext);
     const { currentUser, eventSource, setEventSource } = useContext(AuthContext);
+    const { packages, setPackages, tourings, setTourings } = useContext(DeliveryContext);
 
     useEffect(() => {
         closeIfExists();
         url.searchParams.append('topic', api.API_DOMAIN + '/api/products/{id}');
+        url.searchParams.append('topic', api.API_DOMAIN + '/api/stocks/{id}');
+        url.searchParams.append('topic', api.API_DOMAIN + '/api/provisions/{id}');
+        url.searchParams.append('topic', api.API_DOMAIN + '/api/categories/{id}');
+        url.searchParams.append('topic', api.API_DOMAIN + '/api/containers/{id}');
+        url.searchParams.append('topic', api.API_DOMAIN + '/api/tourings/{id}');
         url.searchParams.append('topic', api.API_DOMAIN + '/api/users/{id}');
         url.searchParams.append('topic', api.API_DOMAIN + '/api/users/{id}/metas');
+        url.searchParams.append('topic', api.API_DOMAIN + '/api/users/{id}/shipments');
         setEventSource(new EventSourcePolyfill(url, { withCredentials: true }));
     }, [currentUser]);
 
     const closeIfExists = () => {
-        if (eventSource !== undefined && Object.keys(eventSource).find(key => key === 'readyState') !== undefined) {
+        if (eventSource !== undefined && Object.keys(eventSource).find(key => key === 'readyState') !== undefined)
             eventSource.close();
-        }
     };
 
     eventSource.onmessage = event => {
         const data = JSON.parse(event.data);
-        // if (data['@id'].includes('products')) {
-        //     const newProducts = data['@type'] === 'Product' ?
-        //         ProductActions.updateFromMercure(products, data) :
-        //         ProductActions.deleteFromMercure(products, data['@id'].substring(parseInt(data['@id'].lastIndexOf('/')) + 1));
-        //     setProducts(newProducts);
-        // }
+        console.log(data);
+        if (data['@id'].includes('tourings'))
+            touringEvents.update(data, tourings, setTourings);
 
-        if (data['@id'].includes('users') || data['@id'].includes('metas')) {
-            console.log(data);
-        }
+        if (data['@id'].includes('containers'))
+            setUpdatedContainers([...updatedContainers, data]);
+
+        if (data['@id'].includes('provisions'))
+            setUpdatedProvisions([...updatedProvisions, data]);
+
+        if (data['@id'].includes('categories'))
+            setUpdatedCategories([...updatedCategories, data]);
+
+        if (data['@id'].includes('users') || data['@id'].includes('metas'))
+            setUpdatedUsers([...updatedUsers, data]);
+
+        if (data['@id'].includes('order_entities') && updatedOrders.findIndex(o => o.id === data.id) === -1)
+            setUpdatedOrders([...updatedOrders, data]);
+
+        if (data['@id'].includes('products') || data['@id'].includes('prices') || data['@id'].includes('stocks'))
+            setUpdatedProducts([...updatedProducts, data]);
     };
-
-    // eventSource.onopen = event => {
-    //     console.log(event);
-    // };
-
-    // eventSource.onerror = event => {
-    //     console.log(event);
-    //     if (event.error.message.toUpperCase().includes("NO ACTIVITY"))
-    //         console.log("Coupure de Mercure");
-    // };
 
     return <>{ children }</>
 }

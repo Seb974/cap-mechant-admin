@@ -1,7 +1,7 @@
 import React from 'react';
 import { CFormGroup, CInput, CInvalidFeedback, CLabel, CValidFeedback } from '@coreui/react';
 
-const Field = ({ name, value, onChange, label = "", placeholder = "", type = "text", error = "", id = "", autocomplete="", disabled=false, required=false, valid=false }) => {
+const Field = ({ name, value, onChange, label = "", placeholder = "", type = "text", error = "", id = "", autocomplete="", disabled=false, required=false, valid=false, maxLength=255 }) => {
     return (
         <CFormGroup>
             <CLabel htmlFor={ name }>{ label }</CLabel>
@@ -17,6 +17,7 @@ const Field = ({ name, value, onChange, label = "", placeholder = "", type = "te
                 invalid={ error.length > 0 }
                 valid={ valid }
                 onChange={ onChange }
+                maxLength={ maxLength }
             />
             <CValidFeedback>Cool! Input is valid</CValidFeedback>
             <CInvalidFeedback>{ error }</CInvalidFeedback>

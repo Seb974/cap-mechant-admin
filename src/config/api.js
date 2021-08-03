@@ -1,9 +1,9 @@
 import axios from 'axios';
 
-// const API_DOMAIN = "https://api.cap-mechant.re";
-// const MERCURE_DOMAIN = "https://api.cap-mechant.re:3000";
 const API_DOMAIN = "http://localhost:8000";
 const MERCURE_DOMAIN = "http://localhost:3000";
+// const API_DOMAIN = "https://api.cap-mechant.re";
+// const MERCURE_DOMAIN = "https://api.cap-mechant.re:3000";
 
 function get(route) {
     return axios.get(API_DOMAIN + route);
@@ -22,7 +22,7 @@ function put(route, entity) {
 }
 
 function patch(route, entity) {
-    return axios.patch(API_DOMAIN + route, entity);
+    return axios.patch(API_DOMAIN + route, entity, { headers: {'Content-type': 'application/merge-patch+json'} });
 }
 
 export default {

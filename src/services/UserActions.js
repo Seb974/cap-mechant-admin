@@ -1,4 +1,5 @@
 import api from 'src/config/api';
+import { isDefined } from 'src/helpers/utils';
 
 function register(user) {
     const { name, email, password } = user;
@@ -29,11 +30,32 @@ function create(user) {
     return api.post('/api/users', user);
 }
 
+function findUser(search) {
+    return api
+            .get('/api/users?name=' + search)
+            .then(response => response.data['hydra:member']);
+}
+
+function findDeliverers() {
+    return api
+            .get('/api/users?roles=DELIVERER')
+            .then(response => response.data['hydra:member']);
+}
+
+function getAccountingId(order) {
+    return isDefined(order.user) && isDefined(order.user.accountingId) ? new Promise((resolve, reject) => resolve(order.user.accountingId)) :
+         api.post('/api/accounting/user/' + order.id)
+            .then(response => response.data)
+}
+
 export default {
     register,
     findAll,
     delete: deleteUser,
     find, 
     update, 
-    create
+    create,
+    findUser,
+    findDeliverers,
+    getAccountingId
 }

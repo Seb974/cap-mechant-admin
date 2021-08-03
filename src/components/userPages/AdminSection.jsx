@@ -1,12 +1,29 @@
-import React, { useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import Field from '../forms/Field';
 import Select from '../forms/Select';
-import Roles from '../../config/Roles';
+import GroupActions from 'src/services/GroupActions';
+import Roles from 'src/config/Roles';
+import AuthContext from 'src/contexts/AuthContext';
 
 const AdminSection = ({ user, onUserChange, errors}) => {
 
-    const roles = Roles.getRoles();
-    const [selectedRole, setSelectedRole] = useState(Roles.getDefaultRole());
+    const { currentUser } = useContext(AuthContext);
+    const [groups, setGroups] = useState([]);
+    const [isAdmin, setIsAdmin] = useState(Roles.hasAdminPrivileges(currentUser));
+
+    useEffect(() => fetchGroups(), []);
+
+    const fetchGroups = () => {
+        GroupActions.findAll()
+                    .then(response => {
+                        const newGroups = !isAdmin ? response.filter(group => group.hasShopAccess) : response;
+                        setGroups(newGroups)
+                    })
+                    .catch(error => {
+                        // TODO : Notification flash d'une erreur
+                        window.location.replace("/components/users");
+                    });
+    };
 
     const handleUserChange = ({ currentTarget }) => {
         onUserChange({...user, [currentTarget.name]: currentTarget.value});
@@ -37,13 +54,15 @@ const AdminSection = ({ user, onUserChange, errors}) => {
                     />
                 </div>
             </div>
-            <div className="row">
-                <div className="col-md-6">
-                    <Select name="roles" label="Catégorie d'utilisateur" value={ user.roles } error={ errors.category } onChange={ handleUserChange }>
-                        { roles.map( (role, key) => <option key={ key } value={ role.value }>{ role.label }</option> ) }
-                    </Select>
+            { isAdmin && 
+                <div className="row">
+                    <div className="col-md-6">
+                        <Select name="roles" label="Catégorie d'utilisateur" value={ user.roles } error={ errors.category } onChange={ handleUserChange }>
+                            { groups.map(role => <option key={ role.id } value={ role.value }>{ role.label }</option> ) }
+                        </Select>
+                    </div>
                 </div>
-            </div>
+            }
         </>
     );
 }

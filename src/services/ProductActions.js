@@ -17,42 +17,60 @@ function find(id) {
 }
 
 function update(id, product) {
-    return api.put('/api/products/' + id,
-                    {...product,
-                        // category: `/api/categories/${ product.category }`,
-                        // suppliers: suppliers.map(supplier => `/api/suppliers/${ supplier.id }`),
-                        // unit: `/api/units/${ product.unit }`,
-                        // userCategories: product.userCategories.map(userCategory => userCategory.value)
-                    });
+    return api.put('/api/products/' + id, product);
 }
 
 function create(product) {
-    return api.post('/api/products', 
-                    {...product, 
-                        // category: `/api/categories/${ product.category }`, 
-                        // suppliers: suppliers.map(supplier => `/api/suppliers/${ supplier.id }`),
-                        // unit: `/api/units/${ product.unit }`,
-                        // userCategories: product.userCategories.map(userCategory => userCategory.value),
-                        // picture: null
-                    });
+    return api.post('/api/products', product);
 }
 
 function updateFromMercure(products, product) {
     const filteredProducts = products.filter(item => item.id !== product.id);
     return [...filteredProducts, product].sort((a, b) => (a.name > b.name) ? 1 : -1);
-
 }
 
 function deleteFromMercure(products, id) {
     return products.filter(item => parseInt(item.id) !== parseInt(id));
 }
 
+function createImage(image) {
+    let formData = new FormData();
+    formData.append('file', image);
+    return api.post('/api/pictures', formData, {headers: {'Content-type': 'multipart/form-data'}})
+              .then(response => response.data['@id']);
+}
+
+function createVariation(variation) {
+    return api.post('/api/variations', variation)
+              .then(response => response.data['@id']);
+}
+
+function updateVariation(id, variation) {
+    return api.put('/api/variations/' + id, variation)
+              .then(response => response.data['@id']);
+}
+
+function createComponent(component) {
+    return api.post('/api/components', component)
+              .then(response => response.data['@id']);
+}
+
+function updateComponent(id, component) {
+    return api.put('/api/components/' + id, component)
+              .then(response => response.data['@id']);
+}
+
 export default { 
     findAll,
     delete: deleteProduct,
-    find, 
-    update, 
+    find,
+    update,
     create,
+    createImage,
+    createVariation,
+    updateVariation,
+    createComponent,
+    updateComponent,
     updateFromMercure,
     deleteFromMercure,
 }

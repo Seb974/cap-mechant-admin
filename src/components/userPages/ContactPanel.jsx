@@ -1,7 +1,7 @@
 import React from 'react';
 import Field from '../forms/Field';
 
-const ContactPanel = ({ user, phone, onUserChange, onPhoneChange, errors }) => {
+const ContactPanel = ({ user, phone, onUserChange, onPhoneChange, errors, label="Contact" }) => {
 
     const handleChange = ({ currentTarget }) => {
         onPhoneChange(currentTarget.value);
@@ -13,7 +13,7 @@ const ContactPanel = ({ user, phone, onUserChange, onPhoneChange, errors }) => {
 
     return (
         <>
-            <div className="row"><h4>Contact</h4></div>
+            <div className="row"><h4>{ label }</h4></div>
             <div className="row mb-3">
                 <div className="col-md-12">
                     <Field 

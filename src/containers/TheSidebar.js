@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import {
   CCreateElement,
@@ -13,21 +13,35 @@ import {
   CSidebarNavDropdown,
   CSidebarNavItem,
 } from '@coreui/react'
+import AuthContext from 'src/contexts/AuthContext'
 import CIcon from '@coreui/icons-react'
 import { useTranslation } from 'react-i18next'
 
 // sidebar nav config
-import navigation from './navigation'
+import navigation from './navigation/navigation';
+import { isDefined } from 'src/helpers/utils'
 
 const TheSidebar = () => {
-  const dispatch = useDispatch()
-  const show = useSelector(state => state.sidebarShow)
-  const { t, i18n } = useTranslation()
-  const [nav, setNav] = useState([])
+  const dispatch = useDispatch();
+  const { currentUser, seller } = useContext(AuthContext);
+  const show = useSelector(state => state.sidebarShow);
+  const { t, i18n } = useTranslation();
+  const [nav, setNav] = useState([]);
 
-  useEffect(() => { setNav(navigation.getNav(t)) }, []);
+  useEffect(() => {
+      setAppropriateNavigation()
+  }, []);
 
-  return (
+  useEffect(() => {
+      setAppropriateNavigation()
+  }, [currentUser, seller]);
+
+  const setAppropriateNavigation = () => {
+    // if (isDefined(navigation))
+        setNav(navigation.getNav(t, currentUser, seller));
+  };
+
+  return !isDefined(nav) ? <></> : (
     <CSidebar
       show={show}
       unfoldable
