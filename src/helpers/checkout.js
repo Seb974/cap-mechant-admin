@@ -46,6 +46,8 @@ export const getOrderToWrite = (order, user, informations, productCart, date, ob
     return {
         ...order,
         user: isDefined(user) ? user['@id'] : null,
+        name: isDefined(user) ? user.name : null,
+        email: isDefined(user) ? user.email : null,
         deliveryDate: date,
         metas: informations,
         catalog: selectedCatalog['@id'],

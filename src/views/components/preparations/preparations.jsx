@@ -60,6 +60,7 @@ const Preparations = (props) => {
             .then(response =>{
                 setOrders(response);
                 setLoading(false);
+                console.log(response);
             })
             .catch(error => {
                 console.log(error);
@@ -230,7 +231,7 @@ const Preparations = (props) => {
                     :
                     <CDataTable
                         items={ orders }
-                        fields={ fields }
+                        fields={ isAdmin ? fields : fields.filter(f => f !== 'total') }
                         bordered
                         itemsPerPage={ itemsPerPage }
                         pagination
@@ -250,14 +251,15 @@ const Preparations = (props) => {
                             ,
                             'date':
                                 item => <td>
-                                            { isAdmin || Roles.isPicker(currentUser) || Roles.isSupervisor(currentUser) ?
+                                            { 
+                                                // isAdmin || Roles.isPicker(currentUser) || Roles.isSupervisor(currentUser) ?
                                             (isSameDate(new Date(item.deliveryDate), new Date()) ? "Aujourd'hui" : 
                                             isSameDate(new Date(item.deliveryDate), getDateFrom(new Date(), 1)) ? "Demain" :
                                             (new Date(item.deliveryDate)).toLocaleDateString('fr-FR', { timeZone: 'UTC'})) 
-                                            : 
-                                            isSameDate( getReverseDeliveryDay(new Date(item.deliveryDate), seller), new Date()) ? "Aujourd'hui" : 
-                                            isSameDate( getReverseDeliveryDay(new Date(item.deliveryDate), seller), getDateFrom(new Date(), 1)) ? "Demain" :
-                                            ( getReverseDeliveryDay(new Date(item.deliveryDate), seller).toLocaleDateString('fr-FR', { timeZone: 'UTC'}))
+                                                // : 
+                                                // isSameDate( getReverseDeliveryDay(new Date(item.deliveryDate), seller), new Date()) ? "Aujourd'hui" : 
+                                                // isSameDate( getReverseDeliveryDay(new Date(item.deliveryDate), seller), getDateFrom(new Date(), 1)) ? "Demain" :
+                                                // ( getReverseDeliveryDay(new Date(item.deliveryDate), seller).toLocaleDateString('fr-FR', { timeZone: 'UTC'}))
                                             }
                                         </td>
                             ,
@@ -279,8 +281,8 @@ const Preparations = (props) => {
                                                 }
                                             </CButton>
                                         }
-                                        <CButton color="warning" disabled={ !isAdmin } href={ "#/components/orders/" + item.id } className="mx-1 my-1"><i className="fas fa-pen"></i></CButton>
-                                        <CButton color="danger" disabled={ !(isAdmin || (item.isRemains && Roles.isPicker(currentUser))) } onClick={ () => handleDelete(item) } className="mx-1 my-1"><i className="fas fa-trash"></i></CButton>
+                                        <CButton color="warning" disabled={ !isAdmin && !Roles.isSeller(currentUser) } href={ "#/components/orders/" + item.id } className="mx-1 my-1"><i className="fas fa-pen"></i></CButton>
+                                        <CButton color="danger" disabled={ !(isAdmin || Roles.isSeller(currentUser) || (item.isRemains && Roles.isPicker(currentUser))) } onClick={ () => handleDelete(item) } className="mx-1 my-1"><i className="fas fa-trash"></i></CButton>
                                     </td>
                                 )
                             ,

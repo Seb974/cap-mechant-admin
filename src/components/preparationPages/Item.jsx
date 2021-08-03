@@ -89,9 +89,10 @@ const Item = ({ item, handleChange, handleDelete, total, index, editing }) => {
                 </CCol>
                 :
                 <CCol xs="12" sm="2">
-                    <Select name={ item.count } id="unit" value={ item.unit } label="U commande" onChange={ onChange }>
+                    <Select name={ item.count } id="unit" value={ item.unit } label="Unité" onChange={ onChange }>
                         <option value="U">U</option>
                         <option value="Kg">Kg</option>
+                        <option value="Kg">L</option>
                     </Select>
                 </CCol>
             }

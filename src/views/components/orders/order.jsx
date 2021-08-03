@@ -68,15 +68,19 @@ const Order = ({ match, history }) => {
 
     useEffect(() => fetchOrder(id), [id]);
 
-    useEffect(() => {
-        setUserInformations();
-    }, [user]);
+    useEffect(() => setUserInformations(), [user]);
     
     useEffect(() => {
         if (id === "new" && isDefined(supervisor) && !isDefined(user)) {
             setUser(supervisor.users[0]);
         }
     }, []);
+
+    useEffect(() => {
+        if (id === "new" && Roles.isSeller(currentUser) && !isDefined(user)) {
+            setUser(users[0]);
+        }
+    }, [users])
 
     useEffect(() => {
         if (groups.length > 0) {
@@ -179,16 +183,21 @@ const Order = ({ match, history }) => {
         setSelectedUser(newUser);
     };
 
+    const handleUserChange = ({ currentTarget }) => {
+        const newUser = users.find(u => parseInt(u.id) === parseInt(currentTarget.value));
+        setUser(newUser);
+    };
+
     const handleCatalogChange = ({ currentTarget }) => {
         const newCatalog = catalogs.find(c => c.id === parseInt(currentTarget.value));
         setCatalog(newCatalog);
     };
 
     const handleSubmit = () => {
-        // const newErrors = validateForm(order, informations, (isDefined(order.calalog) ? order.catalog : catalog), condition, relaypoints);
-        // if (isDefined(newErrors) && Object.keys(newErrors).length > 0) {
-        //     setErrors({...errors, ...newErrors});
-        // } else {
+                // const newErrors = validateForm(order, informations, (isDefined(order.calalog) ? order.catalog : catalog), condition, relaypoints);
+                // if (isDefined(newErrors) && Object.keys(newErrors).length > 0) {
+                //     setErrors({...errors, ...newErrors});
+                // } else {
         const orderToWrite = getOrderToWrite(order, user, informations, items, order.deliveryDate, objectDiscount, catalog, condition, settings);
         const request = !editing ? OrderActions.create(orderToWrite) : OrderActions.patch(id, orderToWrite);
         request.then(response => {
@@ -207,7 +216,7 @@ const Order = ({ match, history }) => {
             }
             //TODO : Flash notification d'erreur
         });
-        // }
+                // }
     };
 
     const getUserGroup = () => {
@@ -255,7 +264,7 @@ const Order = ({ match, history }) => {
                                     {/* { !(isAdmin || Roles.isPicker(currentUser)) && isDefined(supervisor) ? */}
                                     { !(isAdmin || Roles.isPicker(currentUser)) && Roles.isSeller(currentUser) ?
                                         <CCol xs="12" sm="12" md="6" className="mt-4">
-                                            <Select className="mr-2" name="selectedUser" label="Pour le compte de" onChange={ handleSupervisorUserChange } value={ isDefined(user) ? user.id : 0 }>
+                                            <Select className="mr-2" name="selectedUser" label="Pour le compte de" onChange={ handleUserChange } value={ isDefined(user) ? user.id : 0 }>
                                                 { users.map(user => <option value={ user.id }>{ user.name + " - " + user.email }</option>) }
                                             </Select>
                                         </CCol>

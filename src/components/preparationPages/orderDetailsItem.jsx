@@ -3,16 +3,20 @@ import { CButton, CCol, CFormGroup, CInput, CInputGroup, CInputGroupAppend, CInp
 import CIcon from '@coreui/icons-react';
 import ProductsContext from 'src/contexts/ProductsContext';
 import { getFloat, isDefined, isDefinedAndNotVoid } from 'src/helpers/utils';
-
+import Roles from 'src/config/Roles';
+import AuthContext from 'src/contexts/AuthContext';
 
 const OrderDetailsItem = ({ item, order, setOrder, total, index, isDelivery }) => {
 
+    const { currentUser } = useContext(AuthContext);
+    const [isAdmin, setIsAdmin] = useState(Roles.hasAdminPrivileges(currentUser));
     const { products } = useContext(ProductsContext);
     const [variants, setVariants] = useState([]);
     const [displayedProduct, setDisplayedProduct] = useState(item.product);
 
     useEffect(() => getDisplayedProduct(), []);
     useEffect(() => getDisplayedProduct(), [products]);
+    useEffect(() => setIsAdmin(Roles.hasAdminPrivileges(currentUser)), [currentUser]);
 
     const getDisplayedProduct = () => {
         if ( products.length > 0) {
@@ -52,7 +56,7 @@ const OrderDetailsItem = ({ item, order, setOrder, total, index, isDelivery }) =
 
     return !isDefined(item) || !isDefined(displayedProduct) ? <></> : (
         <CRow>
-            <CCol xs="12" sm="3">
+            <CCol xs="12" sm={ isAdmin ? "3" : "9"}>
                 <CFormGroup>
                     <CLabel htmlFor="name">{"Produit " + (total > 1 ? index + 1 : "")}
                     </CLabel>
@@ -61,26 +65,28 @@ const OrderDetailsItem = ({ item, order, setOrder, total, index, isDelivery }) =
                     </CSelect>
                 </CFormGroup>
             </CCol>
-            <CCol xs="12" sm="3">
-                <CFormGroup>
-                    <CLabel htmlFor="name">{"Variante"}
-                    </CLabel>
-                    <CSelect custom name="variant" id="variant" disabled={ true } value={ isDefined(item.variation) && isDefined(item.size) ? item.variation.id + "-" + item.size.id : "0"}>
-                        { !isDefinedAndNotVoid(variants) ? 
-                            <option key="0" value="0">-</option> 
-                            :
-                            variants.map((variant, index) => {
-                                return variant.sizes.map((size, i) => 
-                                    <option key={ (index + "" + i) } value={variant.id + "-" + size.id}>
-                                        { getVariantName(variant.color, size.name) }
-                                    </option>
-                                );
-                            })
-                        }
-                    </CSelect>
-                </CFormGroup>
-            </CCol>
-            <CCol xs="12" sm="2">
+            { isAdmin && 
+                <CCol xs="12" sm="3">
+                    <CFormGroup>
+                        <CLabel htmlFor="name">{"Variante"}
+                        </CLabel>
+                        <CSelect custom name="variant" id="variant" disabled={ true } value={ isDefined(item.variation) && isDefined(item.size) ? item.variation.id + "-" + item.size.id : "0"}>
+                            { !isDefinedAndNotVoid(variants) ? 
+                                <option key="0" value="0">-</option> 
+                                :
+                                variants.map((variant, index) => {
+                                    return variant.sizes.map((size, i) => 
+                                        <option key={ (index + "" + i) } value={variant.id + "-" + size.id}>
+                                            { getVariantName(variant.color, size.name) }
+                                        </option>
+                                    );
+                                })
+                            }
+                        </CSelect>
+                    </CFormGroup>
+                </CCol>
+            }
+            <CCol xs="12" sm={isAdmin ? "2" : "3"}>
                 <CFormGroup>
                     <CLabel htmlFor="name">Commandé
                     </CLabel>
@@ -99,27 +105,29 @@ const OrderDetailsItem = ({ item, order, setOrder, total, index, isDelivery }) =
                     </CInputGroup>
                 </CFormGroup>
             </CCol>
-            <CCol xs="12" sm="2">
-                <CFormGroup>
-                    <CLabel htmlFor="name">Préparé</CLabel>
-                    <CInputGroup>
-                        <CInput
-                            id="preparedQty"
-                            type="number"
-                            name={ item.id }
-                            value={ item.preparedQty }
-                            onChange={ onChange }
-                            disabled={ isDelivery }
-                            valid={ !isDelivery && item.preparedQty.toString().length > 0 && getFloat(item.preparedQty) >= (getFloat(item.orderedQty) * 0.8) }
-                            invalid={ !isDelivery && item.preparedQty.toString().length > 0 && getFloat(item.preparedQty) < (getFloat(item.orderedQty) * 0.8) }
-                        />
-                        <CInputGroupAppend>
-                            <CInputGroupText>{ displayedProduct.unit }</CInputGroupText>
-                        </CInputGroupAppend>
-                    </CInputGroup>
-                </CFormGroup>
-            </CCol>
-            { !isDelivery && item.preparedQty.toString().length > 0 && getFloat(item.preparedQty) < (getFloat(item.orderedQty) * 0.8) &&
+            { isAdmin && 
+                <CCol xs="12" sm="2">
+                    <CFormGroup>
+                        <CLabel htmlFor="name">Préparé</CLabel>
+                        <CInputGroup>
+                            <CInput
+                                id="preparedQty"
+                                type="number"
+                                name={ item.id }
+                                value={ item.preparedQty }
+                                onChange={ onChange }
+                                disabled={ isDelivery }
+                                valid={ !isDelivery && item.preparedQty.toString().length > 0 && getFloat(item.preparedQty) >= (getFloat(item.orderedQty) * 0.8) }
+                                invalid={ !isDelivery && item.preparedQty.toString().length > 0 && getFloat(item.preparedQty) < (getFloat(item.orderedQty) * 0.8) }
+                            />
+                            <CInputGroupAppend>
+                                <CInputGroupText>{ displayedProduct.unit }</CInputGroupText>
+                            </CInputGroupAppend>
+                        </CInputGroup>
+                    </CFormGroup>
+                </CCol>
+            }
+            { isAdmin && !isDelivery && item.preparedQty.toString().length > 0 && getFloat(item.preparedQty) < (getFloat(item.orderedQty) * 0.8) &&
                 <CCol xs="12" md="2" className="mt-4">
                     <CFormGroup row className="mb-0 d-flex align-items-end justify-content-start">
                         <CCol xs="4" sm="4" md="4">
