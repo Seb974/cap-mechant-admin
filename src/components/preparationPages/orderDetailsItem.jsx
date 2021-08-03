@@ -56,13 +56,32 @@ const OrderDetailsItem = ({ item, order, setOrder, total, index, isDelivery }) =
 
     return !isDefined(item) || !isDefined(displayedProduct) ? <></> : (
         <CRow>
-            <CCol xs="12" sm={ isAdmin ? "3" : "9"}>
+            <CCol xs="12" sm={ isAdmin ? "3" : "6"}>
                 <CFormGroup>
                     <CLabel htmlFor="name">{"Produit " + (total > 1 ? index + 1 : "")}
                     </CLabel>
                     <CSelect custom id="product" value={ displayedProduct.id } disabled={ true }>
                         { products.map(product => <option key={ product.id } value={ product.id }>{ product.name }</option>) }
                     </CSelect>
+                </CFormGroup>
+            </CCol>
+            <CCol xs="12" sm={isAdmin ? "2" : "3"}>
+                <CFormGroup>
+                    <CLabel htmlFor="name">Stock
+                    </CLabel>
+                    <CInputGroup>
+                        <CInput
+                            id="stock"
+                            type="number"
+                            name={ item.id }
+                            value={ item.stock }
+                            onChange={ onChange }
+                            disabled={ true }
+                        />
+                        <CInputGroupAppend>
+                            <CInputGroupText>{ item.unit }</CInputGroupText>
+                        </CInputGroupAppend>
+                    </CInputGroup>
                 </CFormGroup>
             </CCol>
             { isAdmin && 

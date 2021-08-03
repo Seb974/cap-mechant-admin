@@ -82,7 +82,10 @@ const Provisions = (props) => {
     const fetchSuppliers = () => {
         SupplierActions
             .findAll()
-            .then(response => setSuppliers(response));
+            .then(response => {
+                const externSuppliers = response.filter(s => !s.isIntern);
+                setSuppliers(externSuppliers);
+            });
     };
 
     const fetchSellers = () => {
@@ -193,15 +196,22 @@ const Provisions = (props) => {
                                     className = "form-control mb-3"
                                 />
                             </CCol>
+                            { !isAdmin && 
+                                <CCol xs="12" lg="6">
+                                    <SelectMultiple name="suppliers" label="Founisseurs" value={ selectedSuppliers } onChange={ handleSuppliersChange } data={ getFormattedEntities(suppliers) }/>
+                                </CCol>
+                            }
                         </CRow>
-                        <CRow>
-                            <CCol xs="12" lg="6">
-                                <SelectMultiple name="sellers" label="Vendeurs" value={ selectedSellers } onChange={ handleSellersChange } data={ getFormattedEntities(sellers) }/>
-                            </CCol>
-                            <CCol xs="12" lg="6">
-                                <SelectMultiple name="suppliers" label="Founisseurs" value={ selectedSuppliers } onChange={ handleSuppliersChange } data={ getFormattedEntities(suppliers) }/>
-                            </CCol>
-                        </CRow>
+                        { isAdmin && 
+                            <CRow>
+                                <CCol xs="12" lg="6">
+                                    <SelectMultiple name="sellers" label="Vendeurs" value={ selectedSellers } onChange={ handleSellersChange } data={ getFormattedEntities(sellers) }/>
+                                </CCol>
+                                <CCol xs="12" lg="6">
+                                    <SelectMultiple name="suppliers" label="Founisseurs" value={ selectedSuppliers } onChange={ handleSuppliersChange } data={ getFormattedEntities(suppliers) }/>
+                                </CCol>
+                            </CRow>
+                        }
                         { loading ? 
                             <CRow>
                                 <CCol xs="12" lg="12" className="text-center">
@@ -211,7 +221,7 @@ const Provisions = (props) => {
                             :
                             <CDataTable
                                 items={ provisions }
-                                fields={ fields }
+                                fields={ isAdmin ? fields : fields.filter(f => f !== "Vendeur") }
                                 bordered
                                 itemsPerPage={ itemsPerPage }
                                 pagination
@@ -251,8 +261,8 @@ const Provisions = (props) => {
                                         item => (
                                             <td className="mb-3 mb-xl-0 text-right">
                                                 { item.status === "ORDERED" && <ProvisionModal item={ item } provisions={ provisions } setProvisions={ setProvisions }/> }
-                                                <CButton color="warning" disabled={ !isAdmin } href={ "#/components/provisions/" + item.id } className="mx-1 my-1"><i className="fas fa-pen"></i></CButton>
-                                                <CButton color="danger" disabled={ !isAdmin } onClick={ () => handleDelete(item) } className="mx-1 my-1"><i className="fas fa-trash"></i></CButton>
+                                                <CButton color="warning" disabled={ !isAdmin && !Roles.isSeller(currentUser) } href={ "#/components/provisions/" + item.id } className="mx-1 my-1"><i className="fas fa-pen"></i></CButton>
+                                                <CButton color="danger" disabled={ !isAdmin && !Roles.isSeller(currentUser) } onClick={ () => handleDelete(item) } className="mx-1 my-1"><i className="fas fa-trash"></i></CButton>
                                             </td>
                                         )
                                     ,

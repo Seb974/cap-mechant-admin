@@ -23,7 +23,7 @@ const ProductPage = ({ match, history }) => {
     const [editing, setEditing] = useState(false);
     const [categories, setCategories] = useState([]);
     const [isAdmin, setIsAdmin] = useState(false);
-    const { currentUser } = useContext(AuthContext);
+    const { currentUser, seller } = useContext(AuthContext);
     const { products } = useContext(ProductsContext);
     const defaultVariant = null;
     const defaultVariantSize = defaultVariant !== null && products[0].variations[0].sizes && products[0].variations[0].sizes.length > 0 ? products[0].variations[0].sizes[0] : null;
@@ -96,7 +96,7 @@ const ProductPage = ({ match, history }) => {
 
     const adaptProduct = (variations = [], adaptedComponents = []) => {
         const { image } = product;
-        const productToWrite = getProductToWrite(product, type, categories, variations, adaptedComponents, components);
+        const productToWrite = getProductToWrite(product, type, categories, variations, adaptedComponents, components, seller);
         if (image && !image.filePath) {
             ProductActions.createImage(product.image)
                           .then(image => writeProduct({...productToWrite, image}));

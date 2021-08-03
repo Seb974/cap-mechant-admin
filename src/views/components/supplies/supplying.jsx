@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import OrderActions from '../../../services/OrderActions'
-import { CCard, CCardBody, CCardHeader, CCol, CDataTable, CRow, CButton, CFormGroup, CInputGroup, CInput, CInputGroupAppend, CInputGroupText, CCardFooter, CLabel } from '@coreui/react';
+import { CCard, CCardBody, CCardHeader, CCol, CDataTable, CRow, CButton, CFormGroup, CInputGroup, CInput, CInputGroupAppend, CInputGroupText, CCardFooter, CLabel, CCollapse } from '@coreui/react';
 import AuthContext from 'src/contexts/AuthContext';
 import Roles from 'src/config/Roles';
 import RangeDatePicker from 'src/components/forms/RangeDatePicker';
@@ -16,6 +16,8 @@ import SimpleDatePicker from 'src/components/forms/SimpleDatePicker';
 import useWindowDimensions from 'src/helpers/screenDimensions';
 import SellerActions from 'src/services/SellerActions';
 import ProvisionActions from 'src/services/ProvisionActions';
+import { Link } from 'react-router-dom';
+import NeedDetails from 'src/components/supplyPages/needDetails';
 
 const Supplying = (props) => {
 
@@ -42,6 +44,7 @@ const Supplying = (props) => {
     const [selectedSeller, setSelectedSeller] = useState(null);
     const [deliveryDate, setDeliveryDate] = useState(today);
     const [supplied, setSupplied] = useState([]);
+    const [details, setDetails] = useState([]);
 
     useEffect(() => {
         setIsAdmin(Roles.hasAdminPrivileges(currentUser));
@@ -54,9 +57,9 @@ const Supplying = (props) => {
     useEffect(() => getOrders(), [dates]);
 
     useEffect(() => {
-        if (isDefinedAndNotVoid(orders) && isDefinedAndNotVoid(products) && isDefinedAndNotVoid(productGroups) && isDefined(selectedSeller)) {
+        if (isDefined(orders) && isDefinedAndNotVoid(products) && isDefinedAndNotVoid(productGroups) && isDefined(selectedSeller)) {
             const productsToDisplay = getProductsList();
-            setDisplayedProducts(productsToDisplay);
+            setDisplayedProducts(productsToDisplay.filter(p => p.quantity > 0));
             setSelectAll(false);
         }
     }, [orders, products, productGroups, evolution, selectedSeller, supplied]);
@@ -79,8 +82,9 @@ const Supplying = (props) => {
         SupplierActions
             .findAll()
             .then(response => {
-                    setSuppliers(response);
-                    setSelectedSupplier(response[0]);
+                    const externSuppliers = response.filter(s => !s.isIntern);
+                    setSuppliers(externSuppliers);
+                    setSelectedSupplier(externSuppliers[0]);
                 });
     };
 
@@ -155,9 +159,6 @@ const Supplying = (props) => {
             .then(response => {
                 setToSupplies(provision.goods);
                 setSelectAll(false);
-                // setDisplayedProducts(displayedProducts.filter(p => !p.selected))
-                //TODO : Flash notification de succès
-                // history.replace("/components/provisions");
             })
             .catch( ({ response }) => {
                 // const { violations } = response.data;
@@ -244,7 +245,7 @@ const Supplying = (props) => {
 
     const getSimpleProduct = product => {
         return {
-            product: { id: product.id, name: product.name },
+            product: {...product},
             variation: null,
             size: null,
             stock: product.stock,
@@ -255,7 +256,7 @@ const Supplying = (props) => {
 
     const getVariantProduct = (product, variation, size) => {
         return {
-            product: { id: product.id, name: product.name },
+            product: {...product},
             variation: { id: variation.id, name: variation.color },
             size: { id: size.id, name: size.name },
             stock: size.stock,
@@ -268,14 +269,12 @@ const Supplying = (props) => {
 
     const addSales = (element, index) => {
         let sales = 0;
-        const { security, quantity } = element.stock;
         orders.map(order => {
             if (!order.isRemains)
                 sales = extractProduct(element, order, sales);
         });
         const evolutedSales = sales * (1 + evolution / 100);
         const suppliedQty = getSuppliedQty(element);
-        // const qty = (evolutedSales + security - quantity - suppliedQty) >= 0 ? (evolutedSales + security - quantity - suppliedQty) : 0;
         const qty = (evolutedSales - suppliedQty) >= 0 ? (evolutedSales - suppliedQty) : 0;
         return {...element, id: index, quantity: qty > 0 ? Math.ceil(qty) : 0, sales: evolutedSales.toFixed(2) };
     };
@@ -318,26 +317,18 @@ const Supplying = (props) => {
         return isDefined(entity) && isDefined(entity[variable]) && entity[variable].length > 0 && entity[variable] !== " ";
     };
 
-    const getSignPostName = item => {
-        return (
-            // item.stock.quantity <= item.stock.security ?
-            //     <span  className={ width >= 576 ? "" : "text-danger" }>
-            //         { width >= 576 ? <i className="fas fa-exclamation-triangle mr-1 text-danger"></i> : ""} 
-            //          { getProductName(item.product, item.variation, item.size) }
-            //     </span>
-            // : item.stock.quantity <= item.sales ?
-            //     <span  className={ width >= 576 ? "" : "text-warning" }>
-            //         { width >= 576 ? <i className="fas fa-info-circle mr-1 text-warning"></i>  : ""} 
-            //          { getProductName(item.product, item.variation, item.size) }
-            //     </span>
-            // : item.stock.quantity <= item.stock.alert ? 
-            //     <span  className={ width >= 576 ? "" : "text-primary" }>
-            //         { width >= 576 ? <i className="fas fa-info-circle mr-1 text-primary"></i>  : ""} 
-            //          { getProductName(item.product, item.variation, item.size) }
-            //     </span>
-            // : 
-            getProductName(item.product, item.variation, item.size)
-        );
+    const getSignPostName = item => getProductName(item.product, item.variation, item.size);
+
+    const toggleDetails = (index, e) => {
+        e.preventDefault();
+        const position = details.indexOf(index)
+        let newDetails = details.slice()
+        if (position !== -1) {
+            newDetails.splice(position, 1)
+        } else {
+            newDetails = [...details, index]
+        }
+        setDetails(newDetails);
     };
 
     return (
@@ -366,12 +357,12 @@ const Supplying = (props) => {
                                     minDate={ dates.start }
                                     maxDate={ dates.end }
                                     onDateChange={ handleDateChange }
-                                    label="Bornes du calcul prévisionnel"
+                                    label="Bornes du calcul"
                                     className = "form-control mb-3"
                                 />
                             </CCol>
                             { !(isAdmin || Roles.isPicker(currentUser)) && 
-                                <CCol xs="12" lg="2" className="mt-4 d-flex align-items-center justify-content-center pr-5">
+                                <CCol xs="12" lg="2" className="mt-3 d-flex align-items-center justify-content-center pr-5">
                                     <CFormGroup row variant="custom-checkbox" inline className="d-flex align-items-center">
                                         <input
                                             className="mx-1 my-2"
@@ -428,7 +419,9 @@ const Supplying = (props) => {
                                 pagination
                                 scopedSlots = {{
                                     'Produit':
-                                        item => <td style={{width: '25%'}}>{ getSignPostName(item) }</td>
+                                        item => <Link to="#" onClick={ e => { toggleDetails(item.id, e) }}>
+                                                    <td style={{width: '25%'}}>{ getSignPostName(item) }</td>
+                                                </Link>
                                     ,
                                     'Sécurité':
                                         item => <td style={{width: '15%'}}>{ item.stock.security + " " + item.unit }</td>
@@ -466,6 +459,11 @@ const Supplying = (props) => {
                                                         style={{zoom: 2.3}}
                                                     />
                                                 </td>
+                                    ,
+                                    'details':
+                                        item => <CCollapse show={details.includes(item.id)}>
+                                                    <NeedDetails orders={ orders } product={ item.product }/>
+                                                </CCollapse>
                                 }}
                             />
                         }

@@ -55,8 +55,8 @@ export const getTotalContentWeight = (components) => {
     return totalContentWeight;
 };
 
-export const getProductToWrite = (product, type, categories, variations, adaptedComponents, components) => {
-    const {image, stock, userGroups, catalogs, ...noImgProduct} = product;
+export const getProductToWrite = (product, type, categories, variations, adaptedComponents, components, seller) => {
+    const {image, stock, userGroups, catalogs, supplier, ...noImgProduct} = product;
     return {
         ...noImgProduct,
         stock: type === "simple" ? stock : null,
@@ -75,7 +75,9 @@ export const getProductToWrite = (product, type, categories, variations, adapted
             return ({...price, amount: parseFloat(price.amount), priceGroup: price.priceGroup['@id']})
         }),
         components: adaptedComponents,
-        variations
+        variations,
+        supplier: supplier['@id'],
+        seller: isDefined(seller) ? seller['@id'] : null
     };
 };
 

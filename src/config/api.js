@@ -1,7 +1,8 @@
 import axios from 'axios';
 
-const API_DOMAIN = "http://localhost:8000";
-const MERCURE_DOMAIN = "http://localhost:3000";
+const ENV = ( !process.env.NODE_ENV || process.env.NODE_ENV === "development") ? "development" : "production" ;
+const API_DOMAIN = ENV === "development" ? "http://localhost:8000" : "https://api.cap-mechant.re";
+const MERCURE_DOMAIN = ENV === "development" ? "http://localhost:3000" : "https://api.cap-mechant.re:3000";
 // const API_DOMAIN = "https://api.cap-mechant.re";
 // const MERCURE_DOMAIN = "https://api.cap-mechant.re:3000";
 

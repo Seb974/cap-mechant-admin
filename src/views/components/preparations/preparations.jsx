@@ -31,7 +31,7 @@ const Preparations = (props) => {
     const [labelLoading, setLabelLoading] = useState(false);
     const [dates, setDates] = useState({start: new Date(), end: new Date() });
     const [daysOff, setDaysOff] = useState([]);
-    const [details, setDetails] = useState([])
+    const [details, setDetails] = useState([]);
 
     useEffect(() => {
         setIsAdmin(Roles.hasAdminPrivileges(currentUser));
@@ -53,14 +53,13 @@ const Preparations = (props) => {
     const getOrders = () => {
         setLoading(true);
         const UTCDates = getUTCDates(dates);
-        const request = isAdmin || Roles.isPicker(currentUser) ?
+        const request = isAdmin || Roles.isPicker(currentUser) ?        // || Roles.isSeller(currentUser)
             OrderActions.findPickersPreparations(UTCDates) :
             OrderActions.findPreparations(UTCDates, currentUser);
         request
             .then(response =>{
                 setOrders(response);
                 setLoading(false);
-                console.log(response);
             })
             .catch(error => {
                 console.log(error);

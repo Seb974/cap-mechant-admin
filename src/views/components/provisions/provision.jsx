@@ -92,7 +92,10 @@ const Provision = ({ match, history }) => {
     const fetchSuppliers = () => {
         SupplierActions
             .findAll()
-            .then(response => setSuppliers(response));
+            .then(response => {
+                const externSuppliers = response.filter(s => !s.isIntern);
+                setSuppliers(externSuppliers);
+            });
     };
 
     const fetchSellers = () => {
@@ -170,11 +173,13 @@ const Provision = ({ match, history }) => {
                     </CCardHeader>
                     <CCardBody>
                             <CRow>
-                                <CCol xs="12" sm="12" md="6" className="mt-4">
-                                    <Select className="mr-2" name="seller" label="Pour le compte de" onChange={ handleSellerChange } value={ isDefined(provision.seller) ? provision.seller.id : 0 }>
-                                        { sellers.map(seller => <option key={ seller.id } value={ seller.id }>{ seller.name }</option>) }
-                                    </Select>
-                                </CCol>
+                                { isAdmin && 
+                                    <CCol xs="12" sm="12" md="6" className="mt-4">
+                                        <Select className="mr-2" name="seller" label="Pour le compte de" onChange={ handleSellerChange } value={ isDefined(provision.seller) ? provision.seller.id : 0 }>
+                                            { sellers.map(seller => <option key={ seller.id } value={ seller.id }>{ seller.name }</option>) }
+                                        </Select>
+                                    </CCol>
+                                }
                                 <CCol xs="12" sm="12" md="6" className="mt-4">
                                     <CFormGroup>
                                         <CLabel htmlFor="name">Date d'approvisionnement</CLabel>

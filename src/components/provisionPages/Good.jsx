@@ -52,7 +52,7 @@ const Good = ({ provision, good, handleChange, handleDelete, total, index, editi
     return !isDefined(good) || !isDefined(good.product) ? <></> : (
         <>
         <CRow>
-            <CCol xs="12" sm="4">
+            <CCol xs="12" md={ isAdmin ? "4" : "4"}>
                 <CFormGroup>
                     <CLabel htmlFor="name">{"Produit " + (total > 1 ? index + 1 : "")}
                     </CLabel>
@@ -61,43 +61,45 @@ const Good = ({ provision, good, handleChange, handleDelete, total, index, editi
                     </CSelect>
                 </CFormGroup>
             </CCol>
-            <CCol xs="12" sm="4">
+            { isAdmin && 
+                <>
+                    <CCol xs="12" md="4">
+                        <CFormGroup>
+                            <CLabel htmlFor="name">{"Variante"}
+                            </CLabel>
+                            <CSelect custom name="variant" id="variant" disabled={ !variants || variants.length <= 0 } onChange={ onVariantChange } value={ isDefined(good.variation) && isDefined(good.size) ? good.variation.id + "-" + good.size.id : "0"}>
+                                { !isDefinedAndNotVoid(variants) ? <option key="0" value="0">-</option> : 
+                                    variants.map((variant, index) => {
+                                        return variant.sizes.map((size, i) => <option key={ (index + "" + i) } value={variant.id + "-" + size.id}>{ getVariantName(variant.color, size.name) }</option>);
+                                    })
+                                }
+                            </CSelect>
+                        </CFormGroup>
+                    </CCol>
+                    <CCol xs="12" md="4">
+                        <CFormGroup>
+                            <CLabel htmlFor="name">Prix
+                            </CLabel>
+                            <CInputGroup>
+                                <CInput
+                                    id="price"
+                                    type="number"
+                                    name={ good.count }
+                                    value={ good.price }
+                                    onChange={ onChange }
+                                    disabled={ provision.status !== "RECEIVED" }
+                                />
+                                <CInputGroupAppend>
+                                    <CInputGroupText>€/{ good.unit }</CInputGroupText>
+                                </CInputGroupAppend>
+                            </CInputGroup>
+                        </CFormGroup>
+                    </CCol>
+                </>
+            }
+            <CCol xs="12" md={ isAdmin ? "4" : "2"}>
                 <CFormGroup>
-                    <CLabel htmlFor="name">{"Variante"}
-                    </CLabel>
-                    <CSelect custom name="variant" id="variant" disabled={ !variants || variants.length <= 0 } onChange={ onVariantChange } value={ isDefined(good.variation) && isDefined(good.size) ? good.variation.id + "-" + good.size.id : "0"}>
-                        { !isDefinedAndNotVoid(variants) ? <option key="0" value="0">-</option> : 
-                            variants.map((variant, index) => {
-                                return variant.sizes.map((size, i) => <option key={ (index + "" + i) } value={variant.id + "-" + size.id}>{ getVariantName(variant.color, size.name) }</option>);
-                            })
-                        }
-                    </CSelect>
-                </CFormGroup>
-            </CCol>
-            <CCol xs="12" sm="4">
-                <CFormGroup>
-                    <CLabel htmlFor="name">Prix
-                    </CLabel>
-                    <CInputGroup>
-                        <CInput
-                            id="price"
-                            type="number"
-                            name={ good.count }
-                            value={ good.price }
-                            onChange={ onChange }
-                            disabled={ provision.status !== "RECEIVED" }
-                        />
-                        <CInputGroupAppend>
-                            <CInputGroupText>€/{ good.unit }</CInputGroupText>
-                        </CInputGroupAppend>
-                    </CInputGroup>
-                </CFormGroup>
-            </CCol>
-        </CRow>
-        <CRow>
-            <CCol xs="12" sm="4">
-                <CFormGroup>
-                    <CLabel htmlFor="name">Quantité
+                    <CLabel htmlFor="name">Commandé
                     </CLabel>
                     <CInputGroup>
                         <CInput
@@ -113,9 +115,9 @@ const Good = ({ provision, good, handleChange, handleDelete, total, index, editi
                     </CInputGroup>
                 </CFormGroup>
             </CCol>
-            <CCol xs="12" sm="4">
+            <CCol xs="12" md={ isAdmin ? "4" : "2"}>
                 <CFormGroup>
-                    <CLabel htmlFor="name">Quantité reçue
+                    <CLabel htmlFor="name">Reçue
                     </CLabel>
                     <CInputGroup>
                         <CInput
@@ -132,13 +134,13 @@ const Good = ({ provision, good, handleChange, handleDelete, total, index, editi
                     </CInputGroup>
                 </CFormGroup>
             </CCol>
-            <CCol xs="12" sm="3">
+            <CCol xs="12" md={isAdmin ? "3" : "2"}>
                 <Select name={ good.count } id="unit" value={ good.unit } label="Unité" onChange={ onChange }>
                     <option value="U">U</option>
                     <option value="Kg">Kg</option>
                 </Select>
             </CCol>
-            <CCol xs="12" sm="1" className="d-flex align-items-center justify-content-end mt-2">
+            <CCol xs="12" md="1" className="d-flex align-items-center justify-content-end mt-2">
                 <CButton 
                     name={ good.count }
                     size="sm" 

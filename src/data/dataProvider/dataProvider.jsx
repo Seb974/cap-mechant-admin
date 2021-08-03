@@ -68,11 +68,12 @@ const DataProvider = ({ children }) => {
     }, [isAuthenticated]);
 
     useEffect(() => {
-        if (Roles.isSeller(currentUser))
+        // if (Roles.isSeller(currentUser))
             SellerActions
                 .findAll()
                 .then(response => setSeller(response[0]));
-        else if (Roles.isSupervisor(currentUser))
+        // else if (Roles.isSupervisor(currentUser))
+        if (Roles.isSupervisor(currentUser))
             SupervisorActions
                 .getSupervisor(currentUser)
                 .then(response => setSupervisor(response));
