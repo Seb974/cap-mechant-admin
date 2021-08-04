@@ -16,9 +16,9 @@ const Supplier = ({ match, history }) => {
     const [isAdmin, setIsAdmin] = useState(false);
     const [editing, setEditing] = useState(false);
     const { currentUser } = useContext(AuthContext);
-    const [supplier, setSupplier] = useState({ name: "", seller: null, email: "", phone: "", isIntern: false });
+    const [supplier, setSupplier] = useState({ name: "", seller: null, email: "", phone: "", isIntern: false, vifCode: "" });
     const [sellers, setSellers] = useState([]);
-    const [errors, setErrors] = useState({ name: "", seller: "", email: "", phone: "", isIntern: "" });
+    const [errors, setErrors] = useState({ name: "", seller: "", email: "", phone: "", isIntern: "", vifCode: "" });
 
     useEffect(() => {
         fetchSellers();
@@ -65,10 +65,10 @@ const Supplier = ({ match, history }) => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        const formattedSupplier = {...supplier, seller: supplier.seller['@id']};
+        const formattedSupplier = {...supplier, seller: supplier.seller['@id'], vifCode: !supplier.isIntern ? null : supplier.vifCode};
         const request = !editing ? SupplierActions.create(formattedSupplier) : SupplierActions.update(id, formattedSupplier);
         request.then(response => {
-                    setErrors({ name: "", seller: "", email: "", phone: "", isIntern: "" });
+                    setErrors({ name: "", seller: "", email: "", phone: "", isIntern: "", vifCode: "" });
                     //TODO : Flash notification de succès
                     history.replace("/components/suppliers");
                 })
@@ -162,18 +162,34 @@ const Supplier = ({ match, history }) => {
                                     </CFormGroup>
                                 </CCol>
                             </CRow>
-                            { isAdmin &&
                                 <CRow>
-                                    <CCol xs="12" md="6" className="mt-4">
-                                        <CFormGroup row className="mb-0 ml-1 d-flex align-items-end">
-                                            <CCol xs="3" sm="2" md="3">
-                                                <CSwitch name="isIntern" className="mr-1" color="dark" shape="pill" variant="opposite" checked={ supplier.isIntern } onChange={ handleIsIntern }/>
-                                            </CCol>
-                                            <CCol tag="label" xs="9" sm="10" md="9" className="col-form-label">Fournisseur interne</CCol>
-                                        </CFormGroup>
-                                    </CCol>
+                                    { isAdmin &&
+                                        <CCol xs="12" md="6" className="mt-4">
+                                            <CFormGroup row className="mb-0 ml-1 d-flex align-items-end">
+                                                <CCol xs="3" sm="2" md="3">
+                                                    <CSwitch name="isIntern" className="mr-1" color="dark" shape="pill" variant="opposite" checked={ supplier.isIntern } onChange={ handleIsIntern }/>
+                                                </CCol>
+                                                <CCol tag="label" xs="9" sm="10" md="9" className="col-form-label">Fournisseur interne</CCol>
+                                            </CFormGroup>
+                                        </CCol>
+                                    }
+                                    {supplier.isIntern && 
+                                        <CCol xs="12" sm="6">
+                                            <CFormGroup>
+                                                <CLabel htmlFor="name">Code VIF</CLabel>
+                                                <CInput
+                                                    id="vifCode"
+                                                    name="vifCode"
+                                                    value={ supplier.vifCode }
+                                                    onChange={ handleChange }
+                                                    placeholder="Code site VIF"
+                                                    invalid={ errors.vifCode.length > 0 } 
+                                                />
+                                                <CInvalidFeedback>{ errors.vifCode }</CInvalidFeedback>
+                                            </CFormGroup>
+                                        </CCol>
+                                    }
                                 </CRow>
-                            }
                             <CRow className="mt-4 d-flex justify-content-center">
                                 <CButton type="submit" size="sm" color="success"><CIcon name="cil-save"/> Enregistrer</CButton>
                             </CRow>

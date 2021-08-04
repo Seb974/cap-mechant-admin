@@ -72,7 +72,7 @@ const SellerOptions = ({ product, setProduct, history }) => {
             <CFormGroup row>
                 <CCol xs="12" md="4">
                     <CLabel htmlFor="select">Fournisseur</CLabel>
-                    <CSelect custom name="unit" id="unit" value={ isDefined(product.supplier) ? product.supplier['@id'] : 0 } onChange={ handleChange }>
+                    <CSelect custom name="unit" id="unit" value={ isDefined(product.supplier) ? product.supplier.id : 0 } onChange={ handleChange }>
                         { suppliers.map(supplier => <option key= { supplier.id } value={ supplier.id }>{ supplier.name }</option>) }
                     </CSelect>
                 </CCol>
