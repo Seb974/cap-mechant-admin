@@ -26,11 +26,12 @@ const TheHeaderDropdown = () => {
     >
       <CDropdownToggle className="c-header-nav-link" caret={false}>
         <div className="c-avatar">
-          <CImg
+          {/* <CImg
             src={'avatars/6.jpg'}
             className="c-avatar-img"
             alt="admin@bootstrapmaster.com"
-          />
+          /> */}
+          <CIcon className="mr-2" size="lg" name="cil-applications-settings" />
         </div>
       </CDropdownToggle>
       <CDropdownMenu className="pt-0" placement="bottom-end">
@@ -43,7 +44,7 @@ const TheHeaderDropdown = () => {
           <strong>{ currentUser.name || "Account" }</strong><br/>
           { isDefined(currentUser.metas) && <small>{ currentUser.metas.zipcode }</small> }
         </CDropdownItem>
-        <CDropdownItem>
+        {/* <CDropdownItem>
           <CIcon name="cil-bell" className="mfe-2" /> 
           Updates
           <CBadge color="info" className="mfs-auto">42</CBadge>
@@ -87,11 +88,11 @@ const TheHeaderDropdown = () => {
           <CIcon name="cil-file" className="mfe-2" /> 
           Projects
           <CBadge color="primary" className="mfs-auto">42</CBadge>
-        </CDropdownItem>
-        <CDropdownItem divider />
+        </CDropdownItem> */}
+        {/* <CDropdownItem divider /> */}
         <CDropdownItem onClick={ handleLogout }>
           <CIcon name="cil-lock-locked" className="mfe-2" /> 
-          Logout
+          Se déconnecter
         </CDropdownItem>
       </CDropdownMenu>
     </CDropdown>

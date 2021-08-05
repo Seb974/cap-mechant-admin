@@ -3,6 +3,7 @@ import axios from 'axios';
 const ENV = ( !process.env.NODE_ENV || process.env.NODE_ENV === "development") ? "development" : "production" ;
 const API_DOMAIN = ENV === "development" ? "http://localhost:8000" : "https://api.cap-mechant.re";
 const MERCURE_DOMAIN = ENV === "development" ? "http://localhost:3000" : "https://api.cap-mechant.re:3000";
+const CLIENT_DOMAIN = ENV === "development" ? "http://localhost:3001" : "https://cap-mechant.re";
 // const API_DOMAIN = "https://api.cap-mechant.re";
 // const MERCURE_DOMAIN = "https://api.cap-mechant.re:3000";
 
@@ -29,6 +30,7 @@ function patch(route, entity) {
 export default {
     API_DOMAIN,
     MERCURE_DOMAIN,
+    CLIENT_DOMAIN,
     get,
     post,
     put,

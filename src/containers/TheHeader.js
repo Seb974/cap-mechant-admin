@@ -1,33 +1,20 @@
-import React from 'react'
+import React, { useContext } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
-import {
-  CHeader,
-  CToggler,
-  CHeaderBrand,
-  CHeaderNav,
-  CHeaderNavItem,
-  CHeaderNavLink,
-  CSubheader,
-  CBreadcrumbRouter,
-  CLink
-} from '@coreui/react'
+import { CHeader, CToggler, CHeaderBrand, CHeaderNav, CHeaderNavItem, CHeaderNavLink, CSubheader, CBreadcrumbRouter, CLink, CImg } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
-
-// routes config
 import routes from '../routes'
-
-import {
-  TheHeaderDropdown,
-  TheHeaderDropdownMssg,
-  TheHeaderDropdownNotif,
-  TheHeaderDropdownTasks
-}  from './index'
+import { TheHeaderDropdown, TheHeaderDropdownMssg, TheHeaderDropdownNotif, TheHeaderDropdownTasks }  from './index'
+import { Link } from 'react-router-dom'
+import AuthContext from 'src/contexts/AuthContext'
+import AuthActions from 'src/services/AuthActions'
+import '../assets/css/header.css'
 
 const TheHeader = () => {
   const dispatch = useDispatch()
   const asideShow = useSelector(state => state.asideShow)
   const darkMode = useSelector(state => state.darkMode)
   const sidebarShow = useSelector(state => state.sidebarShow)
+  const { isAuthenticated, setIsAuthenticated, currentUser, setCurrentUser, setSupervisor, setSeller } = useContext(AuthContext);
 
   const toggleSidebar = () => {
     const val = [true, 'responsive'].includes(sidebarShow) ? false : 'responsive'
@@ -37,6 +24,17 @@ const TheHeader = () => {
   const toggleSidebarMobile = () => {
     const val = [false, 'responsive'].includes(sidebarShow) ? true : 'responsive'
     dispatch({type: 'set', sidebarShow: val})
+  }
+
+  const handleLogout = e => {
+    e.preventDefault();
+    AuthActions.logout()
+               .then(response => {
+                   setIsAuthenticated(false);
+                   setCurrentUser(AuthActions.getCurrentUser());
+                   setSupervisor(null);
+                   setSeller(null);
+               });
   }
 
   return (
@@ -52,11 +50,12 @@ const TheHeader = () => {
         onClick={toggleSidebar}
       />
       <CHeaderBrand className="mx-auto d-lg-none" to="/">
-        <CIcon name="logo" height="48" alt="Logo"/>
+        {/* <CIcon name="logo" height="48" alt="Logo"/>  className="c-sidebar-brand-full"*/}
+        <CImg name="logo" src="assets/img/icon-img/logo.png" height={ 48 }/>
       </CHeaderBrand>
 
       <CHeaderNav className="d-md-down-none mr-auto">
-        <CHeaderNavItem className="px-3" >
+        {/* <CHeaderNavItem className="px-3" >
           <CHeaderNavLink to="/dashboard">Dashboard</CHeaderNavLink>
         </CHeaderNavItem>
         <CHeaderNavItem  className="px-3">
@@ -64,7 +63,7 @@ const TheHeader = () => {
         </CHeaderNavItem>
         <CHeaderNavItem className="px-3">
           <CHeaderNavLink>Settings</CHeaderNavLink>
-        </CHeaderNavItem>
+        </CHeaderNavItem> */}
       </CHeaderNav>
 
       <CHeaderNav className="px-3">
@@ -77,20 +76,21 @@ const TheHeader = () => {
           <CIcon name="cil-moon" className="c-d-dark-none" alt="CoreUI Icons Moon" />
           <CIcon name="cil-sun" className="c-d-default-none" alt="CoreUI Icons Sun" />
         </CToggler>
-        <TheHeaderDropdownNotif/>
+        {/* <TheHeaderDropdownNotif/>
         <TheHeaderDropdownTasks/>
-        <TheHeaderDropdownMssg/>
-        <TheHeaderDropdown/>
-        <CToggler
+        <TheHeaderDropdownMssg/> */}
+        {/* <TheHeaderDropdown/> */}
+        <Link to="/" onClick={ handleLogout }><i className="fas fa-power-off mt-1 logout-button" style={{ fontSize: '1.5em'}}></i></Link>
+        {/* <CToggler
           inHeader
           className="d-md-down-none"
           onClick={() => dispatch({type: 'set', asideShow: !asideShow})}
         >
           <CIcon className="mr-2" size="lg" name="cil-applications-settings" />
-        </CToggler>
+        </CToggler> */}
       </CHeaderNav>
 
-      <CSubheader className="px-3 justify-content-between">
+      {/* <CSubheader className="px-3 justify-content-between">
         <CBreadcrumbRouter className="border-0 c-subheader-nav m-0 px-0 px-md-3" routes={routes} />
           <div className="d-md-down-none mfe-2 c-subheader-nav">
             <CLink className="c-subheader-nav-link"href="#">
@@ -107,7 +107,7 @@ const TheHeader = () => {
               <CIcon name="cil-settings" alt="Settings" />&nbsp;Settings
             </CLink>
           </div>
-      </CSubheader>
+      </CSubheader> */}
     </CHeader>
   )
 }

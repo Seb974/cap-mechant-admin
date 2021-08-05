@@ -1,10 +1,11 @@
 import React, { useContext, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { CButton, CCard, CCardBody, CCardGroup, CCol, CContainer, CForm, CInput, CInputGroup, CInputGroupPrepend, CInputGroupText, CInvalidFeedback, CRow, CFormGroup } from '@coreui/react'
+import { CButton, CCard, CCardBody, CCardGroup, CCol, CContainer, CForm, CInput, CInputGroup, CInputGroupPrepend, CInputGroupText, CInvalidFeedback, CRow, CFormGroup, CImg } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
 import AuthContext from 'src/contexts/AuthContext'
 import AuthActions from 'src/services/AuthActions'
 import { useTranslation } from 'react-i18next'
+import api from 'src/config/api'
 
 const Login = ({ history }) => {
 
@@ -82,26 +83,27 @@ const Login = ({ history }) => {
                         />
                       </CInputGroup>
                     </CFormGroup>
-                    <CRow>
-                      <CCol xs="6">
-                        <CButton type="submit" color="primary" className="px-4">{ t("login.button.label") }</CButton>
+                    <CRow className="d-flex justify-content-center">
+                      <CCol xs="6" className="mt-4">
+                        <CButton type="submit" color="success" className="px-4 mt-4">{ t("login.button.label") }</CButton>
                       </CCol>
-                      <CCol xs="6" className="text-right">
-                        <CButton color="link" className="px-0">{ t("login.forgot-pwd.label") }</CButton>
-                      </CCol>
+                      {/* <CCol xs="6" className="text-right">
+                        <CButton color="link" className="px-0 text-dark">{ t("login.forgot-pwd.label") }</CButton>
+                      </CCol> */}
                     </CRow>
                   </CForm>
                 </CCardBody>
               </CCard>
-              <CCard className="text-white bg-primary py-5 d-md-down-none" style={{ width: '44%' }}>
+              <CCard className="text-white py-5 d-md-down-none" style={{ width: '44%', backgroundColor: 'black' }}>
                 <CCardBody className="text-center">
                   <div>
-                    <h2>Sign up</h2>
-                    <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut
-                      labore et dolore magna aliqua.</p>
-                    <Link to="/register">
-                      <CButton color="primary" className="mt-3" active tabIndex={-1}>Register Now!</CButton>
-                    </Link>
+                    <h2>Cap Méchant</h2>
+                    <CImg src="assets/img/icon-img/short-logo.png" height={100}/>
+                    <br/><br/>
+                    <p>Accès réservé aux administrateurs.</p>
+                    <a href={ api.CLIENT_DOMAIN }>
+                      <CButton color="success" className="mt-3" active tabIndex={-1}>Visiter le site public</CButton>
+                    </a>
                   </div>
                 </CCardBody>
               </CCard>
