@@ -57,7 +57,7 @@ const Products = (props) => {
             <CCardBody>
             <CDataTable
               items={ displayedProducts }
-              fields={ fields }
+              fields={ isAdmin ? fields : fields.filter(f => f !== ' ') }
               bordered
               itemsPerPage={ itemsPerPage }
               pagination

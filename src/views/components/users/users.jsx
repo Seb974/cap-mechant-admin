@@ -22,6 +22,8 @@ const Users = (props) => {
 
     useEffect(() => fetchUsers(), []);
 
+    useEffect(() => setIsAdmin(Roles.hasAdminPrivileges(currentUser)), [currentUser]);
+
     const fetchUsers = () => {
         UserActions.findAll()
           .then(response => {
@@ -54,7 +56,7 @@ const Users = (props) => {
             <CCardBody>
             <CDataTable
               items={ users }
-              fields={ isAdmin ? fields : fields.filter(f => f !== 'roles') }
+              fields={ isAdmin ? fields : fields.filter(f => f !== 'roles' && f !== ' ') }
               bordered
               itemsPerPage={ itemsPerPage }
               pagination

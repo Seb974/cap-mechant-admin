@@ -16,6 +16,7 @@ import ProvisionModal from 'src/components/provisionPages/provisionModal';
 import CIcon from '@coreui/icons-react';
 import MercureContext from 'src/contexts/MercureContext';
 import { updateSuppliersBetween } from 'src/data/dataProvider/eventHandlers/provisionEvents';
+import 'src/assets/css/form.css';
 
 const Provisions = (props) => {
 
@@ -97,7 +98,7 @@ const Provisions = (props) => {
     const handleDelete = item => {
         const originalProvisions = [...provisions];
         setProvisions(provisions.filter(provision => provision.id !== item.id));
-        ProvisionActions.delete(item, isAdmin)
+        ProvisionActions.delete(item.id, isAdmin)
                       .catch(error => {
                            setProvisions(originalProvisions);
                            console.log(error.response);
@@ -151,7 +152,15 @@ const Provisions = (props) => {
         return sum + ((isDefined(current.received) ? current.received : 0) * (isDefined(current.price) ? current.price : 0))
     }, 0);
     const getSupplierCount = () => [...new Set(provisions.map(provision => provision.supplier.id))].length;
-    const getTurnover = () => provisions.reduce((sum, current) => sum + getTotalProvision(current), 0);
+
+    const getProductCount = () => {
+        let allProducts = [];
+        provisions.map(provision => {
+            const products = provision.goods.map(good => good.product);
+            allProducts = [...allProducts, ...products];
+        });
+        return [...new Set(allProducts.map(product => product.id))].length;
+    };
 
     return (
         <CRow>
@@ -165,24 +174,19 @@ const Provisions = (props) => {
                     </CCardHeader>
                     <CCardBody>
                         <CRow>
-                            <CCol xs="12" sm="6" lg="3">
+                            <CCol xs="12" sm="6" lg="4">
                                 <CWidgetIcon text="Commandes" header={ provisions.length } color="primary" iconPadding={false}>
                                     <CIcon width={24} name="cil-clipboard"/>
                                 </CWidgetIcon>
-                                </CCol>
-                                <CCol xs="12" sm="6" lg="3">
-                                <CWidgetIcon text="Fournisseurs" header={ getSupplierCount() } color="info" iconPadding={false}>
+                            </CCol>
+                            <CCol xs="12" sm="6" lg="4">
+                                <CWidgetIcon text="Fournisseurs" header={ getSupplierCount() } color="warning" iconPadding={false}>
                                     <CIcon width={24} name="cil-people"/>
                                 </CWidgetIcon>
-                                </CCol>
-                                <CCol xs="12" sm="6" lg="3">
-                                <CWidgetIcon text="Moyenne" header={ (provisions.length > 0 ? (getTurnover() / provisions.length).toFixed(2) : "0.00") + " €"} color="warning" iconPadding={false}>
-                                    <CIcon width={24} name="cil-chart"/>
-                                </CWidgetIcon>
-                                </CCol>
-                                <CCol xs="12" sm="6" lg="3">
-                                <CWidgetIcon text="Total" header={ getTurnover().toFixed(2) + " €" } color="danger" iconPadding={false}>
-                                    <CIcon width={24} name="cil-money"/>
+                            </CCol>
+                            <CCol xs="12" sm="6" lg="4">
+                                <CWidgetIcon text="Produits" header={ getProductCount() } color="danger" iconPadding={false}>
+                                    <CIcon width={24} name="cil-fastfood"/>
                                 </CWidgetIcon>
                             </CCol>
                         </CRow>
@@ -198,7 +202,7 @@ const Provisions = (props) => {
                             </CCol>
                             { !isAdmin && 
                                 <CCol xs="12" lg="6">
-                                    <SelectMultiple name="suppliers" label="Founisseurs" value={ selectedSuppliers } onChange={ handleSuppliersChange } data={ getFormattedEntities(suppliers) }/>
+                                    <SelectMultiple className="supplier-select" name="suppliers" label="Founisseurs" value={ selectedSuppliers } onChange={ handleSuppliersChange } data={ getFormattedEntities(suppliers) }/>
                                 </CCol>
                             }
                         </CRow>

@@ -17,10 +17,7 @@ const Suppliers = (props) => {
 
     useEffect(() => {
         SupplierActions.findAll()
-            .then(response => {
-              console.log(response);
-              setSuppliers(response);
-            })
+            .then(response => setSuppliers(response))
             .catch(error => console.log(error.response));
     }, []);
 
@@ -49,7 +46,7 @@ const Suppliers = (props) => {
             <CCardBody>
             <CDataTable
               items={ suppliers }
-              fields={ isAdmin ? fields : fields.filter(f => f !== 'Vendeur') }
+              fields={ isAdmin ? fields : fields.filter(f => f !== 'Vendeur' && f !== ' ') }
               bordered
               itemsPerPage={ itemsPerPage }
               pagination

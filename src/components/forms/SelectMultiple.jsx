@@ -18,7 +18,7 @@ const animatedComponents = makeAnimated();
     },
   };
 
-const SelectMultiple = ({ name, value, error = "", label, onChange, data }) => {
+const SelectMultiple = ({ name, value, error = "", label, onChange, data, className= "" }) => {
 
     const handleChange = (value, { action, removedValue }) => {
         switch (action) {
@@ -39,7 +39,7 @@ const SelectMultiple = ({ name, value, error = "", label, onChange, data }) => {
             <label htmlFor={ name }>{ label }</label>
             <Select
                 name={ name }
-                className="basic-multi-select"
+                className={`${ className } basic-multi-select`}
                 classNamePrefix="select"
                 closeMenuOnSelect={ false }
                 components={ animatedComponents }

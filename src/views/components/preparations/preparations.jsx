@@ -95,15 +95,8 @@ const Preparations = (props) => {
     const getUTCDates = () => {
         let UTCEnd = 0;
         let UTCStart = 0;
-        if (Roles.isSeller(currentUser) && isDefined(seller) && isDefined(seller.needsRecovery)) {
-            const dateStart = isOffDay(dates.start) ? dates.start : getDeliveryDay(getStart(dates.start), seller);
-            const dateEnd = isOffDay(dates.end) ? dates.end : getDeliveryDay(getEnd(dates.end), seller);
-            UTCStart = new Date(dateStart.getFullYear(), dateStart.getMonth(), dateStart.getDate(), 4, 0, 0);
-            UTCEnd = new Date(dateEnd.getFullYear(), dateEnd.getMonth(), dateEnd.getDate() + 1, 3, 59, 0);
-        } else {
-            UTCStart = new Date(dates.start.getFullYear(), dates.start.getMonth(), dates.start.getDate(), 4, 0, 0);
-            UTCEnd = new Date(dates.end.getFullYear(), dates.end.getMonth(), dates.end.getDate() + 1, 3, 59, 0);
-        }
+        UTCStart = new Date(dates.start.getFullYear(), dates.start.getMonth(), dates.start.getDate(), 4, 0, 0);
+        UTCEnd = new Date(dates.end.getFullYear(), dates.end.getMonth(), dates.end.getDate() + 1, 3, 59, 0);
         return {start: UTCStart, end: UTCEnd};
     }
 
@@ -143,9 +136,16 @@ const Preparations = (props) => {
 
     const isOffDay = date => daysOff.find(day => isSameDate(new Date(day.date), date)) !== undefined || date.getDay() === 0;
 
-    const getTurnover = () => orders.reduce((sum, current) => sum + current.totalHT, 0);
-
     const getUserCount = () => [...new Set(orders.map(order => order.email))].length;
+
+    const getProductCount = () => {
+        let allProducts = [];
+        orders.map(order => {
+            const products = order.items.map(item => item.product);
+            allProducts = [...allProducts, ...products];
+        });
+        return [...new Set(allProducts.map(product => product.id))].length;
+    };
 
     const toggleDetails = (index, e) => {
         e.preventDefault();
@@ -189,24 +189,19 @@ const Preparations = (props) => {
             </CCardHeader>
             <CCardBody>
                 <CRow>
-                    <CCol xs="12" sm="6" lg="3">
+                    <CCol xs="12" sm="6" lg="4">
                         <CWidgetIcon text="Commandes" header={ orders.length } color="primary" iconPadding={false}>
                             <CIcon width={24} name="cil-clipboard"/>
                         </CWidgetIcon>
-                        </CCol>
-                        <CCol xs="12" sm="6" lg="3">
-                        <CWidgetIcon text="Clients" header={ getUserCount() } color="info" iconPadding={false}>
+                    </CCol>
+                    <CCol xs="12" sm="6" lg="4">
+                        <CWidgetIcon text="Clients" header={ getUserCount() } color="warning" iconPadding={false}>
                             <CIcon width={24} name="cil-people"/>
                         </CWidgetIcon>
-                        </CCol>
-                        <CCol xs="12" sm="6" lg="3">
-                        <CWidgetIcon text="Moyenne" header={ (getUserCount() > 0 ? (getTurnover() / getUserCount()).toFixed(2) : "0.00") + " €"} color="warning" iconPadding={false}>
-                            <CIcon width={24} name="cil-chart"/>
-                        </CWidgetIcon>
-                        </CCol>
-                        <CCol xs="12" sm="6" lg="3">
-                        <CWidgetIcon text="Total" header={ getTurnover().toFixed(2) + " €" } color="danger" iconPadding={false}>
-                            <CIcon width={24} name="cil-money"/>
+                    </CCol>
+                    <CCol xs="12" sm="6" lg="4">
+                        <CWidgetIcon text="Produits" header={ getProductCount() } color="danger" iconPadding={false}>
+                            <CIcon width={24} name="cil-fastfood"/>
                         </CWidgetIcon>
                     </CCol>
                 </CRow>

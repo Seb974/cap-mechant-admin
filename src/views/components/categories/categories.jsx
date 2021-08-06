@@ -1,18 +1,22 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import CategoryActions from '../../../services/CategoryActions'
 import { CBadge, CCard, CCardBody, CCardHeader, CCol, CDataTable, CRow, CButton } from '@coreui/react';
 import { DocsLink } from 'src/reusable'
 import { Link } from 'react-router-dom';
+import AuthContext from 'src/contexts/AuthContext';
+import Roles from 'src/config/Roles';
 
 const Categories = (props) => {
 
     const itemsPerPage = 15;
     const fields = ['name', ' '];
+    const { currentUser } = useContext(AuthContext);
     const [categories, setCategories] = useState([]);
+    const [isAdmin, setIsAdmin] = useState(Roles.hasAdminPrivileges(currentUser));
 
-    useEffect(() => {
-        fetchCategories();
-    }, []);
+    useEffect(() => fetchCategories(), []);
+
+    useEffect(() => setIsAdmin(Roles.hasAdminPrivileges(currentUser)), [currentUser]);
 
     const fetchCategories = () => {
         CategoryActions.findAll()
@@ -46,7 +50,7 @@ const Categories = (props) => {
             <CCardBody>
             <CDataTable
               items={ categories }
-              fields={ fields }
+              fields={ isAdmin ? fields : fields.filter(f => f !== ' ') }
               bordered
               itemsPerPage={ itemsPerPage }
               pagination

@@ -31,7 +31,7 @@ function findStatusBetween(dates, statuses, user) {
 function findPreparations(dates, user) {
     const status = `status[]=WAITING&status[]=PRE-PREPARED`;
     const UTCDates = formatUTC(dates);
-    const dateLimits = `deliveryDate[after]=${ getStringDate(UTCDates.start) }&deliveryDate[before]=${ getStringDate(UTCDates.end) }`
+    const dateLimits = `deliveryDate[after]=${ getStringDate(UTCDates.start) }&deliveryDate[before]=${ getStringDate(UTCDates.end) }`;
     return api
         .get(`/api/order_entities?${ status }&${ dateLimits }`)
         .then(response => {

@@ -1,0 +1,4 @@
+.supplier-select .select__value-container {
+    max-height: 80px!important;
+    overflow: scroll;
+}
