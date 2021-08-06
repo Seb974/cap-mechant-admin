@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import OrderActions from '../../../services/OrderActions'
-import { CCard, CCardBody, CCardHeader, CCol, CDataTable, CRow, CButton, CFormGroup, CInputGroup, CInput, CInputGroupAppend, CInputGroupText, CCardFooter, CLabel, CCollapse } from '@coreui/react';
+import { CCard, CCardBody, CCardHeader, CCol, CDataTable, CRow, CButton, CFormGroup, CInputGroup, CInput, CInputGroupAppend, CInputGroupText, CCardFooter, CLabel, CCollapse, CInputGroupPrepend } from '@coreui/react';
 import AuthContext from 'src/contexts/AuthContext';
 import Roles from 'src/config/Roles';
 import RangeDatePicker from 'src/components/forms/RangeDatePicker';
@@ -18,6 +18,8 @@ import SellerActions from 'src/services/SellerActions';
 import ProvisionActions from 'src/services/ProvisionActions';
 import { Link } from 'react-router-dom';
 import NeedDetails from 'src/components/supplyPages/needDetails';
+import CIcon from '@coreui/icons-react';
+import PlatformContext from 'src/contexts/PlatformContext';
 
 const Supplying = (props) => {
 
@@ -29,6 +31,8 @@ const Supplying = (props) => {
     const fields = ['Produit', 'Sécurité', 'Stock', 'Besoin', 'Commande', 'Sélection'];
     const { currentUser } = useContext(AuthContext);
     const { products } = useContext(ProductsContext);
+    const { platform } = useContext(PlatformContext);
+    const allConsumers = {id: -1, name: "Tous", metas: platform.metas};
     const [orders, setOrders] = useState([]);
     const [isAdmin, setIsAdmin] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -45,6 +49,10 @@ const Supplying = (props) => {
     const [deliveryDate, setDeliveryDate] = useState(today);
     const [supplied, setSupplied] = useState([]);
     const [details, setDetails] = useState([]);
+    const [consumers, setConsumers] = useState([]);
+    const [sendingMode, setSendingMode] = useState("email");
+    const [selectedConsumer, setSelectedConsumer] = useState(allConsumers);
+    const [displayedOrders, setDisplayedOrders] = useState([]);
 
     useEffect(() => {
         setIsAdmin(Roles.hasAdminPrivileges(currentUser));
@@ -57,26 +65,45 @@ const Supplying = (props) => {
     useEffect(() => getOrders(), [dates]);
 
     useEffect(() => {
-        if (isDefined(orders) && isDefinedAndNotVoid(products) && isDefinedAndNotVoid(productGroups) && isDefined(selectedSeller)) {
+        const newConsumers = getConsumers();
+        setConsumers(newConsumers);
+    },[orders]);
+
+    useEffect(() => {
+        if (selectedConsumer.id === allConsumers.id) {
+            setDisplayedOrders(orders);
+        } else {
+            const selectedOrders = orders.filter(o => o.user.id === selectedConsumer.id);
+            setDisplayedOrders(selectedOrders);
+        }
+    }, [orders, selectedConsumer]);
+
+    useEffect(() => {
+        if (isDefined(displayedOrders) && isDefinedAndNotVoid(products) && isDefinedAndNotVoid(productGroups) && isDefined(selectedSeller)) {
             const productsToDisplay = getProductsList();
             setDisplayedProducts(productsToDisplay.filter(p => p.quantity > 0));
             setSelectAll(false);
         }
-    }, [orders, products, productGroups, evolution, selectedSeller, supplied]);
+    }, [displayedOrders, products, productGroups, evolution, selectedSeller, supplied]);
 
     const getOrders = () => {
         setLoading(true);
         const UTCDates = getUTCDates(dates);
-        OrderActions.findStatusBetween(UTCDates, selectedStatus, currentUser)
-                .then(response => {
-                    setOrders(response.map(data => ({...data, selected: false})));
-                    setLoading(false);
-                })
-                .catch(error => {
-                    console.log(error);
-                    setLoading(false);
-                });
-    }
+        OrderActions
+            .findStatusBetween(UTCDates, selectedStatus, currentUser)
+            .then(response => {
+                setOrders(response.map(data => ({...data, selected: false})));
+                setLoading(false);
+            })
+            .catch(error => {
+                console.log(error);
+                setLoading(false);
+            });
+    };
+
+    const getConsumers = () => {
+        return [...new Set(orders.map(o => o.user))];
+    };
 
     const fetchSuppliers = () => {
         SupplierActions
@@ -152,25 +179,21 @@ const Supplying = (props) => {
         }
     };
 
+    const handleSendingModeChange = ({ currentTarget }) => setSendingMode(currentTarget.value);
+
+    const handleSupplierInfosChange = ({ currentTarget }) => {
+        setSelectedSupplier({...selectedSupplier, [currentTarget.name]: currentTarget.value })
+    };
+
     const handleSubmit = () => {
         const provision = getNewProvision();
         ProvisionActions
-            .create(provision)
+            .create(provision, sendingMode)
             .then(response => {
                 setToSupplies(provision.goods);
                 setSelectAll(false);
             })
-            .catch( ({ response }) => {
-                // const { violations } = response.data;
-                // if (violations) {
-                //     const apiErrors = {};
-                //     violations.forEach(({propertyPath, message}) => {
-                //         apiErrors[propertyPath] = message;
-                //     });
-                //     // setErrors(apiErrors);
-                // }
-                //TODO : Flash notification d'erreur
-            });
+            .catch( ({ response }) => console.log(response));
     };
 
     const setToSupplies = goods => {
@@ -188,9 +211,11 @@ const Supplying = (props) => {
     const getNewProvision = () => {
         const goods = getGoods();
         return {
-            seller: selectedSeller['@id'], 
-            supplier: selectedSupplier['@id'], 
-            provisionDate: new Date(deliveryDate), 
+            seller: selectedSeller['@id'],
+            supplier: selectedSupplier,
+            provisionDate: new Date(deliveryDate),
+            metas: selectedConsumer.metas['@id'],
+            sendingMode,
             goods
         };
     };
@@ -269,7 +294,7 @@ const Supplying = (props) => {
 
     const addSales = (element, index) => {
         let sales = 0;
-        orders.map(order => {
+        displayedOrders.map(order => {
             if (!order.isRemains)
                 sales = extractProduct(element, order, sales);
         });
@@ -331,6 +356,11 @@ const Supplying = (props) => {
         setDetails(newDetails);
     };
 
+    const handleConsumerChange = ({ currentTarget }) => {
+        const newSelection = parseInt(currentTarget.value) === -1 ? allConsumers : consumers.find(c => c.id === parseInt(currentTarget.value));
+        setSelectedConsumer(newSelection);
+    };
+
     return (
         <CRow>
             <CCol xs="12" lg="12">
@@ -352,7 +382,13 @@ const Supplying = (props) => {
                                     </Select>
                                 </CCol>
                             }
-                            <CCol xs="12" lg="7">
+                            <CCol xs="12" sm="5" md="5">
+                                    <Select className="mr-2" name="selectedConsumer" label="Client(s)" onChange={ handleConsumerChange } value={ selectedConsumer.id }>
+                                        <option value={ "-1" }>{ "Tous" }</option>
+                                        { consumers.map(consumer => <option key={ consumer.id } value={ consumer.id }>{ consumer.name }</option>) }
+                                    </Select>
+                                </CCol>
+                            <CCol xs="12" lg="5">
                                 <RangeDatePicker
                                     minDate={ dates.start }
                                     maxDate={ dates.end }
@@ -462,7 +498,7 @@ const Supplying = (props) => {
                                     ,
                                     'details':
                                         item => <CCollapse show={details.includes(item.id)}>
-                                                    <NeedDetails orders={ orders } product={ item.product }/>
+                                                    <NeedDetails orders={ displayedOrders } product={ item.product }/>
                                                 </CCollapse>
                                 }}
                             />
@@ -475,12 +511,45 @@ const Supplying = (props) => {
                                     </CCol>
                                 </CRow>
                                 <CRow>
-                                    <CCol xs="12" lg="5" className="mt-4">
+                                    <CCol xs="12" lg="4">
                                         <Select className="mr-2" name="supplier" label="Fournisseur" value={ isDefined(selectedSupplier) ? selectedSupplier.id : 0 } onChange={ handleSupplierChange }>
                                             { suppliers.map(supplier => <option key={ supplier.id } value={ supplier.id }>{ supplier.name }</option>) }
                                         </Select>
                                     </CCol>
-                                    <CCol className="mt-4">
+                                    <CCol xs="12" lg="4" className="mt-4">
+                                        <CInputGroup>
+                                            <CInputGroupPrepend>
+                                                <CInputGroupText style={{ minWidth: '43px'}}><CIcon name="cil-at"/></CInputGroupText>
+                                            </CInputGroupPrepend>
+                                            <CInput
+                                                name="email"
+                                                value={ isDefined(selectedSupplier) && isDefined(selectedSupplier.email) && selectedSupplier.email.length > 0 ? selectedSupplier.email : "-" }
+                                                onChange={ handleSupplierInfosChange }
+                                            />
+                                        </CInputGroup>
+                                    </CCol>
+                                    <CCol xs="12" lg="4" className="mt-4">
+                                        <CInputGroup>
+                                            <CInputGroupPrepend>
+                                                <CInputGroupText style={{ minWidth: '43px'}}><CIcon name="cil-phone"/></CInputGroupText>
+                                            </CInputGroupPrepend>
+                                            <CInput
+                                                name="phone"
+                                                value={ isDefined(selectedSupplier) && isDefined(selectedSupplier.phone) && selectedSupplier.phone.length > 0 ? selectedSupplier.phone : "-" }
+                                                onChange={ handleSupplierInfosChange }
+                                            />
+                                        </CInputGroup>
+                                    </CCol>
+                                </CRow>
+                                <CRow>
+                                    <CCol xs="12" lg="4" className="mt-4">
+                                        <Select className="mr-2" name="sendMode" label="Mode d'envoi" value={ sendingMode } onChange={ handleSendingModeChange }>
+                                            <option value={"email"}>{"Email"}</option>
+                                            <option value={"sms"}>{"SMS"}</option>
+                                            <option value={"email & sms"}>{"Email & SMS"}</option>
+                                        </Select>
+                                    </CCol>
+                                    <CCol xs="12" lg="4" className="mt-4">
                                         <SimpleDatePicker selectedDate={ deliveryDate } minDate={ minDate } onDateChange={ handleDeliveryDateChange } label="Date de livraison souhaitée"/>
                                     </CCol>
                                     <CCol xs="12" lg="2" className="mt-4 d-flex justify-content-center">

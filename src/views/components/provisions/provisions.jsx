@@ -225,7 +225,7 @@ const Provisions = (props) => {
                             :
                             <CDataTable
                                 items={ provisions }
-                                fields={ isAdmin ? fields : fields.filter(f => f !== "Vendeur") }
+                                fields={ isAdmin ? fields : fields.filter(f => f !== "Vendeur" && f !== 'Total') }
                                 bordered
                                 itemsPerPage={ itemsPerPage }
                                 pagination
@@ -274,7 +274,7 @@ const Provisions = (props) => {
                                         item => <CCollapse show={details.includes(item.id)}>
                                                     <CDataTable
                                                         items={ item.goods }
-                                                        fields={ ['Produit', 'Commandé', 'Reçu', 'Prix U','Sous-total'] }
+                                                        fields={ isAdmin ? ['Produit', 'Commandé', 'Reçu', 'Prix U','Sous-total'] : ['Produit', 'Commandé', 'Reçu'] }
                                                         bordered
                                                         itemsPerPage={ itemsPerPage }
                                                         pagination

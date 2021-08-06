@@ -71,7 +71,7 @@ const ProvisionModal = ({ item, provisions, setProvisions }) => {
                     {/* <h6>Détail</h6> */}
                     <CDataTable
                         items={ receivedProvision.goods }
-                        fields={ ['Produit', 'Reçu', 'Prix U'] }
+                        fields={ ['Produit', 'Commandé', 'Reçu'] }
                         bordered
                         itemsPerPage={ 15 }
                         pagination
@@ -79,6 +79,23 @@ const ProvisionModal = ({ item, provisions, setProvisions }) => {
                         scopedSlots = {{
                             'Produit':
                                 item => <td>{ getProductName(item.product, item.variation, item.size) }</td>
+                            ,
+                            'Commandé':
+                                item => <td>
+                                            <CInputGroup>
+                                                <CInput
+                                                    name="quantity"
+                                                    type="number"
+                                                    value={ item.quantity }
+                                                    onChange={ e => handleChange(e, item) }
+                                                    style={{ maxWidth: '180px'}}
+                                                    disabled={ true }
+                                                />
+                                                <CInputGroupAppend>
+                                                    <CInputGroupText style={{ minWidth: '43px'}}>{ item.unit }</CInputGroupText>
+                                                </CInputGroupAppend>
+                                            </CInputGroup>
+                                        </td>
                             ,
                             'Reçu':
                                 item => <td>
@@ -92,22 +109,6 @@ const ProvisionModal = ({ item, provisions, setProvisions }) => {
                                                 />
                                                 <CInputGroupAppend>
                                                     <CInputGroupText style={{ minWidth: '43px'}}>{ item.unit }</CInputGroupText>
-                                                </CInputGroupAppend>
-                                            </CInputGroup>
-                                        </td>
-                            ,
-                            'Prix U':
-                                item => <td>
-                                            <CInputGroup>
-                                                <CInput
-                                                    name="price"
-                                                    type="number"
-                                                    value={ item.price }
-                                                    onChange={ e => handleChange(e, item) }
-                                                    style={{ maxWidth: '180px'}}
-                                                />
-                                                <CInputGroupAppend>
-                                                    <CInputGroupText style={{ minWidth: '43px'}}>€/{ item.unit }</CInputGroupText>
                                                 </CInputGroupAppend>
                                             </CInputGroup>
                                         </td>
