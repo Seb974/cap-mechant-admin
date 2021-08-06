@@ -48,10 +48,15 @@ function getAccountingId(order) {
             .then(response => response.data)
 }
 
+function importUsers() {
+    return api.get('/api/vif/users')
+}
+
 export default {
     register,
     findAll,
     delete: deleteUser,
+    import: importUsers,
     find, 
     update, 
     create,

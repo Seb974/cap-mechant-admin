@@ -30,9 +30,14 @@ function updateFromMercure(suppliers, supplier) {
 
 }
 
+function importSuppliers() {
+    return api.get('/api/vif/suppliers')
+}
+
 export default { 
     findAll,
     delete: deleteSupplier,
+    import: importSuppliers,
     find, 
     update, 
     create,

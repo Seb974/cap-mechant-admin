@@ -168,9 +168,11 @@ const Provisions = (props) => {
                 <CCard>
                     <CCardHeader className="d-flex align-items-center">
                         Liste des approvisionnements
-                        <CCol col="6" sm="4" md="2" className="ml-auto">
-                            <Link role="button" to="/components/provisions/new" block variant="outline" color="success">CRÉER</Link>
-                        </CCol>
+                        { isAdmin &&
+                            <CCol col="6" sm="4" md="2" className="ml-auto">
+                                <Link role="button" to="/components/provisions/new" block variant="outline" color="success">CRÉER</Link>
+                            </CCol>
+                        }
                     </CCardHeader>
                     <CCardBody>
                         <CRow>

@@ -6,6 +6,7 @@ import { DocsLink } from 'src/reusable'
 import { Link } from 'react-router-dom';
 import AuthContext from 'src/contexts/AuthContext';
 import Roles from 'src/config/Roles';
+import { Spinner } from 'react-bootstrap';
 
 const Products = (props) => {
 
@@ -15,6 +16,7 @@ const Products = (props) => {
     const { products, setProducts } = useContext(ProductsContext);
     const [displayedProducts, setDisplayedProducts] = useState([]);
     const [isAdmin, setIsAdmin] = useState(false);
+    const [importLoading, setImportLoading] = useState(false);
 
     useEffect(() => setIsAdmin(Roles.hasAdminPrivileges(currentUser)), []);
     useEffect(() => setIsAdmin(Roles.hasAdminPrivileges(currentUser)), [currentUser]);
@@ -41,6 +43,17 @@ const Products = (props) => {
                            setDisplayedProducts(originalProducts);
                            console.log(error.response);
                       });
+    };
+
+    const handleImport = () => {
+        setImportLoading(true)
+        ProductActions
+            .import()
+            .then(response => setImportLoading(false))
+            .catch(error => {
+                setImportLoading(false);
+                console.log(error);
+            });
     }
 
     return (
@@ -50,8 +63,13 @@ const Products = (props) => {
             <CCardHeader>
                 Liste des produits
                 <CCol col="6" sm="4" md="2" className="ml-auto">
-                    <Link role="button" to="/components/products/new" block variant="outline" color="success">CRÉER</Link>
-                    {/* <CButton block variant="outline" color="success">CRÉER</CButton> */}
+                    <CButton block variant="outline" color="success" onClick={ handleImport }>
+                      { importLoading ? 
+                          <Spinner as="span" animation="border" size="sm"role="status"/>
+                        :
+                        <span>IMPORTER</span>
+                      }
+                    </CButton>
                 </CCol>
             </CCardHeader>
             <CCardBody>

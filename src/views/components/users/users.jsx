@@ -4,6 +4,7 @@ import Roles from '../../../config/Roles'
 import { CBadge, CCard, CCardBody, CCardHeader, CCol, CDataTable, CRow, CButton } from '@coreui/react';
 import { Link } from 'react-router-dom';
 import AuthContext from 'src/contexts/AuthContext';
+import { Spinner } from 'react-bootstrap';
 
 const Users = (props) => {
 
@@ -11,6 +12,7 @@ const Users = (props) => {
     const { currentUser } = useContext(AuthContext);
     const fields = ['name', 'email', 'roles', ' '];
     const [users, setUsers] = useState([]);
+    const [importLoading, setImportLoading] = useState(false);
     const [isAdmin, setIsAdmin] = useState(Roles.hasAdminPrivileges(currentUser));
 
     const getBadge = role => {
@@ -41,7 +43,18 @@ const Users = (props) => {
                       setUsers(originalUsers);
                       console.log(error.response);
                  });
-  }
+  };
+
+  const handleImport = () => {
+    setImportLoading(true)
+    UserActions
+        .import()
+        .then(response => setImportLoading(false))
+        .catch(error => {
+            setImportLoading(false);
+            console.log(error);
+        });
+  };
 
     return (
         <CRow>
@@ -50,7 +63,13 @@ const Users = (props) => {
             <CCardHeader>
               Liste des utilisateurs
                 <CCol col="6" sm="4" md="2" className="ml-auto">
-                    <Link role="button" to="/components/users/new" block variant="outline" color="success">CRÉER</Link>
+                    <CButton block variant="outline" color="success" onClick={ handleImport }>
+                      { importLoading ? 
+                          <Spinner as="span" animation="border" size="sm"role="status"/>
+                        :
+                        <span>IMPORTER</span>
+                      }
+                    </CButton>
                 </CCol>
             </CCardHeader>
             <CCardBody>

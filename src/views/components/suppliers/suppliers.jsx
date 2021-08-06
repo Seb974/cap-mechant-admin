@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom';
 import { isDefined } from 'src/helpers/utils';
 import Roles from 'src/config/Roles';
 import AuthContext from 'src/contexts/AuthContext';
+import { Spinner } from 'react-bootstrap';
 
 const Suppliers = (props) => {
 
@@ -14,6 +15,7 @@ const Suppliers = (props) => {
     const { currentUser } = useContext(AuthContext);
     const [isAdmin, setIsAdmin] = useState(Roles.hasAdminPrivileges(currentUser));
     const [suppliers, setSuppliers] = useState([]);
+    const [importLoading, setImportLoading] = useState(false);
 
     useEffect(() => {
         SupplierActions.findAll()
@@ -31,7 +33,18 @@ const Suppliers = (props) => {
                             setSuppliers(originalSuppliers);
                             console.log(error.response);
                        });
-    }
+    };
+
+    const handleImport = () => {
+      setImportLoading(true)
+      SupplierActions
+          .import()
+          .then(response => setImportLoading(false))
+          .catch(error => {
+              setImportLoading(false);
+              console.log(error);
+          });
+    };
 
     return (
         <CRow>
@@ -40,7 +53,13 @@ const Suppliers = (props) => {
             <CCardHeader>
                 Liste des fournisseurs
                 <CCol col="6" sm="4" md="2" className="ml-auto">
-                    <Link role="button" to="/components/suppliers/new" block variant="outline" color="success">CRÉER</Link>
+                    <CButton block variant="outline" color="success" onClick={ handleImport }>
+                      { importLoading ? 
+                          <Spinner as="span" animation="border" size="sm"role="status"/>
+                        :
+                        <span>IMPORTER</span>
+                      }
+                    </CButton>
                 </CCol>
             </CCardHeader>
             <CCardBody>

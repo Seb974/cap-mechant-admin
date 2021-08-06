@@ -60,9 +60,14 @@ function updateComponent(id, component) {
               .then(response => response.data['@id']);
 }
 
+function importProducts() {
+    return api.get('/api/vif/products')
+}
+
 export default { 
     findAll,
     delete: deleteProduct,
+    import: importProducts,
     find,
     update,
     create,
