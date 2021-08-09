@@ -56,7 +56,7 @@ const Dashboard = () => {
             <WidgetsDropdown sales={ sales } interval={ widgetInterval }/>
             <SalesStats />
             { !isDefined(supervisor) && <StockStats /> }
-            <StatChart style={{height: '300px', marginTop: '40px'}} sales={ sales } interval={ interval }/>
+            {/* <StatChart style={{height: '300px', marginTop: '40px'}} sales={ sales } interval={ interval }/> */}
         </>
     );
 }

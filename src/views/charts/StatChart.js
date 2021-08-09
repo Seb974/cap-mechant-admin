@@ -154,36 +154,36 @@ const StatChart = ({ sales, interval, ...attributes }) => {
   return (
     <>
         <CRow>
-            <CCol xs="12" sm={ !isDefined(supervisor) ? "6" : "4"} lg={ !isDefined(supervisor) ? "3" : "4"}>
+            <CCol xs="12" sm={"4"} lg={"4"}>
                 <CWidgetIcon text="Commandes" header={ sales.length } color="primary" iconPadding={ false }>
                     <CIcon width={ 24 } name="cil-clipboard"/>
                 </CWidgetIcon>
             </CCol>
             { !isDefined(supervisor) && 
-                <CCol xs="12" sm="6" lg="3">
-                    <CWidgetIcon text="Clients" header={ !isDefined(supervisor) ? getClients() : 0 } color="info" iconPadding={ false }>
+                <CCol xs="12" sm="6" lg="4">
+                    <CWidgetIcon text="Clients" header={ getClients() } color="warning" iconPadding={ false }>
                         <CIcon width={ 24 } name="cil-people"/>
                     </CWidgetIcon>
                 </CCol>
             }
-            <CCol xs="12" sm={ !isDefined(supervisor) ? "6" : "4"} lg={ !isDefined(supervisor) ? "3" : "4"}>
+            {/* <CCol xs="12" sm={"4"} lg={"4"}>
                 <CWidgetIcon 
                     text={ !isDefined(supervisor) ? "Chiffre d'affaires" : "Moyenne" }
                     header={ !isDefined(supervisor) ? getTurnover() : (isDefinedAndNotVoid(sales) ? (getTurnover() / sales.length).toFixed(2) : 0) + " €" }
                     color="warning"
                     iconPadding={ false }
                 >
-                    <CIcon width={ 24 } name="cil-chart"/>
+                    <CIcon width={ 24 } name="cil-people"/>
                 </CWidgetIcon>
-            </CCol>
-            <CCol xs="12" sm={ !isDefined(supervisor) ? "6" : "4"} lg={ !isDefined(supervisor) ? "3" : "4"}>
+            </CCol> */}
+            <CCol xs="12" sm={"4"} lg={"4"}>
                 <CWidgetIcon 
-                    text={ !isDefined(supervisor) ? "Gain" : "Total" }
-                    header={ (!isDefined(supervisor) ? getGain() : getTurnover()) + " €" }
+                    text="Produits"
+                    header={ (!isDefined(supervisor) ? getGain() : getTurnover()) }
                     color="danger" 
                     iconPadding={ false }
                 >
-                    <CIcon width={ 24 } name="cil-money"/>
+                    <CIcon width={ 24 } name="cil-fastfood"/>
                 </CWidgetIcon>
             </CCol>
         </CRow>

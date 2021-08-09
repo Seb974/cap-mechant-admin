@@ -40,6 +40,7 @@ const ProvisionModal = ({ item, provisions, setProvisions }) => {
             ...receivedProvision, 
             seller: receivedProvision.seller['@id'], 
             supplier: receivedProvision.supplier['@id'],
+            metas: receivedProvision.metas['@id'],
             goods: receivedProvision.goods.map(g => ({
                 ...g,
                 product: g.product['@id'],

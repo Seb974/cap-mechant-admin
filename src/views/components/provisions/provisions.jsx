@@ -134,8 +134,8 @@ const Provisions = (props) => {
         setDetails(newDetails);
     };
 
-    const getFormattedEntities = suppliers => {
-        return suppliers.map(supplier => ({ value: supplier['@id'], label: supplier.name, isFixed: false }));
+    const getFormattedEntities = entities => {
+        return entities.map(entity => ({ value: entity['@id'], label: entity.name, isFixed: false }));
     };
 
     const getProductName = (product, variation, size) => {

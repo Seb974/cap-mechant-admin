@@ -17,25 +17,13 @@ const WidgetsDropdown = ({ sales, interval }) => {
 
   useEffect(() => getPeriod(), []);
 
-  const getTotalOrder = order => order.items.reduce((sum, i) => sum += i.price * (isDefined(i.deliveredQty) ? i.deliveredQty : i.orderedQty), 0);
-  
-  const getVolumeOrder = order => order.items.reduce((sum, i) => sum += i.product.weight * (isDefined(i.deliveredQty) ? i.deliveredQty : i.orderedQty), 0);
-  
-  const getTurnovers = () => period.map(d => sales.reduce((sum, s) => sum += isSameDate(d, new Date(s.deliveryDate)) ? getTotalOrder(s) : 0, 0));
-  
   const getOrdersNumber = () => period.map(d => sales.reduce((sum, s) => sum += isSameDate(d, new Date(s.deliveryDate)) ? 1 : 0, 0));
-  
+
   const getClientsNumber = () => period.map(d => sales.reduce((unique, s) => isSameDate(d, new Date(s.deliveryDate)) && !unique.includes(s.email) ? [...unique, s.email] : unique, []).length);
-  
-  const getAverageOrders = () => period.map(d => sales.reduce((sum, s) => sum += isSameDate(d, new Date(s.deliveryDate)) && getDayTotalOrder(d) > 0 ? (getTotalOrder(s) / getDayTotalOrder(d)) : 0, 0));
-  
-  const getDayTotalOrder = day => sales.reduce((sum, s) => sum += isSameDate(day, new Date(s.deliveryDate)) ? 1 : 0, 0);
-  
-  const getVolumes = () => period.map(d => sales.reduce((sum, s) => sum += isSameDate(d, new Date(s.deliveryDate)) ? getVolumeOrder(s) : 0, 0));
 
   const getLastElement = (elements, precision) => {
       return (isDefinedAndNotVoid(elements) ? elements.slice(-1)[0] : 0).toFixed(precision);
-  }
+  };
 
   const getPeriod = () => {
     let datesArray = [];
@@ -48,54 +36,68 @@ const WidgetsDropdown = ({ sales, interval }) => {
     setPeriod(datesArray);
 };
 
+const getProductCount = () => {
+  return period.map(d => {
+        let products = []; 
+        sales.map(s => {
+              if (isSameDate(d, new Date(s.deliveryDate))) {
+                  s.items.map(i => {
+                    products = [...products, i.product.id];
+                });
+              }
+        });
+        return [...new Set(products)].length;
+    });
+}
+
   return (
     <CRow>
-      <CCol sm="6" lg="3">
+      <CCol sm="6" lg="4">
         <CWidgetDropdown
-          color="gradient-primary"
-          header={ getLastElement(getOrdersNumber(), 0) }
+          color="gradient-info"
+          header={ 
+              getLastElement(getOrdersNumber(), 0) 
+          }
           text="Commandes"
           footerSlot={
-              <ChartBarSimple
+              <ChartLineSimple
+                  pointed
                   className="mt-3 mx-3"
                   style={{height: '70px'}}
-                  backgroundColor="secondary"
                   dataPoints={ getOrdersNumber() }
+                  pointHoverBackgroundColor="info"
+                  options={{ elements: { line: { tension: 0.00001 }}}}
                   label="Members"
                   labels="months"
               />
           }
         >
           <CDropdown>
-            <CDropdownToggle caret={ false } className="text-white" color="transparent">
+            <CDropdownToggle caret={ false } color="transparent">
               <CIcon name="cil-clipboard"/>
             </CDropdownToggle>
           </CDropdown>
         </CWidgetDropdown>
       </CCol>
 
-      <CCol sm="6" lg="3">
+      <CCol sm="6" lg="4">
         <CWidgetDropdown
-          color="gradient-info"
-          header={ 
-              // Roles.isSupervisor(currentUser) && isDefined(supervisor) ? getLastElement(getVolumes(), 2) : 
-              getLastElement(getClientsNumber(), 0) 
-          }
+          color="gradient-warning"
+          header={ getLastElement(getClientsNumber(), 0) }
           text="Clients"
           footerSlot={
-              <ChartLineSimple
-                  pointed
-                  className="mt-3 mx-3"
-                  style={{height: '70px'}}
-                  dataPoints={ 
-                      // Roles.isSupervisor(currentUser) && isDefined(supervisor) ? (getVolumes() + " Kg") : 
-                      getClientsNumber() 
-                  }
-                  pointHoverBackgroundColor="info"
-                  options={{ elements: { line: { tension: 0.00001 }}}}
-                  label="Members"
-                  labels="months"
-              />
+            <ChartLineSimple
+              className="mt-3"
+              style={{height: '70px'}}
+              backgroundColor="rgba(255,255,255,.2)"
+              dataPoints={ 
+                getClientsNumber() 
+               }
+              options={{ elements: { line: { borderWidth: 2.5 }}}}
+              pointHoverBackgroundColor="warning"
+              label="Members"
+              labels="months"
+            />
           }
         >
           <CDropdown>
@@ -106,43 +108,17 @@ const WidgetsDropdown = ({ sales, interval }) => {
         </CWidgetDropdown>
       </CCol>
 
-      <CCol sm="6" lg="3">
-        <CWidgetDropdown
-          color="gradient-warning"
-          header={ getLastElement(getAverageOrders(), 2) + " €" }
-          text="Commande moyenne"
-          footerSlot={
-            <ChartLineSimple
-              className="mt-3"
-              style={{height: '70px'}}
-              backgroundColor="rgba(255,255,255,.2)"
-              dataPoints={ getAverageOrders() }
-              options={{ elements: { line: { borderWidth: 2.5 }}}}
-              pointHoverBackgroundColor="warning"
-              label="Members"
-              labels="months"
-            />
-          }
-        >
-          <CDropdown>
-            <CDropdownToggle caret={ false } color="transparent">
-              <CIcon name="cil-chart"/>
-            </CDropdownToggle>
-          </CDropdown>
-        </CWidgetDropdown>
-      </CCol>
-
-      <CCol sm="6" lg="3">
+      <CCol sm="6" lg="4">
         <CWidgetDropdown
           color="gradient-danger"
-          header={ getLastElement(getTurnovers(), 2) + " €" }
-          text="Chiffre d'affaires"
+          header={ getLastElement(getProductCount(), 0) }
+          text="Produits"
           footerSlot={
             <ChartLineSimple
               pointed
               className="c-chart-wrapper mt-3 mx-3"
               style={{height: '70px'}}
-              dataPoints={ getTurnovers() }
+              dataPoints={ getProductCount() }
               pointHoverBackgroundColor="rgb(250, 152, 152)"
               label="Members"
               labels="months"
@@ -151,7 +127,7 @@ const WidgetsDropdown = ({ sales, interval }) => {
         >
           <CDropdown>
             <CDropdownToggle caret={ false } color="transparent">
-              <CIcon name="cil-money"/>
+              <CIcon name="cil-fastfood"/>
             </CDropdownToggle>
           </CDropdown>
         </CWidgetDropdown>

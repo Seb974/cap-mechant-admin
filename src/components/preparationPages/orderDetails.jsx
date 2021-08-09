@@ -41,7 +41,6 @@ const OrderDetails = ({ orders = null, order, setOrders = null, isDelivery = fal
     };
 
     const onSubmit = () => {
-        console.log(getPreparedOrder(viewedOrder, currentUser));
         OrderActions
             .update(viewedOrder.id, getPreparedOrder(viewedOrder, currentUser))
             .then(response => {
