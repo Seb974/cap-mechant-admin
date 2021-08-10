@@ -103,7 +103,7 @@ export const getPreparedOrder = (order, currentUser) => {
                     product: isDefined(item.product) ? (typeof item.product === 'string' ? item.product : item.product['@id']) : null,
                     variation: isDefined(item.variation) ? (typeof item.variation === 'string' ? item.variation : item.variation['@id']) : null,
                     size: isDefined(item.size) ? (typeof item.size === 'string' ? item.size : item.size['@id']) : null,
-                    preparedQty: isDefined(item.preparedQty) ? typeof item.preparedQty === 'string' && item.preparedQty.length > 0 ? getFloat(item.preparedQty) : item.preparedQty: null,
+                    preparedQty: isDefined(item.orderedQty) ? typeof item.orderedQty === 'string' && item.orderedQty.length > 0 ? getFloat(item.orderedQty) : item.orderedQty: null,
                     isAdjourned: item.isAdjourned,
                 }
                 :

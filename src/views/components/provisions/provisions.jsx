@@ -1,12 +1,12 @@
 import React, { useContext, useEffect, useState } from 'react';
 import ProvisionActions from '../../../services/ProvisionActions'
-import { CCard, CCardBody, CCardHeader, CCol, CDataTable, CRow, CButton, CCollapse, CFormGroup, CInputCheckbox, CLabel, CWidgetIcon } from '@coreui/react';
+import { CCard, CCardBody, CCardHeader, CCol, CDataTable, CRow, CButton, CCollapse, CFormGroup, CInputCheckbox, CLabel, CWidgetIcon, CCardFooter } from '@coreui/react';
 import { Link } from 'react-router-dom';
 import AuthContext from 'src/contexts/AuthContext';
 import Roles from 'src/config/Roles';
 import RangeDatePicker from 'src/components/forms/RangeDatePicker';
 import { isDefined, isDefinedAndNotVoid } from 'src/helpers/utils';
-import { isSameDate, getDateFrom } from 'src/helpers/days';
+import { isSameDate, getDateFrom, getArchiveDate } from 'src/helpers/days';
 import Spinner from 'react-bootstrap/Spinner'
 import OrderDetails from 'src/components/preparationPages/orderDetails';
 import SelectMultiple from 'src/components/forms/SelectMultiple';
@@ -34,6 +34,9 @@ const Provisions = (props) => {
     const [selectedSellers, setSelectedSellers] = useState([]);
     const { updatedProvisions, setUpdatedProvisions } = useContext(MercureContext);
     const [mercureOpering, setMercureOpering] = useState(false);
+    const [csvContent, setCsvContent] = useState("");
+
+    const csvCode = 'data:text/csv;charset=utf-8,SEP=,%0A' + encodeURIComponent(csvContent);
 
     useEffect(() => {
         setIsAdmin(Roles.hasAdminPrivileges(currentUser));
@@ -65,6 +68,11 @@ const Provisions = (props) => {
                 .then(response => setMercureOpering(response));
         }
     }, [updatedProvisions]);
+
+    useEffect(() => {
+        if (isDefinedAndNotVoid(provisions))
+            setCsvContent(getCsvContent());
+    },[provisions]);
 
     const fetchProvisions = () => {
         setLoading(true);
@@ -162,6 +170,33 @@ const Provisions = (props) => {
         return [...new Set(allProducts.map(product => product.id))].length;
     };
 
+    const getCsvContent = () => {
+        const header = ['Index', 'Fournisseur', 'Date liv.', 'Produit', 'Qte comm.', 'Unite', 'Qte reçue', 'Unite', 'Statut', 'Mode d\'envoi', 'Adresse'].join(',');
+        const data = provisions.map((provision, index) => 
+            provision.goods.map(good => [
+                index + 1,
+                provision.supplier.name,
+                (new Date(provision.provisionDate)).toLocaleDateString('fr-FR', { timeZone: 'UTC'}),
+                good.product.name,
+                isDefined(good.quantity) ? good.quantity.toFixed(2) : "-",
+                good.unit,
+                isDefined(good.received) ? good.received.toFixed(2) : "-",
+                good.unit,
+                provision.status === "RECEIVED" ? "Réceptionné" : "Envoyé",
+                provision.sendingMode,
+                !isDefined(provision.metas) ? '-' : getAddress(provision.metas)
+            ].join(',')).join('\n')
+        ).join('\n');
+        return [header, data].join('\n');
+    };
+
+    const getAddress = metas => {
+        const address = isDefined(metas.address) ? metas.address.replaceAll(',', '') : '';
+        const zipcode = isDefined(metas.zipcode) ? metas.zipcode : '';
+        const city = isDefined(metas.city) ? metas.city : '';
+        return address + ' ' + zipcode + ' - ' + city;
+    };
+
     return (
         <CRow>
             <CCol xs="12" lg="12">
@@ -218,89 +253,100 @@ const Provisions = (props) => {
                                 </CCol>
                             </CRow>
                         }
-                        { loading ? 
+                        { loading ?
                             <CRow>
                                 <CCol xs="12" lg="12" className="text-center">
                                     <Spinner animation="border" variant="danger"/>
                                 </CCol>
                             </CRow>
                             :
-                            <CDataTable
-                                items={ provisions }
-                                fields={ isAdmin ? fields : fields.filter(f => f !== "Vendeur" && f !== 'Total') }
-                                bordered
-                                itemsPerPage={ itemsPerPage }
-                                pagination
-                                hover
-                                scopedSlots = {{
-                                    'Vendeur':
-                                        item => <td>
-                                                    <Link to="#" onClick={ e => { toggleDetails(item.id, e) }} >
-                                                        { item.seller.name }
-                                                        <br/>
-                                                    </Link>
+                            <>
+                                { isDefinedAndNotVoid(provisions) && 
+                                    <CRow className="">
+                                        <CCol xs="12" lg="12" className="my-3 d-flex justify-content-start">
+                                            <CButton color="primary" className="mb-2" href={csvCode} download={`Recap-Achats-${ getArchiveDate(dates.start) }-${ getArchiveDate(dates.end) }.csv`} target="_blank">
+                                                <CIcon name="cil-cloud-download" className="mr-2"/>Télécharger
+                                            </CButton>
+                                        </CCol>
+                                    </CRow>
+                                }
+                                <CDataTable
+                                    items={ provisions }
+                                    fields={ isAdmin ? fields : fields.filter(f => f !== "Vendeur" && f !== 'Total') }
+                                    bordered
+                                    itemsPerPage={ itemsPerPage }
+                                    pagination
+                                    hover
+                                    scopedSlots = {{
+                                        'Vendeur':
+                                            item => <td>
+                                                        <Link to="#" onClick={ e => { toggleDetails(item.id, e) }} >
+                                                            { item.seller.name }
+                                                            <br/>
+                                                        </Link>
+                                                    </td>
+                                        ,
+                                        'Fournisseur':
+                                            item => <td>
+                                                        <Link to="#" onClick={ e => { toggleDetails(item.id, e) }} >
+                                                            { item.supplier.name }
+                                                            <br/>
+                                                        </Link>
+                                                    </td>
+                                        ,
+                                        'Date':
+                                            item => <td style={{color: item.status === "RECEIVED" ? "dimgray" : "black"}}>
+                                                        { isSameDate(new Date(item.provisionDate), new Date()) ? "Aujourd'hui" : 
+                                                        isSameDate(new Date(item.provisionDate), getDateFrom(new Date(), -1)) ? "Hier" :
+                                                        isSameDate(new Date(item.provisionDate), getDateFrom(new Date(), 1)) ? "Demain" :
+                                                        (new Date(item.provisionDate)).toLocaleDateString('fr-FR', { timeZone: 'UTC'})
+                                                        }
+                                                    </td>
+                                        ,
+                                        'Total':
+                                            item => <td style={{color: item.status === "RECEIVED" ? "dimgray" : "black"}}>
+                                                        { item.status === "RECEIVED" ? (getTotalProvision(item)).toFixed(2) + " €" : "-"}
+                                                    </td>
+                                        ,
+                                        ' ':
+                                            item => (
+                                                <td className="mb-3 mb-xl-0 text-right">
+                                                    { item.status === "ORDERED" && <ProvisionModal item={ item } provisions={ provisions } setProvisions={ setProvisions }/> }
+                                                    <CButton color="warning" disabled={ !isAdmin && !Roles.isSeller(currentUser) } href={ "#/components/provisions/" + item.id } className="mx-1 my-1"><i className="fas fa-pen"></i></CButton>
+                                                    <CButton color="danger" disabled={ !isAdmin && !Roles.isSeller(currentUser) } onClick={ () => handleDelete(item) } className="mx-1 my-1"><i className="fas fa-trash"></i></CButton>
                                                 </td>
-                                    ,
-                                    'Fournisseur':
-                                        item => <td>
-                                                    <Link to="#" onClick={ e => { toggleDetails(item.id, e) }} >
-                                                        { item.supplier.name }
-                                                        <br/>
-                                                    </Link>
-                                                </td>
-                                    ,
-                                    'Date':
-                                        item => <td style={{color: item.status === "RECEIVED" ? "dimgray" : "black"}}>
-                                                    { isSameDate(new Date(item.provisionDate), new Date()) ? "Aujourd'hui" : 
-                                                    isSameDate(new Date(item.provisionDate), getDateFrom(new Date(), -1)) ? "Hier" :
-                                                    isSameDate(new Date(item.provisionDate), getDateFrom(new Date(), 1)) ? "Demain" :
-                                                    (new Date(item.provisionDate)).toLocaleDateString('fr-FR', { timeZone: 'UTC'})
-                                                    }
-                                                </td>
-                                    ,
-                                    'Total':
-                                        item => <td style={{color: item.status === "RECEIVED" ? "dimgray" : "black"}}>
-                                                    { item.status === "RECEIVED" ? (getTotalProvision(item)).toFixed(2) + " €" : "-"}
-                                                </td>
-                                    ,
-                                    ' ':
-                                        item => (
-                                            <td className="mb-3 mb-xl-0 text-right">
-                                                { item.status === "ORDERED" && <ProvisionModal item={ item } provisions={ provisions } setProvisions={ setProvisions }/> }
-                                                <CButton color="warning" disabled={ !isAdmin && !Roles.isSeller(currentUser) } href={ "#/components/provisions/" + item.id } className="mx-1 my-1"><i className="fas fa-pen"></i></CButton>
-                                                <CButton color="danger" disabled={ !isAdmin && !Roles.isSeller(currentUser) } onClick={ () => handleDelete(item) } className="mx-1 my-1"><i className="fas fa-trash"></i></CButton>
-                                            </td>
-                                        )
-                                    ,
-                                    'details':
-                                        item => <CCollapse show={details.includes(item.id)}>
-                                                    <CDataTable
-                                                        items={ item.goods }
-                                                        fields={ isAdmin ? ['Produit', 'Commandé', 'Reçu', 'Prix U','Sous-total'] : ['Produit', 'Commandé', 'Reçu'] }
-                                                        bordered
-                                                        itemsPerPage={ itemsPerPage }
-                                                        pagination
-                                                        hover
-                                                        scopedSlots = {{
-                                                            'Produit':
-                                                                item => <td>{ getProductName(item.product, item.variation, item.size) }</td>
-                                                            ,
-                                                            'Commandé':
-                                                                item => <td>{ item.quantity.toFixed(2) + " " + item.unit }</td>
-                                                            ,
-                                                            'Reçu':
-                                                                item => <td>{ isDefined(item.received) ? item.received.toFixed(2) + " " + item.unit : "-" }</td>        //  item.received.toFixed(2) + " " + item.unit item.received + " U :" + (typeof item.received)
-                                                            ,
-                                                            'Prix U':
-                                                                item => <td>{ isDefined(item.price) ? item.price.toFixed(2) + " €" : "-" }</td>     // item.price.toFixed(2) + " €"  item.price + " € :" + (typeof item.price)
-                                                            ,
-                                                            'Sous-total':
-                                                                item => <td>{ isDefined(item.price) && isDefined(item.received) ? (item.received * item.price).toFixed(2) + " €" : "-" }</td>
-                                                        }}
-                                                    />
-                                                </CCollapse>
-                                }}
-                            />
+                                            )
+                                        ,
+                                        'details':
+                                            item => <CCollapse show={details.includes(item.id)}>
+                                                        <CDataTable
+                                                            items={ item.goods }
+                                                            fields={ isAdmin ? ['Produit', 'Commandé', 'Reçu', 'Prix U','Sous-total'] : ['Produit', 'Commandé', 'Reçu'] }
+                                                            bordered
+                                                            itemsPerPage={ itemsPerPage }
+                                                            pagination
+                                                            hover
+                                                            scopedSlots = {{
+                                                                'Produit':
+                                                                    item => <td>{ getProductName(item.product, item.variation, item.size) }</td>
+                                                                ,
+                                                                'Commandé':
+                                                                    item => <td>{ item.quantity.toFixed(2) + " " + item.unit }</td>
+                                                                ,
+                                                                'Reçu':
+                                                                    item => <td>{ isDefined(item.received) ? item.received.toFixed(2) + " " + item.unit : "-" }</td>        //  item.received.toFixed(2) + " " + item.unit item.received + " U :" + (typeof item.received)
+                                                                ,
+                                                                'Prix U':
+                                                                    item => <td>{ isDefined(item.price) ? item.price.toFixed(2) + " €" : "-" }</td>     // item.price.toFixed(2) + " €"  item.price + " € :" + (typeof item.price)
+                                                                ,
+                                                                'Sous-total':
+                                                                    item => <td>{ isDefined(item.price) && isDefined(item.received) ? (item.received * item.price).toFixed(2) + " €" : "-" }</td>
+                                                            }}
+                                                        />
+                                                    </CCollapse>
+                                    }}
+                                />
+                            </>
                         }
                     </CCardBody>
                 </CCard>

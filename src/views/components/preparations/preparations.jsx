@@ -7,7 +7,7 @@ import AuthContext from 'src/contexts/AuthContext';
 import Roles from 'src/config/Roles';
 import RangeDatePicker from 'src/components/forms/RangeDatePicker';
 import { isDefined, isDefinedAndNotVoid } from 'src/helpers/utils';
-import { isSameDate, getDateFrom } from 'src/helpers/days';
+import { isSameDate, getDateFrom, getArchiveDate } from 'src/helpers/days';
 import Spinner from 'react-bootstrap/Spinner'
 import OrderDetails from 'src/components/preparationPages/orderDetails';
 import DayOffActions from 'src/services/DayOffActions';
@@ -32,6 +32,9 @@ const Preparations = (props) => {
     const [dates, setDates] = useState({start: new Date(), end: new Date() });
     const [daysOff, setDaysOff] = useState([]);
     const [details, setDetails] = useState([]);
+    const [csvContent, setCsvContent] = useState("");
+
+    const csvCode = 'data:text/csv;charset=utf-8,SEP=,%0A' + encodeURIComponent(csvContent);
 
     useEffect(() => {
         setIsAdmin(Roles.hasAdminPrivileges(currentUser));
@@ -50,10 +53,15 @@ const Preparations = (props) => {
     useEffect(() => getOrders(), [dates]);
     useEffect(() => getOrders(), [daysOff]);
 
+    useEffect(() => {
+        if (isDefinedAndNotVoid(orders))
+            setCsvContent(getCsvContent());
+    },[orders]);
+
     const getOrders = () => {
         setLoading(true);
         const UTCDates = getUTCDates(dates);
-        const request = isAdmin || Roles.isPicker(currentUser) ?        // || Roles.isSeller(currentUser)
+        const request = isAdmin || Roles.isPicker(currentUser) ?
             OrderActions.findPickersPreparations(UTCDates) :
             OrderActions.findPreparations(UTCDates, currentUser);
         request
@@ -174,7 +182,33 @@ const Preparations = (props) => {
                     });
             })
             .catch(error => console.log(error));
-    }
+    };
+
+    const getCsvContent = () => {
+        const header = ['Index', 'Client', 'Date liv.', 'Produit', 'Qte comm.', 'Unite', 'Stock', 'Unite', 'Adresse'].join(',');
+        const data = orders.map((order, index) => 
+            order.items.map(item => [
+                index + 1,
+                order.user.name,
+                (new Date(order.deliveryDate)).toLocaleDateString('fr-FR', { timeZone: 'UTC'}),
+                item.product.name,
+                isDefined(item.orderedQty) ? item.orderedQty.toFixed(2) : "-",
+                item.unit,
+                isDefined(item.stock) ? item.stock.toFixed(2) : "-",
+                item.unit,
+                !isDefined(order.metas) ? '-' : getAddress(order.metas)
+            ].join(',')).join('\n')
+        ).join('\n');
+        return [header, data].join('\n');
+    };
+
+    const getAddress = metas => {
+        const address = isDefined(metas.address) ? metas.address.replaceAll(',', '') : '';
+        const zipcode = isDefined(metas.zipcode) ? metas.zipcode : '';
+        const city = isDefined(metas.city) ? metas.city : '';
+        return address + ' ' + zipcode + ' - ' + city;
+    };
+
     return (
         <CRow>
         <CCol xs="12" lg="12">
@@ -206,7 +240,7 @@ const Preparations = (props) => {
                     </CCol>
                 </CRow>
                 <CRow>
-                    <CCol xs="12" lg="6">
+                    <CCol xs="12" md="6">
                     <RangeDatePicker
                         minDate={ dates.start }
                         maxDate={ dates.end }
@@ -215,6 +249,13 @@ const Preparations = (props) => {
                         className = "form-control mb-3"
                     />
                     </CCol>
+                    { !loading && isDefinedAndNotVoid(orders) && 
+                        <CCol xs="12" md="6" className="my-3 d-flex justify-content-end align-items-center">
+                            <CButton color="primary" className="my-2" href={csvCode} download={`Recap-Ventes-${ getArchiveDate(dates.start) }-${ getArchiveDate(dates.end) }.csv`} target="_blank">
+                                <CIcon name="cil-cloud-download" className="mr-2"/>Télécharger
+                            </CButton>
+                        </CCol>
+                    }
                 </CRow>
                 { loading ? 
                     <CRow className="mx-5">
