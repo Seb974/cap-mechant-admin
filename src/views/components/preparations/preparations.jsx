@@ -214,12 +214,16 @@ const Preparations = (props) => {
         <CCol xs="12" lg="12">
           <CCard>
             <CCardHeader>
-                Liste des commandes à préparer
-                { (isAdmin || Roles.isPicker(currentUser) || Roles.isSupervisor(currentUser) || Roles.isSeller(currentUser)) &&
-                    <CCol col="6" sm="4" md="2" className="ml-auto">
-                            <Link role="button" to="/components/orders/new" block={ true } variant="outline" color="success">CRÉER</Link>
+                <CRow>
+                    <CCol xs="12" sm="6" md="6" className="my-2 d-flex justify-content-start align-items-center">
+                        Liste des commandes à préparer
                     </CCol>
-                }
+                    { (isAdmin || Roles.isPicker(currentUser) || Roles.isSupervisor(currentUser) || Roles.isSeller(currentUser)) &&
+                        <CCol xs="12" sm="6" md="6" className="my-2 d-flex justify-content-end align-items-center">
+                                <Link role="button" to="/components/orders/new" block={ true } variant="outline" color="success">CRÉER</Link>
+                        </CCol>
+                    }
+                </CRow>
             </CCardHeader>
             <CCardBody>
                 <CRow>

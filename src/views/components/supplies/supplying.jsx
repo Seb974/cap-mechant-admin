@@ -371,7 +371,7 @@ const Supplying = (props) => {
                     <CCardBody>
                         <CRow className="mt-2">
                             <CCol xs="12" lg="12">
-                                <CLabel><h6><b>1. Estimer les besoins</b></h6></CLabel>
+                                <CLabel><h6><b>1. Définir les besoins</b></h6></CLabel>
                             </CCol>
                         </CRow>
                         <CRow>
@@ -393,7 +393,7 @@ const Supplying = (props) => {
                                     minDate={ dates.start }
                                     maxDate={ dates.end }
                                     onDateChange={ handleDateChange }
-                                    label="Bornes du calcul"
+                                    label="Bornes de recherche"
                                     className = "form-control mb-3"
                                 />
                             </CCol>
