@@ -20,6 +20,7 @@ import { Link } from 'react-router-dom';
 import NeedDetails from 'src/components/supplyPages/needDetails';
 import CIcon from '@coreui/icons-react';
 import PlatformContext from 'src/contexts/PlatformContext';
+import { trim } from 'lodash';
 
 const Supplying = (props) => {
 
@@ -110,7 +111,7 @@ const Supplying = (props) => {
             .findAll()
             .then(response => {
                     const externSuppliers = response.filter(s => !s.isIntern);
-                    setSuppliers(externSuppliers);
+                    setSuppliers(externSuppliers.map(s => ({...s, emails: isDefinedAndNotVoid(s.emails) ? s.emails.join(', ') : ''})));
                     setSelectedSupplier(externSuppliers[0]);
                 });
     };
@@ -212,7 +213,7 @@ const Supplying = (props) => {
         const goods = getGoods();
         return {
             seller: selectedSeller['@id'],
-            supplier: selectedSupplier,
+            supplier: {...selectedSupplier, emails: selectedSupplier.emails.split(',').map(email => trim(email))},
             provisionDate: new Date(deliveryDate),
             metas: selectedConsumer.metas['@id'],
             sendingMode,
@@ -511,31 +512,35 @@ const Supplying = (props) => {
                                     </CCol>
                                 </CRow>
                                 <CRow>
-                                    <CCol xs="12" lg="4">
+                                    <CCol xs="12" lg="6">
                                         <Select className="mr-2" name="supplier" label="Fournisseur" value={ isDefined(selectedSupplier) ? selectedSupplier.id : 0 } onChange={ handleSupplierChange }>
                                             { suppliers.map(supplier => <option key={ supplier.id } value={ supplier.id }>{ supplier.name }</option>) }
                                         </Select>
                                     </CCol>
-                                    <CCol xs="12" lg="4" className="mt-4">
-                                        <CInputGroup>
-                                            <CInputGroupPrepend>
-                                                <CInputGroupText style={{ minWidth: '43px'}}><CIcon name="cil-at"/></CInputGroupText>
-                                            </CInputGroupPrepend>
-                                            <CInput
-                                                name="email"
-                                                value={ isDefined(selectedSupplier) && isDefined(selectedSupplier.email) && selectedSupplier.email.length > 0 ? selectedSupplier.email : "-" }
-                                                onChange={ handleSupplierInfosChange }
-                                            />
-                                        </CInputGroup>
-                                    </CCol>
-                                    <CCol xs="12" lg="4" className="mt-4">
+                                    <CCol xs="12" lg="6">
+                                        <CLabel>Téléphone</CLabel>
                                         <CInputGroup>
                                             <CInputGroupPrepend>
                                                 <CInputGroupText style={{ minWidth: '43px'}}><CIcon name="cil-phone"/></CInputGroupText>
                                             </CInputGroupPrepend>
                                             <CInput
                                                 name="phone"
-                                                value={ isDefined(selectedSupplier) && isDefined(selectedSupplier.phone) && selectedSupplier.phone.length > 0 ? selectedSupplier.phone : "-" }
+                                                value={ isDefined(selectedSupplier) && isDefined(selectedSupplier.phone) && selectedSupplier.phone.length > 0 ? selectedSupplier.phone : "" }
+                                                onChange={ handleSupplierInfosChange }
+                                            />
+                                        </CInputGroup>
+                                    </CCol>
+                                </CRow>
+                                <CRow>
+                                    <CCol xs="12" lg="12" >
+                                        <CLabel>Email(s) <small className="ml-3"><i>séparation par ","</i></small></CLabel>
+                                        <CInputGroup>
+                                            <CInputGroupPrepend>
+                                                <CInputGroupText style={{ minWidth: '43px'}}><CIcon name="cil-at"/></CInputGroupText>
+                                            </CInputGroupPrepend>
+                                            <CInput
+                                                name="emails"
+                                                value={ isDefined(selectedSupplier) && isDefined(selectedSupplier.emails) && selectedSupplier.emails.length > 0 ? selectedSupplier.emails : "" }
                                                 onChange={ handleSupplierInfosChange }
                                             />
                                         </CInputGroup>
