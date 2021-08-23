@@ -5,12 +5,9 @@ import { HashRouter, Route, Switch } from 'react-router-dom';
 import DataProvider from './data/dataProvider/dataProvider';
 import AdminRoute from './components/route/AdminRoute';
 import PrivateRoute from './components/route/PrivateRoute';
-import { Elements } from '@stripe/react-stripe-js';
-import { loadStripe } from '@stripe/stripe-js';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import './i18n';
 
-const stripePromise = loadStripe("pk_test_51I4RT9KtG62ZyJyqGD3WG0rqQCXyzZirW9GhFVE4Moq8HsMcMcV8y42fTbYihbTUTfMugi6FzdBHuz1uOyr4G7If008xMpch8a");
 
 const loading = (
     <div className="pt-3 text-center">
@@ -35,24 +32,22 @@ const PackagePlan = React.lazy(() => import('./views/components/preparations/pac
 const App = () => {
 
     return (
-        <Elements stripe={ stripePromise }>
-            <DataProvider>
-                <HashRouter>
-                    <React.Suspense fallback={loading}>
-                        <Switch>
-                            <Route exact path="/login" name="Login Page" component={ Login } />
-                            <Route exact path="/register" name="Register Page" component={ Register } />
-                            <Route exact path="/404" name="Page 404" component={ Page404 } />
-                            <Route exact path="/500" name="Page 500" component={ Page500 } />
-                            <Route path="/apps/email" name="Email App" component={ TheEmailApp } />
-                            <AdminRoute path="/components/deliveries/:id" name="DeliveryNote" component={ DeliveryNote } />
-                            <AdminRoute path="/components/parcels/:id" name="PackagePlan" component={ PackagePlan } />
-                            <AdminRoute path="/" name="Home" component={ TheLayout } />
-                        </Switch>
-                    </React.Suspense>
-                </HashRouter>
-            </DataProvider>
-        </Elements>
+        <DataProvider>
+            <HashRouter>
+                <React.Suspense fallback={loading}>
+                    <Switch>
+                        <Route exact path="/login" name="Login Page" component={ Login } />
+                        <Route exact path="/register" name="Register Page" component={ Register } />
+                        <Route exact path="/404" name="Page 404" component={ Page404 } />
+                        <Route exact path="/500" name="Page 500" component={ Page500 } />
+                        <Route path="/apps/email" name="Email App" component={ TheEmailApp } />
+                        <AdminRoute path="/components/deliveries/:id" name="DeliveryNote" component={ DeliveryNote } />
+                        <AdminRoute path="/components/parcels/:id" name="PackagePlan" component={ PackagePlan } />
+                        <AdminRoute path="/" name="Home" component={ TheLayout } />
+                    </Switch>
+                </React.Suspense>
+            </HashRouter>
+        </DataProvider>
     );
 }
 

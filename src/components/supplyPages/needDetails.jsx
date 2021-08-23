@@ -4,32 +4,24 @@ import { isDefined, isDefinedAndNotVoid } from 'src/helpers/utils';
 import AuthContext from 'src/contexts/AuthContext';
 import Roles from 'src/config/Roles';
 
-const NeedDetails = ({ orders, product }) => {
+const NeedDetails = ({ goods, provision, provisions, setProvisions }) => {
 
     const { currentUser } = useContext(AuthContext);
     const [isAdmin, setIsAdmin] = useState(false);
-    const [consumers, setConsumers] = useState([]);
 
-    useEffect(() => getConsumers(), [orders, product]);
     useEffect(() => setIsAdmin(Roles.hasAdminPrivileges(currentUser)), [currentUser]);
 
-    const getConsumers = () => {
-        let newConsumers = [];
-        orders.map(o => {
-            o.items.map(i => {
-                if (i.product.id === product.id)
-                    newConsumers = [...newConsumers, {name: o.name, quantity: i.orderedQty, unit: i.unit, stock: i.stock }];
-            });
-        });
-        setConsumers(newConsumers);
+    const onChange = ({ currentTarget }) => {
+        const newItems = goods.map(i => i.id === parseInt(currentTarget.name) ? {...i, quantity: currentTarget.value} : i);
+        const newOrders = provisions.map(o => o.id === provision.id ? {...provision, goods: newItems} : o);
+        setProvisions(newOrders);
     };
-
-    const onChange = ({ currentTarget }) => setConsumers({...consumers, [currentTarget.id]: currentTarget.value});
 
     return (
         <>
-            { !isDefinedAndNotVoid(consumers) ? <></> : consumers.map((item, index) => {
-                if (isAdmin || Roles.isPicker(currentUser) || Roles.isSupervisor(currentUser) || (!isAdmin && product.seller.users.find(user => user.id == currentUser.id) !== undefined)) {
+            {
+            !isDefinedAndNotVoid(goods) ? <></> : 
+                goods.map((item, index) => {
                     return(
                         <CCardBody key={ item.id }>
                             <CRow className="text-center mt-0">
@@ -41,12 +33,11 @@ const NeedDetails = ({ orders, product }) => {
                                     <CRow>
                                         <CCol xs="12" sm="6">
                                             <CFormGroup>
-                                                <CLabel htmlFor="name">{"Client " + (consumers.length > 1 ? index + 1 : "")}
-                                                </CLabel>
+                                                <CLabel htmlFor="name">Produit</CLabel>
                                                 <CInput
                                                     id="name"
                                                     name={ item.id }
-                                                    value={ item.name }
+                                                    value={ item.product.name }
                                                     onChange={ onChange }
                                                     disabled={ true }
                                                 />
@@ -84,7 +75,7 @@ const NeedDetails = ({ orders, product }) => {
                                                         name={ item.id }
                                                         value={ item.quantity }
                                                         onChange={ onChange }
-                                                        disabled={ true }
+                                                        disabled={ false }
                                                     />
                                                     <CInputGroupAppend>
                                                         <CInputGroupText>{ item.unit }</CInputGroupText>
@@ -97,7 +88,6 @@ const NeedDetails = ({ orders, product }) => {
                             </CRow>
                         </CCardBody>
                     );
-                } else return <></>
             })}
             <CRow className="text-center mt-0">
                 <CCol md="1">{""}</CCol>

@@ -3,7 +3,7 @@ import { CButton, CCol, CRow } from '@coreui/react';
 import CIcon from '@coreui/icons-react';
 import Good from './Good';
 
-const Goods = ({ provision, goods, setGoods, defaultGood, editing }) => {
+const Goods = ({ provision, goods, setGoods, defaultGood, editing, availableProducts }) => {
 
     const handleGoodAdd = () => {
         setGoods([
@@ -45,6 +45,7 @@ const Goods = ({ provision, goods, setGoods, defaultGood, editing }) => {
                                     total={ goods.length } 
                                     index={ index }
                                     editing={ editing }
+                                    availableProducts={ availableProducts }
                                 />
                             </CCol>
                         </CRow>

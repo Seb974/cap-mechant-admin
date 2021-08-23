@@ -1,11 +1,20 @@
-import React from 'react';
+import React, { useContext, useEffect } from 'react';
 import { CButton, CCol, CRow } from '@coreui/react';
 import CIcon from '@coreui/icons-react';
 import Item from './Item';
-import { isDefined } from 'src/helpers/utils';
-import Packages from './Packages';
+import { isDefined, isDefinedAndNotVoid } from 'src/helpers/utils';
+import ProductsContext from 'src/contexts/ProductsContext';
 
-const Items = ({ items, setItems, defaultItem, editing, packages = null }) => {
+const Items = ({ items, setItems }) => {
+
+    const { products } = useContext(ProductsContext);
+
+    const defaultItem = {product: products[0], count: 0, orderedQty: "", unit: products[0].unit, stock: 0};
+
+    useEffect(() => {
+        if (!isDefinedAndNotVoid(items))
+            setItems([defaultItem]);
+    }, [items]);
 
     const handleItemAdd = () => {
         setItems([
@@ -45,7 +54,6 @@ const Items = ({ items, setItems, defaultItem, editing, packages = null }) => {
                                     handleDelete={ handleItemDelete } 
                                     total={ items.length } 
                                     index={ index }
-                                    editing={ editing }
                                 />
                             </CCol>
                         </CRow>
@@ -56,7 +64,6 @@ const Items = ({ items, setItems, defaultItem, editing, packages = null }) => {
                 <CCol md="1">{""}</CCol>
                 <CCol md="10"><hr/></CCol>
             </CRow>
-            { isDefined(packages) && <Packages packages={ packages } /> }
             <CRow className="mt-4 d-flex justify-content-start ml-1">
                 <CButton size="sm" color="warning" onClick={ handleItemAdd }><CIcon name="cil-plus"/> Ajouter un produit</CButton>
             </CRow>

@@ -7,47 +7,45 @@ import AuthContext from 'src/contexts/AuthContext';
 import Select from '../forms/Select';
 import Roles from 'src/config/Roles';
 
-const Good = ({ provision, good, handleChange, handleDelete, total, index, editing }) => {
+const Good = ({ provision, good, handleChange, handleDelete, total, index, editing, availableProducts }) => {
 
     const [isAdmin, setIsAdmin] = useState(false);
     const { products } = useContext(ProductsContext);
-    const [variants, setVariants] = useState([]);
+    // const [variants, setVariants] = useState([]);
     const { currentUser } = useContext(AuthContext);
 
     useEffect(() => {
         setIsAdmin(Roles.hasAdminPrivileges(currentUser));
         getUnit();
-        if (isDefined(good.product.variations))
-            setVariants(good.product.variations);
+        // if (isDefined(good.product.variations))
+        //     setVariants(good.product.variations);
     }, []);
 
-    const onChange = ({ currentTarget }) => {
-        handleChange({...good, [currentTarget.id]: currentTarget.value});
-    };
+    const onChange = ({ currentTarget }) => handleChange({...good, [currentTarget.id]: currentTarget.value});
 
     const onProductChange = ({ currentTarget }) => {
         const selection = products.find(product => parseInt(product.id) === parseInt(currentTarget.value));
-        const newVariants = isDefined(selection.variations) ? selection.variations : null;
-        const selectedVariant = isDefinedAndNotVoid(newVariants) ? newVariants[0] : null;
-        const selectedSize = isDefined(selectedVariant) && isDefinedAndNotVoid(selectedVariant.sizes) ? selectedVariant.sizes[0] : null;
-        handleChange({...good, product: selection, variation: selectedVariant, size: selectedSize, unit: selection.unit});
-        setVariants(isDefined(selection.variations) ? selection.variations : null);
+        // const newVariants = isDefined(selection.variations) ? selection.variations : null;
+        // const selectedVariant = isDefinedAndNotVoid(newVariants) ? newVariants[0] : null;
+        // const selectedSize = isDefined(selectedVariant) && isDefinedAndNotVoid(selectedVariant.sizes) ? selectedVariant.sizes[0] : null;
+        handleChange({...good, product: selection,  unit: selection.unit});
+        // setVariants(isDefined(selection.variations) ? selection.variations : null);
     };
 
-    const onVariantChange = ({ currentTarget }) => {
-        const ids = currentTarget.value.split("-");
-        const selectedVariant = good.product.variations.find(variation => variation.id === parseInt(ids[0]));
-        const selectedSize = selectedVariant.sizes.find(size => size.id === parseInt(ids[1]));
-        handleChange({...good, variation: selectedVariant, size: selectedSize});
-    };
+    // const onVariantChange = ({ currentTarget }) => {
+    //     const ids = currentTarget.value.split("-");
+    //     const selectedVariant = good.product.variations.find(variation => variation.id === parseInt(ids[0]));
+    //     const selectedSize = selectedVariant.sizes.find(size => size.id === parseInt(ids[1]));
+    //     handleChange({...good, variation: selectedVariant, size: selectedSize});
+    // };
 
     const getUnit = () => onChange({currentTarget: {id: "unit", value: good.product.unit}});
 
-    const getVariantName = (variantName, sizeName) => {
-        const isVariantEmpty = variantName.length === 0 || variantName.replace(" ","").length === 0;
-        const isSizeEmpty = sizeName.length === 0 || sizeName.replace(" ","").length === 0;
-        return isVariantEmpty ? sizeName : isSizeEmpty ? variantName : variantName + " - " + sizeName;
-    };
+    // const getVariantName = (variantName, sizeName) => {
+    //     const isVariantEmpty = variantName.length === 0 || variantName.replace(" ","").length === 0;
+    //     const isSizeEmpty = sizeName.length === 0 || sizeName.replace(" ","").length === 0;
+    //     return isVariantEmpty ? sizeName : isSizeEmpty ? variantName : variantName + " - " + sizeName;
+    // };
 
     return !isDefined(good) || !isDefined(good.product) ? <></> : (
         <>
@@ -57,46 +55,10 @@ const Good = ({ provision, good, handleChange, handleDelete, total, index, editi
                     <CLabel htmlFor="name">{"Produit " + (total > 1 ? index + 1 : "")}
                     </CLabel>
                     <CSelect custom id="product" value={ good.product.id } onChange={ onProductChange }>
-                        { products.map(product => <option key={ product.id } value={ product.id }>{ product.name }</option>) }
+                        { availableProducts.map(product => <option key={ product.id } value={ product.id }>{ product.name }</option>) }
                     </CSelect>
                 </CFormGroup>
             </CCol>
-            { isAdmin && 
-                <>
-                    <CCol xs="12" md="4">
-                        <CFormGroup>
-                            <CLabel htmlFor="name">{"Variante"}
-                            </CLabel>
-                            <CSelect custom name="variant" id="variant" disabled={ !variants || variants.length <= 0 } onChange={ onVariantChange } value={ isDefined(good.variation) && isDefined(good.size) ? good.variation.id + "-" + good.size.id : "0"}>
-                                { !isDefinedAndNotVoid(variants) ? <option key="0" value="0">-</option> : 
-                                    variants.map((variant, index) => {
-                                        return variant.sizes.map((size, i) => <option key={ (index + "" + i) } value={variant.id + "-" + size.id}>{ getVariantName(variant.color, size.name) }</option>);
-                                    })
-                                }
-                            </CSelect>
-                        </CFormGroup>
-                    </CCol>
-                    <CCol xs="12" md="4">
-                        <CFormGroup>
-                            <CLabel htmlFor="name">Prix
-                            </CLabel>
-                            <CInputGroup>
-                                <CInput
-                                    id="price"
-                                    type="number"
-                                    name={ good.count }
-                                    value={ good.price }
-                                    onChange={ onChange }
-                                    disabled={ provision.status !== "RECEIVED" }
-                                />
-                                <CInputGroupAppend>
-                                    <CInputGroupText>€/{ good.unit }</CInputGroupText>
-                                </CInputGroupAppend>
-                            </CInputGroup>
-                        </CFormGroup>
-                    </CCol>
-                </>
-            }
             <CCol xs="12" md={ isAdmin ? "4" : "2"}>
                 <CFormGroup>
                     <CLabel htmlFor="name">Commandé
@@ -116,23 +78,41 @@ const Good = ({ provision, good, handleChange, handleDelete, total, index, editi
                 </CFormGroup>
             </CCol>
             <CCol xs="12" md={ isAdmin ? "4" : "2"}>
-                <CFormGroup>
-                    <CLabel htmlFor="name">Reçue
-                    </CLabel>
-                    <CInputGroup>
-                        <CInput
-                            id="received"
-                            type="number"
-                            name={ good.count }
-                            value={ good.received }
-                            onChange={ onChange }
-                            disabled={ provision.status !== "RECEIVED" }
-                        />
-                        <CInputGroupAppend>
-                            <CInputGroupText>{ good.unit }</CInputGroupText>
-                        </CInputGroupAppend>
-                    </CInputGroup>
-                </CFormGroup>
+                { provision.status === "RECEIVED" ? 
+                    <CFormGroup>
+                        <CLabel htmlFor="name">Reçue</CLabel>
+                        <CInputGroup>
+                            <CInput
+                                id="received"
+                                type="number"
+                                name={ good.count }
+                                value={ good.received }
+                                onChange={ onChange }
+                                disabled={ provision.status !== "RECEIVED" }
+                            />
+                            <CInputGroupAppend>
+                                <CInputGroupText>{ good.unit }</CInputGroupText>
+                            </CInputGroupAppend>
+                        </CInputGroup>
+                    </CFormGroup>
+                :
+                    <CFormGroup>
+                        <CLabel htmlFor="name">Stock</CLabel>
+                        <CInputGroup>
+                            <CInput
+                                id="stock"
+                                type="number"
+                                name={ good.count }
+                                value={ good.stock }
+                                onChange={ onChange }
+                                disabled={ provision.status === "RECEIVED" }
+                            />
+                            <CInputGroupAppend>
+                                <CInputGroupText>{ good.unit }</CInputGroupText>
+                            </CInputGroupAppend>
+                        </CInputGroup>
+                    </CFormGroup>
+                }
             </CCol>
             <CCol xs="12" md={isAdmin ? "3" : "2"}>
                 <Select name={ good.count } id="unit" value={ good.unit } label="Unité" onChange={ onChange }>
