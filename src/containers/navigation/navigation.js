@@ -24,10 +24,6 @@ function getNav(translation, currentUser, seller = null)
       name: 'Dashboard',
       to: '/dashboard',
       icon: <CIcon name="cil-speedometer" customClasses="c-sidebar-nav-icon"/>,
-      // badge: {
-      //   color: 'info',
-      //   text: 'NEW',
-      // }
     },
     !["ADMIN"].includes(mainRole) ? voidValue : 
       {
@@ -63,12 +59,12 @@ function getNav(translation, currentUser, seller = null)
       },
 
 
-    !["ADMIN", "PICKER", "SELLER", "DELIVERER", "RELAYPOINT"].includes(mainRole) ? voidValue : 
+    !["ADMIN", "PICKER", "DELIVERER", "RELAYPOINT"].includes(mainRole) ? voidValue :      // "SELLER",
     {
       _tag: 'CSidebarNavTitle',
       _children: [translation("orders.label")]
     },
-    !["ADMIN", "PICKER", "SELLER"].includes(mainRole) ? voidValue : 
+    !["ADMIN", "PICKER"].includes(mainRole) ? voidValue :                                 // , "SELLER"
         {
           _tag: 'CSidebarNavItem',
           name: translation("preparations.label"),
@@ -113,7 +109,7 @@ function getNav(translation, currentUser, seller = null)
     !["ADMIN", "PICKER", "SELLER"].includes(mainRole) ? voidValue : 
     {
       _tag: 'CSidebarNavTitle',
-      _children: [translation("activity.label")],
+      _children: [mainRole === "SELLER" ? translation("orders.label") : translation("activity.label")],
     },
     !["ADMIN", "PICKER", "SELLER"].includes(mainRole) ? voidValue :  
       {
@@ -125,7 +121,7 @@ function getNav(translation, currentUser, seller = null)
     !["ADMIN", "PICKER", "SELLER"].includes(mainRole) ? voidValue :  
       {
         _tag: 'CSidebarNavItem',
-        name: translation("provisions.label"),
+        name: mainRole === "SELLER" ? "Listing" : translation("provisions.label"),
         to: '/components/provisions',
         icon: <CIcon name="cib-azure-artifacts" customClasses="c-sidebar-nav-icon"/>,
       },

@@ -8,22 +8,22 @@ export const updateSuppliersBetween = (dates, provisions, setProvisions, data, s
     return new Promise((resolve, reject) => resolve(false));
 };
 
-export const updateBetween = (dates, provisions, setProvisions, data, setData, user, seller, sellers) => {
-    const { updatedProvisions, newData } = getProvisionsWithUpdates(data, dates, sellers, provisions, user, seller);
+export const updateBetween = (dates, provisions, setProvisions, data, setData) => {
+    const { updatedProvisions, newData } = getProvisionsWithUpdates(data, dates, provisions);
     setProvisions(updatedProvisions);
     setData(newData.filter(d => !isDefined(d.treated)));
     return new Promise((resolve, reject) => resolve(false));
 };
 
-const getProvisionsWithUpdates = (data, dates, sellers, provisions, user, seller, suppliers = null) => {
+const getProvisionsWithUpdates = (data, dates, provisions, suppliers = null) => {
     let updatedProvisions = provisions;
     const { start, end } = formatUTC(dates);
     const newData = data.map(provision => {
         const isDeleted = !isDefined(provision.id);
-        if (!isDeleted && isFromSelectedSellers(provision, sellers) && isFromSelectedSuppliers(provision, suppliers) ) {
+        if (!isDeleted && isFromSelectedSuppliers(provision, suppliers) ) {
             const provisionDate = new Date(provision.provisionDate);
             const provisionToEdit = {...provision, goods : getFormattedGoods(provision)};
-            if (provisionDate >= start && provisionDate <= end && hasAccess(provisionToEdit, user, seller))   // && status.findIndex(s => s.value === provision.status) !== -1
+            if (provisionDate >= start && provisionDate <= end)
                 updatedProvisions = getUpdatedProvisions(provisionToEdit, updatedProvisions);
         } else {
             updatedProvisions = [...updatedProvisions].filter(p => p['@id'] !== provision['@id']);
@@ -32,6 +32,24 @@ const getProvisionsWithUpdates = (data, dates, sellers, provisions, user, seller
     });
     return { updatedProvisions, newData };
 };
+
+// const getProvisionsWithUpdates = (data, dates, sellers, provisions, user, seller, suppliers = null) => {
+//     let updatedProvisions = provisions;
+//     const { start, end } = formatUTC(dates);
+//     const newData = data.map(provision => {
+//         const isDeleted = !isDefined(provision.id);
+//         if (!isDeleted && isFromSelectedSellers(provision, sellers) && isFromSelectedSuppliers(provision, suppliers) ) {
+//             const provisionDate = new Date(provision.provisionDate);
+//             const provisionToEdit = {...provision, goods : getFormattedGoods(provision)};
+//             if (provisionDate >= start && provisionDate <= end && hasAccess(provisionToEdit, user, seller))   // && status.findIndex(s => s.value === provision.status) !== -1
+//                 updatedProvisions = getUpdatedProvisions(provisionToEdit, updatedProvisions);
+//         } else {
+//             updatedProvisions = [...updatedProvisions].filter(p => p['@id'] !== provision['@id']);
+//         }
+//         return {...provision, treated: true};
+//     });
+//     return { updatedProvisions, newData };
+// };
 
 const getUpdatedProvisions = (newProvision, updatedProvisions) => {
     const index = updatedProvisions.findIndex(p => p.id === newProvision.id);

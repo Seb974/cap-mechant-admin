@@ -17,9 +17,9 @@ const WidgetsDropdown = ({ sales, interval }) => {
 
   useEffect(() => getPeriod(), []);
 
-  const getOrdersNumber = () => period.map(d => sales.reduce((sum, s) => sum += isSameDate(d, new Date(s.deliveryDate)) ? 1 : 0, 0));
+  const getOrdersNumber = () => period.map(d => sales.reduce((sum, s) => sum += isSameDate(d, new Date(s.provisionDate)) ? 1 : 0, 0));
 
-  const getClientsNumber = () => period.map(d => sales.reduce((unique, s) => isSameDate(d, new Date(s.deliveryDate)) && !unique.includes(s.email) ? [...unique, s.email] : unique, []).length);
+  const getClientsNumber = () => period.map(d => sales.reduce((unique, s) => isDefined(s.user) && isSameDate(d, new Date(s.provisionDate)) && !unique.includes(s.user.id) ? [...unique, s.user.id] : unique, []).length);
 
   const getLastElement = (elements, precision) => {
       return (isDefinedAndNotVoid(elements) ? elements.slice(-1)[0] : 0).toFixed(precision);
@@ -40,8 +40,8 @@ const getProductCount = () => {
   return period.map(d => {
         let products = []; 
         sales.map(s => {
-              if (isSameDate(d, new Date(s.deliveryDate))) {
-                  s.items.map(i => {
+              if (isSameDate(d, new Date(s.provisionDate))) {
+                  s.goods.map(i => {
                     products = [...products, i.product.id];
                 });
               }
@@ -55,9 +55,7 @@ const getProductCount = () => {
       <CCol sm="6" lg="4">
         <CWidgetDropdown
           color="gradient-info"
-          header={ 
-              getLastElement(getOrdersNumber(), 0) 
-          }
+          header={ getLastElement(getOrdersNumber(), 0) }
           text="Commandes"
           footerSlot={
               <ChartLineSimple

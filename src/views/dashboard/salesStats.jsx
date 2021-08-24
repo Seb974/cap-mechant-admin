@@ -9,13 +9,14 @@ import { updateStatusBetween } from 'src/data/dataProvider/eventHandlers/orderEv
 import MercureContext from 'src/contexts/MercureContext';
 import ProvisionActions from 'src/services/ProvisionActions';
 import Select from 'src/components/forms/Select';
+import { updateBetween } from 'src/data/dataProvider/eventHandlers/provisionEvents';
 
 const SalesStats = () => {
 
     const status = getActiveStatus();
     const { products } = useContext(ProductsContext);
     const { currentUser, supervisor, seller } = useContext(AuthContext);
-    const { updatedOrders, setUpdatedOrders } = useContext(MercureContext);
+    const { updatedProvisions, setUpdatedProvisions } = useContext(MercureContext);
     const [mercureOpering, setMercureOpering] = useState(false);
     const [sales, setSales] = useState([]);
     const [dates, setDates] = useState({start: getDateFrom(new Date(), -30), end: new Date() });
@@ -25,12 +26,12 @@ const SalesStats = () => {
     const [productLimit, setProductLimit] = useState(10);
 
     useEffect(() => {
-        if (isDefinedAndNotVoid(updatedOrders) && !mercureOpering) {
+        if (isDefinedAndNotVoid(updatedProvisions) && !mercureOpering) {
             setMercureOpering(true);
-            updateStatusBetween(updatedOrders, getUTCDates(), status, sales, setSales, currentUser, supervisor, setUpdatedOrders)
+            updateBetween(getUTCDates(), sales, setSales, updatedProvisions, setUpdatedProvisions)
                 .then(response => setMercureOpering(response));
         }
-    }, [updatedOrders]);
+    }, [updatedProvisions]);
 
     useEffect(() => fetchSales(), [dates]);
 
@@ -44,7 +45,7 @@ const SalesStats = () => {
     const fetchSales = () => {
         ProvisionActions
             .findBetween(getUTCDates(), [{ value: seller['@id'], label: seller.name }])
-            .then(response => setSales(response.filter(p => isDefinedAndNotVoid(p.goods) && p.status === "RECEIVED")));
+            .then(response => setSales(response.filter(p => isDefinedAndNotVoid(p.goods) )));       // && p.status === "RECEIVED"
     };
 
     const handleDateChange = datetime => {
@@ -85,7 +86,7 @@ const SalesStats = () => {
             sales.map(s => {
                 if (supplier.id === s.supplier.id) {
                     totalOrdered += s.goods.reduce((sum, i) => sum += i.quantity, 0);
-                    totalDelivered += s.goods.reduce((sum, i) => sum += i.received, 0);
+                    totalDelivered += s.goods.reduce((sum, i) => sum += isDefined(i.received) ? i.received : i.quantity, 0);
                 }
             })
             return {...supplier, ordered: totalOrdered, delivered: totalDelivered, failed: totalOrdered - totalDelivered};
@@ -204,8 +205,8 @@ const SalesStats = () => {
                                     <br />
                                     <strong className="h4">
                                         { !isDefined(supervisor) ?
-                                            supplierSales.reduce((sum, b) => sum += b.ordered, 0) > 0 ?
-                                                (supplierSales.reduce((sum, b) => sum += b.failed, 0) * 100 / supplierSales.reduce((sum, b) => sum += b.ordered, 0)).toFixed(2)+ '%' :
+                                            supplierSales.reduce((sum, b) => sum += isDefined(b.ordered) ? b.ordered : 0, 0) > 0 ?
+                                                (supplierSales.reduce((sum, b) => sum += b.failed, 0) * 100 / supplierSales.reduce((sum, b) => sum += isDefined(b.ordered) ? b.ordered : 0, 0)).toFixed(2)+ '%' :
                                                 0
                                             :
                                             sales.length
