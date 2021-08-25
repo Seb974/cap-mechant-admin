@@ -12,13 +12,15 @@ import CIcon from '@coreui/icons-react';
 import { updateStatusBetween } from 'src/data/dataProvider/eventHandlers/orderEvents';
 import MercureContext from 'src/contexts/MercureContext';
 import Select from 'src/components/forms/Select';
+import { updateBetween } from 'src/data/dataProvider/eventHandlers/provisionEvents';
+import ProvisionActions from 'src/services/ProvisionActions';
 
 const StockStats = () => {
 
     const status = getActiveStatus();
     const { products } = useContext(ProductsContext);
     const { currentUser, supervisor, seller } = useContext(AuthContext);
-    const { updatedOrders, setUpdatedOrders } = useContext(MercureContext);
+    const { updatedProvisions, setUpdatedProvisions } = useContext(MercureContext);
     const [mercureOpering, setMercureOpering] = useState(false);
     const [sales, setSales] = useState([]);
     const [dates, setDates] = useState({start: new Date(), end: new Date() });
@@ -27,12 +29,12 @@ const StockStats = () => {
     const [limit, setLimit] = useState(10);
 
     useEffect(() => {
-        if (isDefinedAndNotVoid(updatedOrders) && !mercureOpering) {
+        if (isDefinedAndNotVoid(updatedProvisions) && !mercureOpering) {
             setMercureOpering(true);
-            updateStatusBetween(updatedOrders, getUTCDates(dates), status, sales, setSales, currentUser, supervisor, setUpdatedOrders)
+            updateBetween(getUTCDates(), sales, setSales, updatedProvisions, setUpdatedProvisions)
                 .then(response => setMercureOpering(response));
         }
-    }, [updatedOrders]);
+    }, [updatedProvisions]);
 
     useEffect(() => fetchSales(), [dates]);
 
@@ -41,9 +43,9 @@ const StockStats = () => {
     useEffect(() => setBreaks(getBreaks()), [stocks]);
 
     const fetchSales = () => {
-        OrderActions
-            .findStatusBetween(getUTCDates(dates), status, currentUser)
-            .then(response => setSales(response.filter(o => isDefinedAndNotVoid(o.items))));
+        ProvisionActions
+            .findBetween(getUTCDates(), [{ value: seller['@id'], label: seller.name }])
+            .then(response => setSales(response.filter(p => isDefinedAndNotVoid(p.goods) )));       // && p.status === "RECEIVED"
     };
 
     const handleDateChange = datetime => {
@@ -53,17 +55,6 @@ const StockStats = () => {
             setDates({start: newStart, end: newEnd});
         }
     };
-
-    // const getDateName = () => {
-    //     const { end } = dates;
-    //     const { start } = getUTCDates();
-    //     return  isSameDate(new Date(), start) && isSameDate(new Date(), end) ? "Aujourd'hui" :
-    //             isSameDate(new Date(), end) ? "Du " + getFormattedDate(start) + " à aujourd'hui" :
-    //             isSameDate(new Date(), start) ? "D'aujourd'hui au " + getFormattedDate(end) :
-    //             "Du " + getFormattedDate(start) + " au " + getFormattedDate(end);
-    // };
-
-    // const getFormattedDate = date => date.toLocaleDateString('fr-FR', { timeZone: 'UTC'});
 
     const getUTCDates = () => {
         const UTCStart = new Date(dates.start.getFullYear(), dates.start.getMonth(), dates.start.getDate(), 4, 0, 0);
@@ -80,52 +71,42 @@ const StockStats = () => {
     };
 
     const getStock = (product, stocks) => {
-        if (isDefined(product.stock))
+        // if (isDefined(product.stock))
             stocks = [...stocks, {...product.stock, name: product.name, unit: product.unit }];
-        else if (isDefinedAndNotVoid(product.variations)) {
-            product.variations.map(variation => {
-                if (isDefinedAndNotVoid(variation.sizes)) {
-                    variation.sizes.map(size => {
-                        stocks = [...stocks, {...size.stock, name: getProductName(product, variation, size), unit: product.unit }];
-                    });
-                }
-            });
-        }
+        // else if (isDefinedAndNotVoid(product.variations)) {
+        //     product.variations.map(variation => {
+        //         if (isDefinedAndNotVoid(variation.sizes)) {
+        //             variation.sizes.map(size => {
+        //                 stocks = [...stocks, {...size.stock, name: getProductName(product, variation, size), unit: product.unit }];
+        //             });
+        //         }
+        //     });
+        // }
         return stocks;
     };
 
-    const getProductName = (product, variation, size) => {
-        const variationName = exists(variation, variation.color) ? " - " + variation.color : "";
-        const sizeName = exists(size, size.name) ? " " + size.name : "";
-        return product.name + variationName + sizeName;
-    };
+    // const getProductName = (product, variation, size) => {
+    //     const variationName = exists(variation, variation.color) ? " - " + variation.color : "";
+    //     const sizeName = exists(size, size.name) ? " " + size.name : "";
+    //     return product.name + variationName + sizeName;
+    // };
 
-    const exists = (entity, entityName) => {
-        return isDefined(entity) && isDefined(entityName) && entityName.length > 0 && entityName !== " ";
-    };
+    // const exists = (entity, entityName) => {
+    //     return isDefined(entity) && isDefined(entityName) && entityName.length > 0 && entityName !== " ";
+    // };
 
     const getBreaks = () => {
-        const brokenStocks = stocks.map(stock => {
+        const brokenStocks = products.map(p => {
             let totalOrdered = 0;
             sales.map(s => {
-                s.items.map(i => {
-                    if (isSameProduct(stock, i) && !isDefined(i.preparedQty))
-                        totalOrdered += i.orderedQty;
+                s.goods.map(i => {
+                    if (i.product.id === p.id && !isDefined(i.received))
+                        totalOrdered += i.quantity;
                 });
             });
-            return { ...stock, ordered: totalOrdered };
+            return { ...p, ordered: totalOrdered };
         });
         return brokenStocks.filter(b => b.ordered > 0);
-    };
-
-    const isSameProduct = (stock, item) => {
-        let isSameProduct = false;
-        if (isDefined(item.size) && parseInt(item.size.stock.id) === parseInt(stock.id)) {
-            isSameProduct = true;
-        } else {
-            isSameProduct = isDefined(item.product.stock) && parseInt(item.product.stock.id) === parseInt(stock.id);
-        }
-        return isSameProduct;
     };
 
     const getColor = item => {
@@ -138,10 +119,12 @@ const StockStats = () => {
     const getConsumers = item => {
         let consumers = [];
         sales.map(s => {
-            s.items.map(i => {
-                if (item.id === i.product.stock.id)
-                    consumers = [...consumers, { user: s.user}];
-            });
+            if (isDefined(s.user)) {
+                s.goods.map(i => {
+                    if (item.id === i.product.id)
+                        consumers = [...consumers, { user: s.user}];
+                });
+            }
         });
         return [...new Set(consumers.map(c => c.user.id))].length;
     };

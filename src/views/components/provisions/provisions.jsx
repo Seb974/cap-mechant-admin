@@ -21,7 +21,7 @@ import 'src/assets/css/form.css';
 const Provisions = (props) => {
 
     const itemsPerPage = 30;
-    const fields = ['Vendeur', 'Fournisseur', 'Date', 'Total', ' '];
+    const fields = ['Client', 'Fournisseur', 'Date', 'Total', ' '];
     const { currentUser, seller } = useContext(AuthContext);
     const [provisions, setProvisions] = useState([]);
     const [suppliers, setSuppliers] = useState([]);
@@ -92,7 +92,7 @@ const Provisions = (props) => {
         SupplierActions
             .findAll()
             .then(response => {
-                const externSuppliers = response.filter(s => !s.isIntern);
+                const externSuppliers = response;       // .filter(s => !s.isIntern)
                 setSuppliers(externSuppliers);
             });
     };
@@ -171,11 +171,12 @@ const Provisions = (props) => {
     };
 
     const getCsvContent = () => {
-        const header = ['Index', 'Fournisseur', 'Date liv.', 'Produit', 'Qte comm.', 'Unite', 'Qte reçue', 'Unite', 'Statut', 'Mode d\'envoi', 'Adresse'].join(',');
+        const header = ['Index', 'Fournisseur', 'Client', 'Date liv.', 'Produit', 'Qte comm.', 'Unite', 'Qte reçue', 'Unite', 'Statut', 'Mode d\'envoi', 'Adresse'].join(',');
         const data = provisions.map((provision, index) => 
             provision.goods.map(good => [
                 index + 1,
                 provision.supplier.name,
+                isDefined(provision.user) ? provision.user.name : '-',
                 (new Date(provision.provisionDate)).toLocaleDateString('fr-FR', { timeZone: 'UTC'}),
                 good.product.name,
                 isDefined(good.quantity) ? good.quantity.toFixed(2) : "-",
@@ -272,16 +273,16 @@ const Provisions = (props) => {
                                 }
                                 <CDataTable
                                     items={ provisions }
-                                    fields={ isAdmin ? fields : fields.filter(f => f !== "Vendeur" && f !== 'Total') }
+                                    fields={ isAdmin ? fields : fields.filter(f => f !== 'Total') }     // f !== "Vendeur" &&
                                     bordered
                                     itemsPerPage={ itemsPerPage }
                                     pagination
                                     hover
                                     scopedSlots = {{
-                                        'Vendeur':
+                                        'Client':
                                             item => <td>
                                                         <Link to="#" onClick={ e => { toggleDetails(item.id, e) }} >
-                                                            { item.seller.name }
+                                                            { isDefined(item.user) ? item.user.name : '-' }
                                                             <br/>
                                                         </Link>
                                                     </td>
@@ -321,7 +322,7 @@ const Provisions = (props) => {
                                             item => <CCollapse show={details.includes(item.id)}>
                                                         <CDataTable
                                                             items={ item.goods }
-                                                            fields={ isAdmin ? ['Produit', 'Commandé', 'Reçu', 'Prix U','Sous-total'] : ['Produit', 'Commandé', 'Reçu'] }
+                                                            fields={  ['Produit', 'Stock', 'Commandé', 'Reçu'] }     // isAdmin ? ['Produit', 'Commandé', 'Reçu', 'Prix U','Sous-total'] :
                                                             bordered
                                                             itemsPerPage={ itemsPerPage }
                                                             pagination
@@ -330,17 +331,20 @@ const Provisions = (props) => {
                                                                 'Produit':
                                                                     item => <td>{ getProductName(item.product, item.variation, item.size) }</td>
                                                                 ,
+                                                                'Stock':
+                                                                    item => <td>{ isDefined(item.stock) ? item.stock.toFixed(2) + " " + item.unit : "-" }</td>
+                                                                ,
                                                                 'Commandé':
                                                                     item => <td>{ item.quantity.toFixed(2) + " " + item.unit }</td>
                                                                 ,
                                                                 'Reçu':
                                                                     item => <td>{ isDefined(item.received) ? item.received.toFixed(2) + " " + item.unit : "-" }</td>        //  item.received.toFixed(2) + " " + item.unit item.received + " U :" + (typeof item.received)
                                                                 ,
-                                                                'Prix U':
-                                                                    item => <td>{ isDefined(item.price) ? item.price.toFixed(2) + " €" : "-" }</td>     // item.price.toFixed(2) + " €"  item.price + " € :" + (typeof item.price)
-                                                                ,
-                                                                'Sous-total':
-                                                                    item => <td>{ isDefined(item.price) && isDefined(item.received) ? (item.received * item.price).toFixed(2) + " €" : "-" }</td>
+                                                                // 'Prix U':
+                                                                //     item => <td>{ isDefined(item.price) ? item.price.toFixed(2) + " €" : "-" }</td>     // item.price.toFixed(2) + " €"  item.price + " € :" + (typeof item.price)
+                                                                // ,
+                                                                // 'Sous-total':
+                                                                //     item => <td>{ isDefined(item.price) && isDefined(item.received) ? (item.received * item.price).toFixed(2) + " €" : "-" }</td>
                                                             }}
                                                         />
                                                     </CCollapse>

@@ -16,9 +16,9 @@ const Supplier = ({ match, history }) => {
     const [isAdmin, setIsAdmin] = useState(false);
     const [editing, setEditing] = useState(false);
     const { currentUser } = useContext(AuthContext);
-    const [supplier, setSupplier] = useState({ name: "", seller: null, email: "", phone: "", isIntern: false, vifCode: "" });
+    const [supplier, setSupplier] = useState({ name: "", seller: null, emails: [], phone: "", isIntern: false, vifCode: "" });
     const [sellers, setSellers] = useState([]);
-    const [errors, setErrors] = useState({ name: "", seller: "", email: "", phone: "", isIntern: "", vifCode: "" });
+    const [errors, setErrors] = useState({ name: "", seller: "", emails: "", phone: "", isIntern: "", vifCode: "" });
 
     useEffect(() => {
         fetchSellers();
@@ -68,7 +68,7 @@ const Supplier = ({ match, history }) => {
         const formattedSupplier = {...supplier, seller: supplier.seller['@id'], vifCode: !supplier.isIntern ? null : supplier.vifCode};
         const request = !editing ? SupplierActions.create(formattedSupplier) : SupplierActions.update(id, formattedSupplier);
         request.then(response => {
-                    setErrors({ name: "", seller: "", email: "", phone: "", isIntern: "", vifCode: "" });
+                    setErrors({ name: "", seller: "", emails: "", phone: "", isIntern: "", vifCode: "" });
                     //TODO : Flash notification de succès
                     history.replace("/components/suppliers");
                 })
@@ -134,16 +134,16 @@ const Supplier = ({ match, history }) => {
                             <CRow>
                                 <CCol xs="12" sm="6">
                                     <CFormGroup>
-                                        <CLabel htmlFor="email">Email</CLabel>
+                                        <CLabel htmlFor="emails">Emails</CLabel>
                                         <CInput
-                                            id="email"
-                                            name="email"
-                                            value={ supplier.email }
+                                            id="emails"
+                                            name="emails"
+                                            value={ isDefined(supplier.emails) ? supplier.emails.join(', ') : "" }
                                             onChange={ handleChange }
-                                            placeholder="Email du fournisseur"
-                                            invalid={ errors.email.length > 0 } 
+                                            placeholder="Emails du fournisseur"
+                                            invalid={ errors.emails.length > 0 } 
                                         />
-                                        <CInvalidFeedback>{ errors.email }</CInvalidFeedback>
+                                        <CInvalidFeedback>{ errors.emails }</CInvalidFeedback>
                                     </CFormGroup>
                                 </CCol>
                                 <CCol xs="12" sm="6">

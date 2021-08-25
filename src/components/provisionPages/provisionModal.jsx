@@ -41,13 +41,15 @@ const ProvisionModal = ({ item, provisions, setProvisions }) => {
             seller: receivedProvision.seller['@id'], 
             supplier: receivedProvision.supplier['@id'],
             metas: receivedProvision.metas['@id'],
+            user: receivedProvision.user['@id'],
             goods: receivedProvision.goods.map(g => ({
                 ...g,
                 product: g.product['@id'],
                 variation: isDefined(g.variation) ? g.variation['@id'] : null,
                 size: isDefined(g.size) ? g.size['@id'] : null,
                 price: getFloat(g.price),
-                received: getFloat(g.received)
+                received: getFloat(g.received),
+                stock: getFloat(g.stock)
             }))
         };
     };

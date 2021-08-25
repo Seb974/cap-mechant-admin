@@ -42,34 +42,34 @@ export const getShop = platform => {
     return { id: -id, coordinates: position, name, address, zipcode, city };
 };
 
-export const getOrderToWrite = (order, user, informations, productCart, date, objectDiscount, selectedCatalog, condition, settings) => {
+export const getOrderToWrite = (order, user, informations, productCart, date) => {
     return {
         ...order,
         user: isDefined(user) ? user['@id'] : null,
         name: isDefined(user) ? user.name : null,
-        email: isDefined(user) ? user.email : null,
+        emails: isDefined(user) ? [user.email] : [],
         deliveryDate: date,
         metas: informations,
-        catalog: selectedCatalog['@id'],
-        appliedCondition: isDefined(condition) ? condition['@id'] : null,
-        promotion: isDefined(objectDiscount) ? objectDiscount['@id'] : null,
+        // catalog: selectedCatalog['@id'],
+        // appliedCondition: isDefined(condition) ? condition['@id'] : null,
+        // promotion: isDefined(objectDiscount) ? objectDiscount['@id'] : null,
         items: productCart.map(item => ({
             ...item, 
             product: item.product['@id'],
-            variation: isDefined(item.variation) ? item.variation['@id'] : null,
-            size: isDefined(item.size) ? item.size['@id'] : null,
+            // variation: isDefined(item.variation) ? item.variation['@id'] : null,
+            // size: isDefined(item.size) ? item.size['@id'] : null,
             orderedQty: getFloat(item.orderedQty),
-            preparedQty: isDefined(item.preparedQty) ? !isNaN(getFloat(item.preparedQty)) ? getFloat(item.preparedQty) : null : null,
-            deliveredQty: isDefined(item.deliveredQty) ? !isNaN(getFloat(item.deliveredQty)) ?getFloat(item.deliveredQty) : null : null,
-            price: getFloat(item.price),
+            // preparedQty: isDefined(item.preparedQty) ? !isNaN(getFloat(item.preparedQty)) ? getFloat(item.preparedQty) : null : null,
+            // deliveredQty: isDefined(item.deliveredQty) ? !isNaN(getFloat(item.deliveredQty)) ?getFloat(item.deliveredQty) : null : null,
+            // price: getFloat(item.price),
             unit: item.unit,
-            taxRate: item.product.tax.catalogTaxes.find(catalogTax => catalogTax.catalog.id === selectedCatalog.id).percent,   // !settings.subjectToTaxes ? 0 : 
-            isAdjourned: false,
+            // taxRate: item.product.tax.catalogTaxes.find(catalogTax => catalogTax.catalog.id === selectedCatalog.id).percent,   // !settings.subjectToTaxes ? 0 : 
+            // isAdjourned: false,
             isPrepared: false
         })),
-        isRemains: false,
+        // isRemains: false,
         status: !isDefined(order.status) ? "WAITING" : order.status,
-        packages: !isDefinedAndNotVoid(order.packages) ? [] : order.packages.map(p => ({...p, container: p.container['@id']})),
+        // packages: !isDefinedAndNotVoid(order.packages) ? [] : order.packages.map(p => ({...p, container: p.container['@id']})),
     };
 };
 

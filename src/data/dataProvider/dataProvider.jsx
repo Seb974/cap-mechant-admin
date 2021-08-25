@@ -4,17 +4,17 @@ import AuthContext from '../../contexts/AuthContext';
 import AuthActions from '../../services/AuthActions';
 import ProductActions from 'src/services/ProductActions';
 import DeliveryContext from 'src/contexts/DeliveryContext';
-import ContainerActions from 'src/services/ContainerActions';
+// import ContainerActions from 'src/services/ContainerActions';
 import CatalogActions from 'src/services/CatalogActions';
 import CategoryActions from 'src/services/CategoryActions';
-import RelaypointActions from 'src/services/RelaypointActions';
+// import RelaypointActions from 'src/services/RelaypointActions';
 import ContainerContext from 'src/contexts/ContainerContext';
-import Roles from 'src/config/Roles';
+// import Roles from 'src/config/Roles';
 import { isDefined, isDefinedAndNotVoid } from 'src/helpers/utils';
 import SellerActions from 'src/services/SellerActions';
 import PlatformContext from 'src/contexts/PlatformContext';
 import PlatformActions from 'src/services/PlatformActions';
-import SupervisorActions from 'src/services/SupervisorActions';
+// import SupervisorActions from 'src/services/SupervisorActions';
 import Mercure from 'src/mercure/Mercure';
 import CatalogContext from 'src/contexts/CatalogContext';
 
@@ -43,18 +43,22 @@ const DataProvider = ({ children }) => {
 
     useEffect(() => {
         AuthActions.setErrorHandler(setCurrentUser, setIsAuthenticated);
-        AuthActions.getGeolocation()
-                   .then(response => setCountry(response));
+        // AuthActions.getGeolocation()
+        //            .then(response => setCountry(response));
         PlatformActions.find()
                        .then(response => setPlatform(response));
-        ProductActions.findAll()
-                      .then(response => setProducts(response));
-        ContainerActions.findAll()
-                        .then(response => setContainers(response));
+
+        // if (!isDefinedAndNotVoid(products)) {
+            ProductActions.findAll()
+                          .then(response => setProducts(response));
+        // }
+
+        // ContainerActions.findAll()
+        //                 .then(response => setContainers(response));
         CatalogActions.findAll()
                       .then(response => setCatalogs(response));
-        RelaypointActions.findAll()
-                         .then(response => setRelaypoints(response));
+        // RelaypointActions.findAll()
+        //                  .then(response => setRelaypoints(response));
         CategoryActions.findAll()
                        .then(response => setCategories(response));
     },[]);
@@ -63,8 +67,8 @@ const DataProvider = ({ children }) => {
         setCurrentUser(AuthActions.getCurrentUser());
         AuthActions.getUserSettings()
                    .then(response => setSettings(response));
-        ProductActions.findAll()
-                      .then(response => setProducts(response));
+        // ProductActions.findAll()
+        //               .then(response => setProducts(response));
     }, [isAuthenticated]);
 
     useEffect(() => {
@@ -73,10 +77,10 @@ const DataProvider = ({ children }) => {
                 .findAll()
                 .then(response => setSeller(response[0]));
         // else if (Roles.isSupervisor(currentUser))
-        if (Roles.isSupervisor(currentUser))
-            SupervisorActions
-                .getSupervisor(currentUser)
-                .then(response => setSupervisor(response));
+        // if (Roles.isSupervisor(currentUser))
+        //     SupervisorActions
+        //         .getSupervisor(currentUser)
+        //         .then(response => setSupervisor(response));
     },[currentUser]);
 
     useEffect(() => {
