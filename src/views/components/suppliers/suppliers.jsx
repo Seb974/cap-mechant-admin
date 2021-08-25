@@ -51,16 +51,25 @@ const Suppliers = (props) => {
         <CCol xs="12" lg="12">
           <CCard>
             <CCardHeader>
-                Liste des fournisseurs
-                <CCol col="6" sm="4" md="2" className="ml-auto">
-                    <CButton block variant="outline" color="success" onClick={ handleImport }>
-                      { importLoading ? 
-                          <Spinner as="span" animation="border" size="sm"role="status"/>
-                        :
-                        <span>IMPORTER</span>
-                      }
-                    </CButton>
-                </CCol>
+                <CRow>
+                      <CCol xs="12" md="6">
+                          Liste des fournisseurs
+                      </CCol>
+                      <CCol xs="6" md="3">
+                          <Link role="button" to="/components/suppliers/new" block variant="outline" color="warning">
+                              <CButton block variant="outline" color="warning">CRÉER</CButton>
+                          </Link>
+                      </CCol>
+                      <CCol xs="6" md="3">
+                          <CButton block variant="outline" color="success" onClick={ handleImport }>
+                            { importLoading ? 
+                                <Spinner as="span" animation="border" size="sm"role="status"/>
+                              :
+                              <span>IMPORTER</span>
+                            }
+                          </CButton>
+                      </CCol>
+                </CRow>
             </CCardHeader>
             <CCardBody>
             <CDataTable
