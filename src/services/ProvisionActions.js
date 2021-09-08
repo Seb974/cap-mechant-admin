@@ -72,7 +72,7 @@ function getSuppliersList(suppliers) {
     let suppliersList = "";
     suppliers.map((s, i) => {
         const separator = i < suppliers.length - 1 ? "&" : "";
-        suppliersList += "supplier[]=" + s.value + separator;
+        suppliersList += "supplier[]=" + s['@id'] + separator;
     });
     return suppliersList;
 }

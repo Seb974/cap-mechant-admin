@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import Flatpickr from 'react-flatpickr';
 import { French } from "flatpickr/dist/l10n/fr.js";
-import { Link } from 'react-router-dom';
+import { Link, Redirect } from 'react-router-dom';
 import ProvisionActions from 'src/services/ProvisionActions';
 import { CButton, CCard, CCardBody, CCardFooter, CCardHeader, CCol, CForm, CFormGroup, CInput, CInputGroup, CInputGroupPrepend, CInputGroupText, CInvalidFeedback, CLabel, CRow, CSwitch } from '@coreui/react';
 import CIcon from '@coreui/icons-react';
@@ -158,7 +158,6 @@ const Provision = ({ match, history }) => {
 
     const handleSubmit = () => {
         const provisionToWrite = getProvisionToWrite();
-        // console.log(provisionToWrite);
         const request = !editing ? ProvisionActions.create(provisionToWrite) : ProvisionActions.patch(id, provisionToWrite);
         request.then(response => {
             setErrors(defaultErrors);
@@ -180,11 +179,11 @@ const Provision = ({ match, history }) => {
 
     const getProvisionToWrite = () => {
         const { seller, supplier, provisionDate, status, user } = provision;
-        const { id, emails, ...othersVariables } = supplier;
+        const { id, emails, phone, ...othersVariables } = supplier;
         return {
             ...provision, 
             seller: seller['@id'],
-            supplier: {id, emails: emails.split(',').map(email => email.trim())},
+            supplier: {id, phone, emails: emails.split(',').map(email => email.trim())},
             provisionDate: new Date(provisionDate),
             sendingMode,
             user: user['@id'],
@@ -202,7 +201,7 @@ const Provision = ({ match, history }) => {
         }
     }
 
-    return !isDefined(provision) ? <></> : (
+    return !isDefinedAndNotVoid(products) ? <Redirect to="/components/provisions"/> : !isDefined(provision) ? <></> : (
         <CRow>
             <CCol xs="12" sm="12">
                 <CCard>

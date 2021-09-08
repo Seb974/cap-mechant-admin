@@ -27,6 +27,7 @@ const Supplying = (props) => {
     const [isAdmin, setIsAdmin] = useState(false);
     const [loading, setLoading] = useState(false);
     const [provisions, setProvisions] = useState([]);
+    const [visibleProvisions, setVisibleProvisions] = useState([]);
     const [availableSuppliers, setAvailableSuppliers] = useState([]);
     const [dates, setDates] = useState({start: new Date(), end: new Date() });
     const [selectAll, setSelectAll] = useState(false);
@@ -42,20 +43,20 @@ const Supplying = (props) => {
 
     useEffect(() => setIsAdmin(Roles.hasAdminPrivileges(currentUser)), []);
 
-    useEffect(() => getAvaiableSuppliers(), [provisions]);
+    useEffect(() => getAvailableSuppliers(), [provisions]);
 
-    useEffect(() => getWaitingProvisions(), [dates, selectedSupplier.id]);
+    useEffect(() => getWaitingProvisions(), [dates]);       // , selectedSupplier.id
+
+    useEffect(() => getVisibleProvisions(), [provisions, selectedSupplier]);
 
     useEffect(() => setIsAdmin(Roles.hasAdminPrivileges(currentUser)), [currentUser]);
 
     const getWaitingProvisions = () => {
         setLoading(true);
         const UTCDates = getUTCDates(dates);
-        const filter = isDefined(selectedSupplier) && parseInt(selectedSupplier.id) !== parseInt(allSuppliers.id) ? [selectedSupplier] : null; 
         ProvisionActions
-            .findNeedsPerSuppliersBetween(UTCDates, filter)
+            .findNeedsPerSuppliersBetween(UTCDates)
             .then(response => {
-                console.log(response);
                 setProvisions(response.map(data => ({...data, selected: false, emailEnabled: false})));
                 setLoading(false);
             })
@@ -65,15 +66,25 @@ const Supplying = (props) => {
             });
     };
 
-    const getAvaiableSuppliers = () => {
+    const getVisibleProvisions = () => {
+        if (!isDefined(selectedSupplier) || parseInt(selectedSupplier.id) === parseInt(allSuppliers.id))
+            setVisibleProvisions(provisions);
+        else
+            setVisibleProvisions(provisions.filter(p => parseInt(p.supplier.id) === parseInt(selectedSupplier.id)))
+    }
+
+    const getAvailableSuppliers = () => {
         let newSuppliers = [];
         provisions.map(p => {
             if (newSuppliers.find(s => s.id === p.supplier.id) === undefined)
                 newSuppliers = [...newSuppliers, p.supplier];
         });
-        setAvailableSuppliers(newSuppliers);
-        if (newSuppliers.length === 1)
-            setSelectedSupplier(newSuppliers[0]);
+
+        if (JSON.stringify(availableSuppliers.map(s => s.id)) !== JSON.stringify(newSuppliers.map(s => s.id))) {
+            setAvailableSuppliers(newSuppliers);
+            if (newSuppliers.length === 1)
+                setSelectedSupplier(newSuppliers[0]);
+        }
     };
 
     const handleDateChange = datetime => {
@@ -121,7 +132,7 @@ const Supplying = (props) => {
     };
 
     const handleSubmit = async () => {
-        const provisionsToSend = getFormattedProvisions(provisions.filter(o => o.selected));
+        const provisionsToSend = getFormattedProvisions(visibleProvisions.filter(o => o.selected));
         const sentProvisions = await sendProvisions(provisionsToSend);
         const newProvisions = provisions.map(p => {
             const updated = sentProvisions.find(provision => provision.id === p.id);
@@ -134,11 +145,11 @@ const Supplying = (props) => {
 
     const getFormattedProvisions = provisions => {
         return provisions.map(provision => {
-            const { seller, metas, supplier, user, goods, provisionDate } = provision;
+            const { seller, metas, user, goods, provisionDate } = provision;
             return {
                 ...provision,
                 seller: seller['@id'],
-                supplier: {id: supplier.id, emails: Array.isArray(supplier.emails) ? supplier.emails : supplier.emails.split(',').map(email => email.trim())},
+                supplier: {id: selectedSupplier.id, emails: Array.isArray(selectedSupplier.emails) ? selectedSupplier.emails : selectedSupplier.emails.split(',').map(email => email.trim()), phone: selectedSupplier.phone},
                 provisionDate: new Date(provisionDate),
                 user: user['@id'],
                 metas: metas['@id'],
@@ -161,10 +172,7 @@ const Supplying = (props) => {
         for (const newProvision of newProvisions) {
             const savedProvision = await  ProvisionActions
                                             .update(newProvision.id, newProvision)
-                                            .then(response => {
-                                                console.log(response.data);
-                                                return response.data;
-                                            });
+                                            .then(response => response.data);
             savedProvisions = [...savedProvisions, savedProvision];
           }
 
@@ -326,7 +334,7 @@ const Supplying = (props) => {
                             </CRow>
                             :
                             <CDataTable
-                                items={ provisions }
+                                items={ visibleProvisions }
                                 fields={ width < 576 ? ['Produit', 'Date de livraison', 'Sélection'] : (isAdmin || Roles.isPicker(currentUser)) ? fields : ['Produit', 'Date de livraison', ' ', 'Sélection'] }
                                 bordered
                                 itemsPerPage={ itemsPerPage }
