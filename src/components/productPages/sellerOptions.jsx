@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { CCol, CFormGroup, CInput, CInputGroup, CInputGroupAppend, CInputGroupText,  CLabel, CSelect, CSwitch } from '@coreui/react';
+import { CCol, CFormGroup, CInput, CInputGroup, CInputGroupAppend, CInputGroupText, CLabel, CSelect, CSwitch } from '@coreui/react';
 import AuthContext from 'src/contexts/AuthContext';
 import Roles from 'src/config/Roles';
 import TaxActions from 'src/services/TaxActions';
@@ -40,6 +40,10 @@ const SellerOptions = ({ product, setProduct, history }) => {
 
     const handleChange = ({ currentTarget }) => setProduct({...product, [currentTarget.name]: currentTarget.value});
     const handleCheckBoxes = ({ currentTarget }) => setProduct({...product, [currentTarget.name]: !product[currentTarget.name]});
+    const handleSupplierChange = ({ currentTarget }) => {
+        const newSupplier = suppliers.find(supplier => supplier.id === parseInt(currentTarget.value));
+        setProduct({...product, suppliers: [newSupplier]});
+    };
 
     const fetchTaxes = () => {
         let request = TaxActions.findAll();
@@ -72,8 +76,8 @@ const SellerOptions = ({ product, setProduct, history }) => {
             <CFormGroup row>
                 <CCol xs="12" md="4">
                     <CLabel htmlFor="select">Fournisseur</CLabel>
-                    <CSelect custom name="unit" id="unit" value={ isDefined(product.supplier) ? product.supplier.id : 0 } onChange={ handleChange }>
-                        { suppliers.map(supplier => <option key= { supplier.id } value={ supplier.id }>{ supplier.name }</option>) }
+                    <CSelect custom name="suppliers" id="suppliers" value={ isDefinedAndNotVoid(product.suppliers) ? product.suppliers[0].id : 0 } onChange={ handleSupplierChange }>
+                        { suppliers.map(supplier => <option key={ supplier.id } value={ supplier.id }>{ supplier.name }</option>) }
                     </CSelect>
                 </CCol>
                 <CCol xs="12" md="4">

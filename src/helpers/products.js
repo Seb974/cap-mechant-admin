@@ -55,7 +55,7 @@ export const getTotalContentWeight = (components) => {
     return totalContentWeight;
 };
 
-export const getProductToWrite = (product, type, categories, variations, adaptedComponents, components, seller) => {
+export const getProductToWrite = (product, type, variations, adaptedComponents, components, seller) => {
     const {image, stock, userGroups, catalogs, supplier, ...noImgProduct} = product;
     return {
         ...noImgProduct,
@@ -65,7 +65,6 @@ export const getProductToWrite = (product, type, categories, variations, adapted
         productGroup: type === "mixed" ? null : product.productGroup,
         tax: product.tax['@id'],
         seller: noImgProduct.seller['@id'],
-        categories: [product.categories['@id']],             //product.categories.map(category => categories.find(element => element.id === category.value)['@id']),
         stockManaged: type === "mixed" ? null : noImgProduct.stockManaged,
         unit: type === "mixed" ? "U" : noImgProduct.unit,
         fullDescription: type === "mixed" ? createDescription(product, components) : noImgProduct.fullDescription,
@@ -114,14 +113,13 @@ export const defineType = (product) => {
 };
 
 export const formatProduct = (product, defaultStock) => {
-    const {prices, categories, stock, variations} = product;
-    const basePrice = prices !== null && prices !== undefined && prices.length > 0 ? prices[0].amount : "";
+    const {stock, variations} = product;
     const formattedProduct = {
         ...product, 
         userGroups: isDefinedAndNotVoid(product.userGroups) ? isDefined(product.userGroups[0].label) ? product.userGroups : product.userGroups.map(group => ({value: group})) : [],
         catalogs: isDefinedAndNotVoid(product.catalogs) ? isDefined(product.catalogs[0].label) ? product.catalogs : product.catalogs.map(catalog => ({...catalog, value: catalog.id, label: catalog.name, isFixed: false})) : [],
-        categories: categories[0], //categories.map(category => ({value: category.id, label: category.name, isFixed: false})),
-        uniquePrice: isDefinedAndNotVoid(prices) ? prices.every(price => price.amount === basePrice) : true,
+        prices: [],
+        uniquePrice: true,
         stock: isDefined(stock) ? stock : isDefinedAndNotVoid(variations) ? variations[0].sizes[0].stock : defaultStock
     };
     return formattedProduct;

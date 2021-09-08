@@ -36,7 +36,10 @@ const StockStats = () => {
         }
     }, [updatedProvisions]);
 
-    useEffect(() => fetchSales(), [dates]);
+    useEffect(() => {
+        if (isDefined(seller))
+            fetchSales()
+    }, [dates, seller]);
 
     useEffect(() => setStocks(defineStocks()), [sales, products]);
 

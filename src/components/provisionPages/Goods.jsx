@@ -5,6 +5,7 @@ import Good from './Good';
 
 const Goods = ({ provision, goods, setGoods, defaultGood, editing, availableProducts }) => {
 
+    
     const handleGoodAdd = () => {
         setGoods([
             ...goods, 
@@ -13,6 +14,7 @@ const Goods = ({ provision, goods, setGoods, defaultGood, editing, availableProd
     };
 
     const handleGoodChange = good => {
+        console.log("good change");
         const filteredGoods = goods.filter(option => parseInt(option.count) !== parseInt(good.count));
         setGoods([...filteredGoods, good].sort((a, b) => (a.count > b.count) ? 1 : -1));
     };

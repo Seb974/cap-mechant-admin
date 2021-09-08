@@ -19,14 +19,14 @@ const MercureHub = ({ children }) => {
     useEffect(() => {
         closeIfExists();
         url.searchParams.append('topic', api.API_DOMAIN + '/api/products/{id}');
-        url.searchParams.append('topic', api.API_DOMAIN + '/api/stocks/{id}');
+        // url.searchParams.append('topic', api.API_DOMAIN + '/api/stocks/{id}');
         url.searchParams.append('topic', api.API_DOMAIN + '/api/provisions/{id}');
         url.searchParams.append('topic', api.API_DOMAIN + '/api/categories/{id}');
-        url.searchParams.append('topic', api.API_DOMAIN + '/api/containers/{id}');
-        url.searchParams.append('topic', api.API_DOMAIN + '/api/tourings/{id}');
+        // url.searchParams.append('topic', api.API_DOMAIN + '/api/containers/{id}');
+        // url.searchParams.append('topic', api.API_DOMAIN + '/api/tourings/{id}');
         url.searchParams.append('topic', api.API_DOMAIN + '/api/users/{id}');
         url.searchParams.append('topic', api.API_DOMAIN + '/api/users/{id}/metas');
-        url.searchParams.append('topic', api.API_DOMAIN + '/api/users/{id}/shipments');
+        // url.searchParams.append('topic', api.API_DOMAIN + '/api/users/{id}/shipments');
         setEventSource(new EventSourcePolyfill(url, { withCredentials: true }));
     }, [currentUser]);
 

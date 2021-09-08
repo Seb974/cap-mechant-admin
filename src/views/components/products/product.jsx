@@ -4,7 +4,6 @@ import ProductActions from 'src/services/ProductActions';
 import { CButton, CCard, CCardBody, CCardFooter, CCardHeader, CCol, CForm, CRow } from '@coreui/react';
 import { getFormattedVariations, getFormattedComponents, getProductToWrite, getComponentsToWrite, getVariationToWrite, formatProduct, defineType } from 'src/helpers/products';
 import CIcon from '@coreui/icons-react';
-import CategoryActions from 'src/services/CategoryActions';
 import Stock from 'src/components/productPages/stock';
 import Price from 'src/components/productPages/price';
 import Options from 'src/components/productPages/options';
@@ -21,7 +20,6 @@ const ProductPage = ({ match, history }) => {
     const { id = "new" } = match.params;
     const defaultSize = {count: 0, name: ""};
     const [editing, setEditing] = useState(false);
-    const [categories, setCategories] = useState([]);
     const [isAdmin, setIsAdmin] = useState(false);
     const { currentUser, seller } = useContext(AuthContext);
     const { products } = useContext(ProductsContext);
@@ -31,25 +29,19 @@ const ProductPage = ({ match, history }) => {
     const defaultComponent = {...defaultProduct, count: 0, quantity: ""};
     const defaultStock = {quantity: 0, alert: 0, security:0};
     const defaultVariation = {count: 0, name: "", image: null, sizes: [defaultSize]};
-    const [product, setProduct] = useState({name: "", weight:0, contentWeight:0, seller: {id: -1, name: ""}, userGroups: [], catalogs: [], image: null, supplier: null, unit: "Kg", productGroup: "J + 1", fullDescription: "", stock: defaultStock, stockManaged: false, tax: "-1", uniquePrice: true, prices: [], available: true, requireLegalAge: false, requireDeclaration: false, new: false, isMixed: false, categories: []});
+    const [product, setProduct] = useState({name: "", weight:0, contentWeight:0, seller: {id: -1, name: ""}, userGroups: [], catalogs: [], image: null, supplier: null, unit: "Kg", productGroup: "J + 1", fullDescription: "", stock: defaultStock, stockManaged: false, tax: "-1", uniquePrice: true, prices: [], available: true, requireLegalAge: false, requireDeclaration: false, new: false, isMixed: false, categories: ""});
     const [errors, setErrors] = useState({name: "", weight: "", contentWeight:"", seller: "", userGroups: "", catalogs: [], image: "", supplier: "", unit: "", productGroup: "", fullDescription: "", stock: {alert: "", security:""}, stockManaged: "", tax: "", uniquePrice: "", prices: [{name: 'BASE', price:""}, {name: 'USER_VIP', price:""}, {name: 'PRO_CHR', price:""}, {name: 'PRO_GC', price:""}, {name: 'PRO_VIP', price:""}], available: "", requireLegalAge: "", new: "", isMixed: "", categories: ""});
     const [variations, setVariations] = useState([defaultVariation]);
     const [components, setComponents] = useState([defaultComponent]);
     const [type, setType] = useState("simple");
     
     useEffect(() => {
-        fetchCategories();
         fetchProduct(id);
         setIsAdmin(Roles.hasAdminPrivileges(currentUser));
     }, []);
 
     useEffect(() => fetchProduct(id), [id]);
     useEffect(() => setIsAdmin(Roles.hasAdminPrivileges(currentUser)), [currentUser]);
-
-    useEffect(() => {
-        if (!isDefinedAndNotVoid(product.categories) && isDefinedAndNotVoid(categories))
-            setProduct({...product, categories: categories[0]});
-    }, [product, categories])
 
     const fetchProduct = id => {
         if (id !== "new") {
@@ -73,16 +65,6 @@ const ProductPage = ({ match, history }) => {
             setEditing(false);
     };
 
-    const fetchCategories = () => {
-        let request = CategoryActions.findAll()
-        request
-            .then(response => setCategories(response))
-            .catch(error => {
-                // TODO : Notification flash d'une erreur
-                history.replace("/components/products");
-            });
-    };
-
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (type === "with-variations" && JSON.stringify(variations) !== JSON.stringify([defaultVariation])) {
@@ -97,7 +79,7 @@ const ProductPage = ({ match, history }) => {
 
     const adaptProduct = (variations = [], adaptedComponents = []) => {
         const { image } = product;
-        const productToWrite = getProductToWrite(product, type, categories, variations, adaptedComponents, components, seller);
+        const productToWrite = getProductToWrite(product, type, variations, adaptedComponents, components, seller);
         if (image && !image.filePath) {
             ProductActions.createImage(product.image)
                           .then(image => writeProduct({...productToWrite, image}));
@@ -154,7 +136,6 @@ const ProductPage = ({ match, history }) => {
                         <CForm onSubmit={ handleSubmit }>
                             <Characteristics
                                 product={product}
-                                categories={categories}
                                 type={type}
                                 errors={errors}
                                 setProduct={setProduct}

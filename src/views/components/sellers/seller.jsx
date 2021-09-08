@@ -228,7 +228,7 @@ const Seller = ({ match, history }) => {
                         </CForm>
                     </CCardBody>
                     <CCardFooter>
-                        <Link to="/components/sellers" className="btn btn-link">Retour à la liste</Link>
+                        <Link to="/" className="btn btn-link">Retour à la liste</Link>
                     </CCardFooter>
                 </CCard>
             </CCol>

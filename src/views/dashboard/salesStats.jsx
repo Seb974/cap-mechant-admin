@@ -33,7 +33,10 @@ const SalesStats = () => {
         }
     }, [updatedProvisions]);
 
-    useEffect(() => fetchSales(), [dates]);
+    useEffect(() => {
+        if (isDefined(seller))
+            fetchSales()
+    }, [dates, seller]);
 
     useEffect(() => {
         const suppliersStats = getSuppliersStats();

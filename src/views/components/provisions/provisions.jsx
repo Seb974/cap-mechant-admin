@@ -15,7 +15,7 @@ import SellerActions from 'src/services/SellerActions';
 import ProvisionModal from 'src/components/provisionPages/provisionModal';
 import CIcon from '@coreui/icons-react';
 import MercureContext from 'src/contexts/MercureContext';
-import { updateSuppliersBetween } from 'src/data/dataProvider/eventHandlers/provisionEvents';
+import { updateBetween, updateSuppliersBetween } from 'src/data/dataProvider/eventHandlers/provisionEvents';
 import 'src/assets/css/form.css';
 
 const Provisions = (props) => {
@@ -64,7 +64,7 @@ const Provisions = (props) => {
     useEffect(() => {
         if (isDefinedAndNotVoid(updatedProvisions) && !mercureOpering) {
             setMercureOpering(true);
-            updateSuppliersBetween(getUTCDates(), provisions, setProvisions, updatedProvisions, setUpdatedProvisions, currentUser, seller, sellers, suppliers)
+            updateBetween(getUTCDates(), provisions, setProvisions, updatedProvisions, setUpdatedProvisions)
                 .then(response => setMercureOpering(response));
         }
     }, [updatedProvisions]);

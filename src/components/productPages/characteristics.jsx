@@ -10,7 +10,7 @@ import SellerActions from 'src/services/SellerActions';
 import AuthContext from 'src/contexts/AuthContext';
 import Roles from 'src/config/Roles';
 
-const Characteristics = ({ product, categories, type, setProduct, errors, history}) => {
+const Characteristics = ({ product, type, setProduct, errors, history}) => {
 
     const { currentUser } = useContext(AuthContext);
     const [groups, setGroups] = useState([]);
@@ -47,7 +47,6 @@ const Characteristics = ({ product, categories, type, setProduct, errors, histor
     const handleCatalogsChange = catalogs => setProduct(product => ({...product, catalogs}));
     const handleChange = ({ currentTarget }) => setProduct({...product, [currentTarget.name]: currentTarget.value});
     const handleSellerChange = ({ currentTarget }) => setProduct({...product, seller: sellers.find(seller => seller.id === parseInt(currentTarget.value))});
-    const handleCategoriesChange = ({ currentTarget }) => setProduct({...product, categories: categories.find(seller => seller['@id'] === currentTarget.value)});
 
     const fetchGroups = () => {
         GroupActions.findAll()
@@ -127,10 +126,16 @@ const Characteristics = ({ product, categories, type, setProduct, errors, histor
             }
             <CRow className="mb-3">
                 <CCol xs="12" sm={ isAdmin ? "6" : "12"}>
-                    <Select custom name="categories" id="categories" value={ isDefined(product.categories) ? product.categories['@id'] : 0 } onChange={ handleCategoriesChange }>
-                        { categories.map(c => <option key={ c.id } value={ c['@id'] }>{ c.name }</option>) }
-                    </Select>
-                    {/* <SelectMultiple name="categories" label="Catégories" value={ product.categories } error={ errors.categories } onChange={ handleCategoriesChange } data={ categories.map(category => ({value: category.id, label: category.name, isFixed: false})) }/> */}
+                    <CFormGroup>
+                        <CLabel htmlFor="sku">Catégorie</CLabel>
+                        <CInput
+                            id="categories"
+                            name="categories"
+                            value={ product.categories }
+                            onChange={ handleChange }
+                            placeholder="Categorie"
+                        />
+                    </CFormGroup>
                 </CCol>
                 { isAdmin &&
                     <CCol xs="12" sm="6">

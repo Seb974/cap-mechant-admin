@@ -196,7 +196,7 @@ function getNav(translation, currentUser, seller = null)
         _tag: 'CSidebarNavTitle',
         _children: [translation("component.label")]
       },
-    !["ADMIN", "SELLER"].includes(mainRole) ? voidValue :       // !["ADMIN"]
+    !["ADMIN"].includes(mainRole) ? voidValue :       // !["ADMIN", "SELLER"]
         {
           _tag: 'CSidebarNavItem',
           name: translation("categories.label"),

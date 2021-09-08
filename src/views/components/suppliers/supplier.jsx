@@ -16,7 +16,7 @@ const Supplier = ({ match, history }) => {
     const [isAdmin, setIsAdmin] = useState(false);
     const [editing, setEditing] = useState(false);
     const { currentUser } = useContext(AuthContext);
-    const [supplier, setSupplier] = useState({ name: "", seller: null, emails: [], phone: "", isIntern: false, vifCode: "" });
+    const [supplier, setSupplier] = useState({ name: "", seller: null, emails: "", phone: "", isIntern: false, vifCode: "" });
     const [sellers, setSellers] = useState([]);
     const [errors, setErrors] = useState({ name: "", seller: "", emails: "", phone: "", isIntern: "", vifCode: "" });
 
@@ -41,7 +41,10 @@ const Supplier = ({ match, history }) => {
         if (id !== "new") {
             setEditing(true);
             SupplierActions.find(id)
-                .then(response => setSupplier(response))
+                .then(response => {
+                    const formattedEmails = isDefinedAndNotVoid(response.emails) ? response.emails.join(', ') : "";
+                    setSupplier({...response, emails: formattedEmails});
+                })
                 .catch(error => {
                     console.log(error);
                     // TODO : Notification flash d'une erreur
@@ -65,7 +68,7 @@ const Supplier = ({ match, history }) => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        const formattedSupplier = {...supplier, seller: supplier.seller['@id'], vifCode: !supplier.isIntern ? null : supplier.vifCode};
+        const formattedSupplier = getFormattedSupplier();
         const request = !editing ? SupplierActions.create(formattedSupplier) : SupplierActions.update(id, formattedSupplier);
         request.then(response => {
                     setErrors({ name: "", seller: "", emails: "", phone: "", isIntern: "", vifCode: "" });
@@ -87,6 +90,15 @@ const Supplier = ({ match, history }) => {
                     } else 
                         console.log(error);
                });
+    };
+
+    const getFormattedSupplier = () => {
+        return {
+            ...supplier, 
+            seller: supplier.seller['@id'], 
+            vifCode: !supplier.isIntern ? null : supplier.vifCode,
+            emails: supplier.emails.length > 0 ? supplier.emails.split(',').map(email => email.trim()) : []
+        };
     }
 
     return (
@@ -138,7 +150,7 @@ const Supplier = ({ match, history }) => {
                                         <CInput
                                             id="emails"
                                             name="emails"
-                                            value={ isDefined(supplier.emails) ? supplier.emails.join(', ') : "" }
+                                            value={ supplier.emails }
                                             onChange={ handleChange }
                                             placeholder="Emails du fournisseur"
                                             invalid={ errors.emails.length > 0 } 

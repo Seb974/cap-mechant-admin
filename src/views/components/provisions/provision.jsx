@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom';
 import ProvisionActions from 'src/services/ProvisionActions';
 import { CButton, CCard, CCardBody, CCardFooter, CCardHeader, CCol, CForm, CFormGroup, CInput, CInputGroup, CInputGroupPrepend, CInputGroupText, CInvalidFeedback, CLabel, CRow, CSwitch } from '@coreui/react';
 import CIcon from '@coreui/icons-react';
-import { getFloat, isDefined, isDefinedAndNotVoid } from 'src/helpers/utils';
+import { getDateFrom, getFloat, isDefined, isDefinedAndNotVoid } from 'src/helpers/utils';
 import AuthContext from 'src/contexts/AuthContext';
 import ProductsContext from 'src/contexts/ProductsContext';
 import Roles from 'src/config/Roles';
@@ -16,14 +16,15 @@ import UserActions from 'src/services/UserActions';
 
 const Provision = ({ match, history }) => {
 
+    const today = new Date();
     const { id = "new" } = match.params;
     const [editing, setEditing] = useState(false);
     const { products } = useContext(ProductsContext);
     const { currentUser, seller } = useContext(AuthContext);
-    const [provision, setProvision] = useState({ provisionDate: new Date(), status: "ORDERED", seller });
+    const [provision, setProvision] = useState({ provisionDate: getDateFrom(today, today.getDay() === 6 ? 2 : 1), status: "ORDERED", seller });
     const defaultErrors = { provisionDate: "" };
     const [errors, setErrors] = useState(defaultErrors);
-    const [defaultGood, setDefaultGood] = useState({product: products[0], count: 0, quantity: "", received: "", stock: 0, unit: products[0].unit});
+    const [defaultGood, setDefaultGood] = useState({product: products[0], count: 0, quantity: "", received: "", stock: 0, unit: "Kg"});     //  products[0].unit
     const [goods, setGoods] = useState([defaultGood]);
     const [suppliers, setSuppliers] = useState([]);
     const [availableSuppliers, setAvailableSuppliers] = useState([]);
@@ -36,16 +37,30 @@ const Provision = ({ match, history }) => {
         setIsAdmin(Roles.hasAdminPrivileges(currentUser));
         fetchUsers();
         fetchSuppliers();
-        // fetchSellers();
         fetchProvision(id);
-        console.log(defaultGood);
     }, []);
 
     useEffect(() => fetchProvision(id), [id]);
 
     useEffect(() => {
-        if (isDefinedAndNotVoid(suppliers) && !isDefined(provision.supplier))
-            setProvision({...provision, supplier: suppliers[0]});
+        if (isDefinedAndNotVoid(products) && !isDefined(defaultGood.product)) {
+            setDefaultGood({...defaultGood, product: products[0], unit: products[0].unit})
+        }
+    }, [products]);
+
+    useEffect(() => {
+        if (isDefinedAndNotVoid(suppliers) && !isDefinedAndNotVoid(availableSuppliers) && isDefined(provision.user) ) {
+            const filteredSuppliers = suppliers.filter(s => {
+                const filtered = isDefinedAndNotVoid(s.products) && isDefinedAndNotVoid(provision.user.products) ? s.products.find(p => {
+                    return provision.user.products.includes(p);
+                }) !== undefined : false;
+                return filtered;
+            });
+            const finalSuppliers = filteredSuppliers.length > 0 ? filteredSuppliers : suppliers;
+            setAvailableSuppliers(finalSuppliers);
+            setProvision({...provision, supplier: finalSuppliers[0]});
+        }
+            // setProvision({...provision, supplier: suppliers[0]});
     }, [suppliers, provision]);
 
     useEffect(() => {
@@ -53,28 +68,16 @@ const Provision = ({ match, history }) => {
             setProvision({...provision, user: consumers[0]});
     }, [consumers, provision.user]);
 
-    useEffect(() => {
-        console.log(provision.user);
-        const filteredSuppliers = suppliers.filter(s => {
-            const filtered = isDefinedAndNotVoid(s.products) && isDefinedAndNotVoid(provision.user.products) ? s.products.find(p => {
-                return provision.user.products.includes(p);
-            }) !== undefined : false;
-            return filtered;
-        });
-        const finalSuppliers = filteredSuppliers.length > 0 ? filteredSuppliers : suppliers;
-        setAvailableSuppliers(finalSuppliers);
-        setProvision({...provision, supplier: finalSuppliers[0]})
-    }, [provision.user]);
-
     useEffect(() => getAvailableProducts(), [provision, products])
 
     const getAvailableProducts = () => {
         const usersProducts = isDefined(provision.user) && isDefinedAndNotVoid(provision.user.products) ? products.filter(p => provision.user.products.includes(p['@id'])) : products;
         const suppliersProducts = isDefined(provision.supplier) && isDefinedAndNotVoid(provision.supplier.products) ? usersProducts.filter(p => provision.supplier.products.includes(p['@id'])) : products;
         if (isDefinedAndNotVoid(suppliersProducts)) {
-            const updatedGoods = goods.map(g => ({...g, product: g.product['@id'] === defaultGood.product['@id'] ? suppliersProducts[0] : g.product}));
-            setGoods(updatedGoods);
+            // const updatedGoods = goods.map(g => ({...g, product: g.product['@id'] === defaultGood.product['@id'] ? suppliersProducts[0] : g.product}));
             setDefaultGood({...defaultGood, product: suppliersProducts[0]});
+            // if (JSON.stringify(goods) === JSON.stringify([defaultGood]))
+            //     setGoods(updatedGoods);
         }
         setAvailableProducts(suppliersProducts);
     };
@@ -97,13 +100,15 @@ const Provision = ({ match, history }) => {
                         provisionDate: new Date(response.provisionDate), 
                         status: isDefined(response.status) ? response.status : provision.status
                     });
-                    setGoods(response.goods.map((good, key) => ({
+                    const newGoods = response.goods.map((good, key) => {
+                        return {
                         ...good,
                         price: isDefined(good.price) ? good.price : "",
                         received: isDefined(good.received) ? good.received : "",
                         product: products.find(product => good.product.id === product.id),
                         count: key
-                    })));
+                    }});
+                    setGoods(newGoods);
                 })
                 .catch(error => {
                     console.log(error);
@@ -153,7 +158,7 @@ const Provision = ({ match, history }) => {
 
     const handleSubmit = () => {
         const provisionToWrite = getProvisionToWrite();
-        console.log(provisionToWrite);
+        // console.log(provisionToWrite);
         const request = !editing ? ProvisionActions.create(provisionToWrite) : ProvisionActions.patch(id, provisionToWrite);
         request.then(response => {
             setErrors(defaultErrors);
