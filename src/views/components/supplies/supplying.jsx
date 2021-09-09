@@ -14,14 +14,13 @@ import CIcon from '@coreui/icons-react';
 import ProvisionActions from 'src/services/ProvisionActions';
 import api from 'src/config/api';
 import { Button } from 'react-bootstrap';
-import { divIcon } from 'leaflet';
 
 const Supplying = (props) => {
 
     const itemsPerPage = 30;
     const autohideValue = 4000;
     const { width } = useWindowDimensions();
-    const fields = ['Produit', 'Sécurité', 'Stock', 'Besoin', 'Commande', 'Sélection'];
+    const fields = ['Site', 'Sécurité', 'Stock', 'Besoin', 'Commande', 'Sélection'];
     const { currentUser, seller } = useContext(AuthContext);
     const allSuppliers = {id: -1, name: "Tous"};
     const [isAdmin, setIsAdmin] = useState(false);
@@ -335,12 +334,12 @@ const Supplying = (props) => {
                             :
                             <CDataTable
                                 items={ visibleProvisions }
-                                fields={ width < 576 ? ['Produit', 'Date de livraison', 'Sélection'] : (isAdmin || Roles.isPicker(currentUser)) ? fields : ['Produit', 'Date de livraison', ' ', 'Sélection'] }
+                                fields={ width < 576 ? ['Site', 'Date de livraison', 'Sélection'] : (isAdmin || Roles.isPicker(currentUser)) ? fields : ['Site', 'Date de livraison', ' ', 'Sélection'] }
                                 bordered
                                 itemsPerPage={ itemsPerPage }
                                 pagination
                                 scopedSlots = {{
-                                    'Produit':
+                                    'Site':
                                         item => <Link to="#" onClick={ e => { toggleDetails(item.id, e) }} >
                                                     <td style={{width: '40%'}}>
                                                         <div className="mt-3">

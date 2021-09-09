@@ -14,19 +14,15 @@ const MercureHub = ({ children }) => {
     const { updatedOrders, setUpdatedOrders, updatedProducts, setUpdatedProducts, updatedCategories, setUpdatedCategories } = useContext(MercureContext);
     const { updatedUsers, setUpdatedUsers, updatedProvisions, setUpdatedProvisions, updatedContainers, setUpdatedContainers } = useContext(MercureContext);
     const { currentUser, eventSource, setEventSource } = useContext(AuthContext);
-    const { packages, setPackages, tourings, setTourings } = useContext(DeliveryContext);
+    const { tourings, setTourings } = useContext(DeliveryContext);
 
     useEffect(() => {
         closeIfExists();
         url.searchParams.append('topic', api.API_DOMAIN + '/api/products/{id}');
-        // url.searchParams.append('topic', api.API_DOMAIN + '/api/stocks/{id}');
         url.searchParams.append('topic', api.API_DOMAIN + '/api/provisions/{id}');
         url.searchParams.append('topic', api.API_DOMAIN + '/api/categories/{id}');
-        // url.searchParams.append('topic', api.API_DOMAIN + '/api/containers/{id}');
-        // url.searchParams.append('topic', api.API_DOMAIN + '/api/tourings/{id}');
         url.searchParams.append('topic', api.API_DOMAIN + '/api/users/{id}');
         url.searchParams.append('topic', api.API_DOMAIN + '/api/users/{id}/metas');
-        // url.searchParams.append('topic', api.API_DOMAIN + '/api/users/{id}/shipments');
         setEventSource(new EventSourcePolyfill(url, { withCredentials: true }));
     }, [currentUser]);
 
@@ -37,7 +33,6 @@ const MercureHub = ({ children }) => {
 
     eventSource.onmessage = event => {
         const data = JSON.parse(event.data);
-        console.log(data);
         if (data['@id'].includes('tourings'))
             touringEvents.update(data, tourings, setTourings);
 

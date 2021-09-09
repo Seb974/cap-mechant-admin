@@ -5,7 +5,6 @@ import userEvents from './userEvents';
 
 function dispatch(event) {
     const data = JSON.parse(event.data);
-    console.log(data);
     if (data['@id'].includes('tourings'))
         touringEvents.update(data);
 

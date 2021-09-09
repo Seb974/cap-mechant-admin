@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { Fragment, useContext, useEffect, useState } from 'react';
 import { CButton, CCardBody, CCol, CFormGroup, CInput, CInputGroup, CInputGroupAppend, CInputGroupText, CLabel, CRow } from '@coreui/react';
 import { isDefined, isDefinedAndNotVoid } from 'src/helpers/utils';
 import AuthContext from 'src/contexts/AuthContext';
@@ -18,16 +18,16 @@ const NeedDetails = ({ goods, provision, provisions, setProvisions }) => {
     };
 
     return (
-        <>
+        <div className="my-2">
             {
             !isDefinedAndNotVoid(goods) ? <></> : 
                 goods.map((item, index) => {
                     return(
-                        <CCardBody key={ item.id }>
-                            <CRow className="text-center mt-0">
+                        <CCardBody key={ item.id } className="my-0 py-0">
+                            <CRow className="text-center my-0 py-0">
                                 <CCol md="1">{""}</CCol>
                             </CRow>
-                            <CRow>
+                            <CRow className="my-0 py-0">
                                 <CCol md="1">{""}</CCol>
                                 <CCol md="10">
                                     <CRow>
@@ -89,10 +89,10 @@ const NeedDetails = ({ goods, provision, provisions, setProvisions }) => {
                         </CCardBody>
                     );
             })}
-            <CRow className="text-center mt-0">
+            <CRow className="text-center my-0 py-0">
                 <CCol md="1">{""}</CCol>
             </CRow>
-        </>
+        </div>
     );
 }
  

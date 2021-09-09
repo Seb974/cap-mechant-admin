@@ -11,41 +11,21 @@ const Good = ({ provision, good, handleChange, handleDelete, total, index, editi
 
     const [isAdmin, setIsAdmin] = useState(false);
     const { products } = useContext(ProductsContext);
-    // const [variants, setVariants] = useState([]);
     const { currentUser } = useContext(AuthContext);
 
     useEffect(() => {
         setIsAdmin(Roles.hasAdminPrivileges(currentUser));
         getUnit();
-        // if (isDefined(good.product.variations))
-        //     setVariants(good.product.variations);
     }, []);
 
     const onChange = ({ currentTarget }) => handleChange({...good, [currentTarget.id]: currentTarget.value});
 
     const onProductChange = ({ currentTarget }) => {
         const selection = products.find(product => parseInt(product.id) === parseInt(currentTarget.value));
-        // const newVariants = isDefined(selection.variations) ? selection.variations : null;
-        // const selectedVariant = isDefinedAndNotVoid(newVariants) ? newVariants[0] : null;
-        // const selectedSize = isDefined(selectedVariant) && isDefinedAndNotVoid(selectedVariant.sizes) ? selectedVariant.sizes[0] : null;
         handleChange({...good, product: selection,  unit: selection.unit});
-        // setVariants(isDefined(selection.variations) ? selection.variations : null);
     };
 
-    // const onVariantChange = ({ currentTarget }) => {
-    //     const ids = currentTarget.value.split("-");
-    //     const selectedVariant = good.product.variations.find(variation => variation.id === parseInt(ids[0]));
-    //     const selectedSize = selectedVariant.sizes.find(size => size.id === parseInt(ids[1]));
-    //     handleChange({...good, variation: selectedVariant, size: selectedSize});
-    // };
-
     const getUnit = () => onChange({currentTarget: {id: "unit", value: good.product.unit}});
-
-    // const getVariantName = (variantName, sizeName) => {
-    //     const isVariantEmpty = variantName.length === 0 || variantName.replace(" ","").length === 0;
-    //     const isSizeEmpty = sizeName.length === 0 || sizeName.replace(" ","").length === 0;
-    //     return isVariantEmpty ? sizeName : isSizeEmpty ? variantName : variantName + " - " + sizeName;
-    // };
 
     return !isDefined(good) || !isDefined(good.product) ? <></> : (
         <>
