@@ -56,7 +56,9 @@ const Supplying = (props) => {
         ProvisionActions
             .findNeedsPerSuppliersBetween(UTCDates)
             .then(response => {
-                setProvisions(response.map(data => ({...data, selected: false, emailEnabled: false})));
+                const externProvisions = response.filter(p => !p.supplier.isIntern)
+                                                 .map(p => ({...p, selected: false, emailEnabled: false}));
+                setProvisions(externProvisions);
                 setLoading(false);
             })
             .catch(error => {
@@ -75,7 +77,7 @@ const Supplying = (props) => {
     const getAvailableSuppliers = () => {
         let newSuppliers = [];
         provisions.map(p => {
-            if (newSuppliers.find(s => s.id === p.supplier.id) === undefined)
+            if (!p.supplier.isIntern && newSuppliers.find(s => s.id === p.supplier.id) === undefined)
                 newSuppliers = [...newSuppliers, p.supplier];
         });
 

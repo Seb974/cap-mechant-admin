@@ -58,9 +58,9 @@ const Provision = ({ match, history }) => {
             });
             const finalSuppliers = filteredSuppliers.length > 0 ? filteredSuppliers : suppliers;
             setAvailableSuppliers(finalSuppliers);
-            setProvision({...provision, supplier: finalSuppliers[0]});
+            if (id === "new")
+                setProvision({...provision, supplier: finalSuppliers[0]});
         }
-            // setProvision({...provision, supplier: suppliers[0]});
     }, [suppliers, provision]);
 
     useEffect(() => {
@@ -74,10 +74,7 @@ const Provision = ({ match, history }) => {
         const usersProducts = isDefined(provision.user) && isDefinedAndNotVoid(provision.user.products) ? products.filter(p => provision.user.products.includes(p['@id'])) : products;
         const suppliersProducts = isDefined(provision.supplier) && isDefinedAndNotVoid(provision.supplier.products) ? usersProducts.filter(p => provision.supplier.products.includes(p['@id'])) : products;
         if (isDefinedAndNotVoid(suppliersProducts)) {
-            // const updatedGoods = goods.map(g => ({...g, product: g.product['@id'] === defaultGood.product['@id'] ? suppliersProducts[0] : g.product}));
             setDefaultGood({...defaultGood, product: suppliersProducts[0]});
-            // if (JSON.stringify(goods) === JSON.stringify([defaultGood]))
-            //     setGoods(updatedGoods);
         }
         setAvailableProducts(suppliersProducts);
     };
@@ -126,12 +123,6 @@ const Provision = ({ match, history }) => {
                 setSuppliers(externSuppliers);
             });
     };
-
-    // const fetchSellers = () => {
-    //     SellerActions
-    //         .findAll()
-    //         .then(response => setSellers(response));
-    // };
 
     const onDateChange = datetime => {
         const newDate = new Date(datetime[0].getFullYear(), datetime[0].getMonth(), datetime[0].getDate(), 9, 0, 0);

@@ -11,7 +11,7 @@ function findAll() {
 }
 
 function findSuppliersBetween(dates, suppliers, sellers, user) {
-    const supplierList = getSuppliersList(suppliers);
+    const supplierList = getSuppliersMultipleList(suppliers);
     const sellerList = getSellersList(sellers);
     const UTCDates = formatUTC(dates);
     const dateLimits = `provisionDate[after]=${ getStringDate(UTCDates.start) }&provisionDate[before]=${ getStringDate(UTCDates.end) }`;
@@ -73,6 +73,15 @@ function getSuppliersList(suppliers) {
     suppliers.map((s, i) => {
         const separator = i < suppliers.length - 1 ? "&" : "";
         suppliersList += "supplier[]=" + s['@id'] + separator;
+    });
+    return suppliersList;
+}
+
+function getSuppliersMultipleList(suppliers) {
+    let suppliersList = "";
+    suppliers.map((s, i) => {
+        const separator = i < suppliers.length - 1 ? "&" : "";
+        suppliersList += "supplier[]=" + s.value + separator;
     });
     return suppliersList;
 }

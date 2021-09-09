@@ -59,13 +59,13 @@ function setErrorHandler(setCurrentUser, setIsAuthenticated) {
     axios.defaults.withCredentials = true
     axios.interceptors.response.use(response => response, error => {
         if (error.response !== undefined) {
-            // if (error.response.status === 401) {
-            //     logout().then(res => {
-            //         setIsAuthenticated(false);
-            //         setCurrentUser(getCurrentUser());
-            //         return ;
-            //     })
-            // }
+            if (error.response.status === 401) {
+                logout().then(res => {
+                    setIsAuthenticated(false);
+                    setCurrentUser(getCurrentUser());
+                    return ;
+                })
+            }
         } else {
             console.log(error);
         }
