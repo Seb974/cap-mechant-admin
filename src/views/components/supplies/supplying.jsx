@@ -3,7 +3,7 @@ import { CCard, CCardBody, CCardHeader, CCol, CDataTable, CRow, CButton, CFormGr
 import AuthContext from 'src/contexts/AuthContext';
 import Roles from 'src/config/Roles';
 import RangeDatePicker from 'src/components/forms/RangeDatePicker';
-import { getFloat, isDefined, isDefinedAndNotVoid } from 'src/helpers/utils';
+import { getDateFrom, getFloat, isDefined, isDefinedAndNotVoid } from 'src/helpers/utils';
 import Spinner from 'react-bootstrap/Spinner'
 import Select from 'src/components/forms/Select';
 import SimpleDatePicker from 'src/components/forms/SimpleDatePicker';
@@ -20,7 +20,8 @@ const Supplying = (props) => {
     const itemsPerPage = 30;
     const autohideValue = 4000;
     const { width } = useWindowDimensions();
-    const fields = ['Site', 'Sécurité', 'Stock', 'Besoin', 'Commande', 'Sélection'];
+    const today = getDateFrom(new Date(), 0, 4, 0);
+    const fields = ['Fournisseur', 'Site', 'Sécurité', 'Stock', 'Besoin', 'Commande', 'Sélection'];
     const { currentUser, seller } = useContext(AuthContext);
     const allSuppliers = {id: -1, name: "Tous"};
     const [isAdmin, setIsAdmin] = useState(false);
@@ -44,7 +45,7 @@ const Supplying = (props) => {
 
     useEffect(() => getAvailableSuppliers(), [provisions]);
 
-    useEffect(() => getWaitingProvisions(), [dates]);       // , selectedSupplier.id
+    useEffect(() => getWaitingProvisions(), [dates]);
 
     useEffect(() => getVisibleProvisions(), [provisions, selectedSupplier]);
 
@@ -53,8 +54,9 @@ const Supplying = (props) => {
     const getWaitingProvisions = () => {
         setLoading(true);
         const UTCDates = getUTCDates(dates);
+        // .findNeedsPerSuppliersBetween(UTCDates)
         ProvisionActions
-            .findNeedsPerSuppliersBetween(UTCDates)
+            .findNeedsPerSuppliersBetweenOrderDates(UTCDates)
             .then(response => {
                 const externProvisions = response.filter(p => !p.supplier.isIntern)
                                                  .map(p => ({...p, selected: false, emailEnabled: false}));
@@ -149,7 +151,7 @@ const Supplying = (props) => {
             const { seller, metas, user, goods, provisionDate } = provision;
             return {
                 ...provision,
-                seller: seller['@id'],
+                seller: isDefined(seller) ? seller['@id'] : '/api/sellers/1',
                 supplier: {id: selectedSupplier.id, emails: Array.isArray(selectedSupplier.emails) ? selectedSupplier.emails : selectedSupplier.emails.split(',').map(email => email.trim()), phone: selectedSupplier.phone},
                 provisionDate: new Date(provisionDate),
                 user: user['@id'],
@@ -336,28 +338,38 @@ const Supplying = (props) => {
                             :
                             <CDataTable
                                 items={ visibleProvisions }
-                                fields={ width < 576 ? ['Site', 'Date de livraison', 'Sélection'] : (isAdmin || Roles.isPicker(currentUser)) ? fields : ['Site', 'Date de livraison', ' ', 'Sélection'] }
+                                fields={ width < 576 ? ['Site', 'Date de livraison', 'Sélection'] : (isAdmin ) ? fields : ['Fournisseur', 'Site', 'Date de livraison', ' ', 'Sélection'] }      // || Roles.isPicker(currentUser)
                                 bordered
                                 itemsPerPage={ itemsPerPage }
                                 pagination
                                 scopedSlots = {{
+                                    'Fournisseur':
+                                        item => <td style={{width: '30%'}}>
+                                                    <Link to="#" onClick={ e => { toggleDetails(item.id, e) }} >
+                                                        <div className="mt-3">
+                                                            { item.supplier.name }<br/>
+                                                            <small><i>{ 'Le ' + (new Date(item.orderDate)).toLocaleDateString() + ' à ' + (new Date(item.orderDate)).toLocaleTimeString() }</i></small>
+                                                        </div>
+                                                    </Link>
+                                                </td>
+                                    ,
                                     'Site':
-                                        item => <Link to="#" onClick={ e => { toggleDetails(item.id, e) }} >
-                                                    <td style={{width: '40%'}}>
+                                        item => <td style={{width: '30%'}}>
+                                                    <Link to="#" onClick={ e => { toggleDetails(item.id, e) }} >
                                                         <div className="mt-3">
                                                             { item.user.name }<br/>
                                                             <small><i>{ 'N°' + item.id.toString().padStart(10, '0') }</i></small>
                                                         </div>
-                                                    </td>
-                                                </Link>
+                                                    </Link>
+                                                </td>
                                     ,
                                     'Date de livraison':
-                                        item => <td style={{width: '20%'}}>
-                                                    <SimpleDatePicker selectedDate={ new Date(item.provisionDate) } minDate={ new Date(item.provisionDate) } onDateChange={ datetime => handleDeliveryDateChange(datetime, item) } label=" "/>
+                                        item => <td style={{width: '15%'}}>
+                                                    <SimpleDatePicker selectedDate={ new Date(item.provisionDate) } minDate={ today < new Date(item.provisionDate) ? today : new Date(item.provisionDate) } onDateChange={ datetime => handleDeliveryDateChange(datetime, item) } label=" "/>
                                                 </td>
                                     ,
                                     ' ':
-                                        item => <td style={{width: '20%', textAlign: 'center', margin: 'auto'}}>
+                                        item => <td style={{width: '15%', textAlign: 'center', margin: 'auto'}}>
                                             <Button
                                                 className="mt-3"
                                                 variant="warning"
@@ -371,7 +383,7 @@ const Supplying = (props) => {
                                         </td>
                                     ,
                                     'Sélection':
-                                        item => <td style={{width: '20%', textAlign: 'center', margin: 'auto'}}>
+                                        item => <td style={{width: '10%', textAlign: 'center', margin: 'auto'}}>
                                                     <input
                                                         className="mt-2 mb-1 my-1"
                                                         type="checkbox"

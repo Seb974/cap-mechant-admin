@@ -45,6 +45,18 @@ function findNeedsPerSuppliersBetween(dates, suppliers = null) {
         });
 }
 
+function findNeedsPerSuppliersBetweenOrderDates(dates, suppliers = null) {
+    const status = `status[]=WAITING`;
+    const supplierList = isDefined(suppliers) ? "&" + getSuppliersList(suppliers) : "";
+    const UTCDates = formatUTC(dates);
+    const dateLimits = `orderDate[after]=${ getStringDate(UTCDates.start) }&orderDate[before]=${ getStringDate(UTCDates.end) }`;
+    return api
+        .get(`/api/provisions?${ status }&${ dateLimits }${ supplierList }`)
+        .then(response => {
+            return response.data['hydra:member'].sort((a, b) => (new Date(a.deliveryDate) < new Date(b.deliveryDate)) ? -1 : 1)
+        });
+}
+
 
 function deleteProvision(id) {
     return api.delete('/api/provisions/' + id);
@@ -110,6 +122,7 @@ export default {
     findAll,
     findBetween,
     findSuppliersBetween,
+    findNeedsPerSuppliersBetweenOrderDates,
     findNeedsPerSuppliersBetween,
     delete: deleteProvision,
     find,

@@ -11,19 +11,19 @@ import ProvisionActions from 'src/services/ProvisionActions';
 import Select from 'src/components/forms/Select';
 import { updateBetween } from 'src/data/dataProvider/eventHandlers/provisionEvents';
 
-const SalesStats = () => {
+const SalesStats = ({ originalSales }) => {
 
     const status = getActiveStatus();
     const { products } = useContext(ProductsContext);
     const { currentUser, supervisor, seller } = useContext(AuthContext);
     const { updatedProvisions, setUpdatedProvisions } = useContext(MercureContext);
     const [mercureOpering, setMercureOpering] = useState(false);
-    const [sales, setSales] = useState([]);
-    const [dates, setDates] = useState({start: getDateFrom(new Date(), -30), end: new Date() });
+    const [dates, setDates] = useState({start: getDateFrom(new Date(), -7), end: new Date() });
+    const [sales, setSales] = useState(originalSales);
     const [supplierSales, setSupplierSales] = useState([]);
     const [breaks, setBreaks] = useState([]);
-    const [supplierLimit, setSupplierLimit] = useState(10);
-    const [productLimit, setProductLimit] = useState(10);
+    const [supplierLimit, setSupplierLimit] = useState(5);
+    const [productLimit, setProductLimit] = useState(5);
 
     useEffect(() => {
         if (isDefinedAndNotVoid(updatedProvisions) && !mercureOpering) {

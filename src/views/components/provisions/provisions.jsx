@@ -70,7 +70,7 @@ const Provisions = (props) => {
     }, [updatedProvisions]);
 
     useEffect(() => {
-        if (isDefinedAndNotVoid(provisions))
+        // if (isDefinedAndNotVoid(provisions))
             setCsvContent(getCsvContent());
     },[provisions]);
 
@@ -79,6 +79,7 @@ const Provisions = (props) => {
         const UTCDates = getUTCDates(dates);
         ProvisionActions.findSuppliersBetween(UTCDates, selectedSuppliers, selectedSellers, currentUser)
                 .then(response =>{
+                    console.log(response);
                     setProvisions(response);
                     setLoading(false);
                 })
@@ -284,6 +285,7 @@ const Provisions = (props) => {
                                                         <Link to="#" onClick={ e => { toggleDetails(item.id, e) }} >
                                                             { isDefined(item.user) ? item.user.name : '-' }
                                                             <br/>
+                                                            <small><i>Commande S{ item.id.toString().padStart(10, '0') }</i></small>
                                                         </Link>
                                                     </td>
                                         ,

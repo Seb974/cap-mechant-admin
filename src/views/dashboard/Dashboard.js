@@ -12,7 +12,7 @@ const WidgetsDropdown = lazy(() => import('../widgets/WidgetsDropdown.js'));
 
 const Dashboard = () => {
 
-    const interval = 30;
+    const interval = 7;
     const widgetInterval = 7;
     const now = new Date();
     const dates = { start: getDateFrom(now, -interval, 0), end: now };
@@ -22,6 +22,7 @@ const Dashboard = () => {
     const [sales, setSales] = useState([]);
 
     useEffect(() => fetchProvisions(), []);
+    useEffect(() => fetchProvisions(), [seller]);
 
     useEffect(() => {
         if (isDefinedAndNotVoid(updatedProvisions) && !mercureOpering) {
@@ -32,9 +33,11 @@ const Dashboard = () => {
     }, [updatedProvisions]);
 
     const fetchProvisions = () => {
-        ProvisionActions
-            .findBetween(getUTCDates(), [{ value: seller['@id'], label: seller.name }])
-            .then(response => setSales(response.filter(p => isDefinedAndNotVoid(p.goods))));
+        if (isDefined(seller)) {
+            ProvisionActions
+                .findBetween(getUTCDates(), [{ value: seller['@id'], label: seller.name }])
+                .then(response => setSales(response.filter(p => isDefinedAndNotVoid(p.goods))));
+        }
     };
 
     const getUTCDates = () => {
@@ -46,7 +49,7 @@ const Dashboard = () => {
     return (
         <>
             <WidgetsDropdown sales={ sales } interval={ widgetInterval }/>
-            <SalesStats/>
+            <SalesStats originalSales={ sales }/>
             { !isDefined(supervisor) && <StockStats/> }
             {/* <StatChart style={{height: '300px', marginTop: '40px'}} sales={ sales } interval={ interval }/> */}
         </>

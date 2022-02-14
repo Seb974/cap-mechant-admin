@@ -89,6 +89,13 @@ const NeedDetails = ({ goods, provision, provisions, setProvisions }) => {
                         </CCardBody>
                     );
             })}
+
+            <CRow className="text-center my-0 py-0">
+                <CCol>
+                    <CButton color="warning" disabled={ !isAdmin && !Roles.isSeller(currentUser) } href={ "#/components/provisions/" + provision.id } className="mx-1 my-1"><i className="fas fa-pen mr-2"></i>Modifier la commande</CButton>
+                </CCol>
+            </CRow>
+
             <CRow className="text-center my-0 py-0">
                 <CCol md="1">{""}</CCol>
             </CRow>

@@ -92,7 +92,7 @@ const Suppliers = (props) => {
             </CCardHeader>
             <CCardBody>
             <CDataTable
-              items={ suppliers }
+              items={ suppliers.sort((a, b) => (a.name > b.name) ? 1 : -1) }
               fields={ isAdmin ? fields : fields.filter(f => f !== 'Vendeur' && f !== ' ') }
               bordered
               itemsPerPage={ itemsPerPage }

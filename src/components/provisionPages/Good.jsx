@@ -18,6 +18,12 @@ const Good = ({ provision, good, handleChange, handleDelete, total, index, editi
         getUnit();
     }, []);
 
+    useEffect(() => {
+        const productSupplier = availableProducts.find(a => a.id === good.product.id);
+        if (!isDefined(productSupplier))
+            handleChange({...good, product: availableProducts[0], unit: availableProducts[0].unit});
+    }, [availableProducts]);
+
     const onChange = ({ currentTarget }) => handleChange({...good, [currentTarget.id]: currentTarget.value});
 
     const onProductChange = ({ currentTarget }) => {

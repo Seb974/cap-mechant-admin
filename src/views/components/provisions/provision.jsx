@@ -50,14 +50,7 @@ const Provision = ({ match, history }) => {
 
     useEffect(() => {
         if (isDefinedAndNotVoid(suppliers) && !isDefinedAndNotVoid(availableSuppliers) && isDefined(provision.user) ) {
-            const filteredSuppliers = suppliers.filter(s => {
-                const filtered = isDefinedAndNotVoid(s.products) && isDefinedAndNotVoid(provision.user.products) ? s.products.find(p => {
-                    return provision.user.products.includes(p);
-                }) !== undefined : false;
-                return filtered;
-            });
-            const finalSuppliers = filteredSuppliers.length > 0 ? filteredSuppliers : suppliers;
-            setAvailableSuppliers(finalSuppliers);
+            const finalSuppliers = updateSuppliersList();
             if (id === "new")
                 setProvision({...provision, supplier: finalSuppliers[0]});
         }
@@ -68,22 +61,25 @@ const Provision = ({ match, history }) => {
             setProvision({...provision, user: consumers[0]});
     }, [consumers, provision.user]);
 
-    useEffect(() => getAvailableProducts(), [provision, products])
+    useEffect(() => getAvailableProducts(), [provision, products, consumers])
 
     const getAvailableProducts = () => {
-        const usersProducts = isDefined(provision.user) && isDefinedAndNotVoid(provision.user.products) ? products.filter(p => provision.user.products.includes(p['@id'])) : products;
-        const suppliersProducts = isDefined(provision.supplier) && isDefinedAndNotVoid(provision.supplier.products) ? usersProducts.filter(p => provision.supplier.products.includes(p['@id'])) : products;
-        if (isDefinedAndNotVoid(suppliersProducts)) {
-            setDefaultGood({...defaultGood, product: suppliersProducts[0]});
+        if (isDefined(provision) && isDefinedAndNotVoid(products) && isDefinedAndNotVoid(consumers)) {
+            const selectedUser = isDefined(provision.user) && isDefinedAndNotVoid(consumers) ? consumers.find(c => c.id === provision.user.id) : null;
+            const usersProducts = isDefined(selectedUser) ? products.filter(p => selectedUser.products.includes(p['@id'])) : products;
+            const suppliersProducts = isDefined(provision.supplier) ? usersProducts.filter(p => p.suppliers.find(s => s.id === provision.supplier.id)) : products;
+            if (isDefinedAndNotVoid(suppliersProducts)) {
+                setDefaultGood({...defaultGood, product: suppliersProducts[0]});
+            }
+            setAvailableProducts(suppliersProducts);
         }
-        setAvailableProducts(suppliersProducts);
     };
 
     const fetchUsers = () => {
         UserActions
             .findAll()
             .then(response => {
-                setConsumers(response.filter(u => !u.roles.includes("ROLE_SUPER_ADMIN")  && !u.roles.includes("ROLE_SELLER")));
+                setConsumers(response.filter(u => !u.roles.includes("ROLE_SUPER_ADMIN") && !u.roles.includes("ROLE_SELLER") && (isDefined(u.isIntern) && u.isIntern)));
             });
     }
 
@@ -119,7 +115,7 @@ const Provision = ({ match, history }) => {
         SupplierActions
             .findAll()
             .then(response => {
-                const externSuppliers = response.map(s => ({...s, emails: isDefined(s.emails) ? s.emails.join(', ') : ''}));        // .filter(s => !s.isIntern)
+                const externSuppliers = response.map(s => ({...s, emails: isDefined(s.emails) ? s.emails.join(', ') : ''}));
                 setSuppliers(externSuppliers);
             });
     };
@@ -134,8 +130,10 @@ const Provision = ({ match, history }) => {
     const handleSendingModeChange = ({ currentTarget }) => setSendingMode(currentTarget.value);
 
     const handleSupplierChange = ({ currentTarget }) => {
-        const newSupplier = suppliers.find(s => parseInt(s.id) === parseInt(currentTarget.value));
-        setProvision({...provision, supplier: newSupplier});
+        if (isDefinedAndNotVoid(suppliers)) {
+            const newSupplier = suppliers.find(s => parseInt(s.id) === parseInt(currentTarget.value));
+            setProvision({...provision, supplier: newSupplier});
+        }
     };
 
     const handleSupplierInfosChange = ({ currentTarget }) => {
@@ -144,7 +142,8 @@ const Provision = ({ match, history }) => {
 
     const handleConsumerChange = ({ currentTarget }) => {
         const newUser = consumers.find(c => c.id === parseInt(currentTarget.value));
-        setProvision({...provision, user: newUser});
+        const finalSuppliers = updateSuppliersList(newUser);
+        setProvision({...provision, user: newUser, supplier: finalSuppliers[0]});
     };
 
     const handleSubmit = () => {
@@ -168,13 +167,27 @@ const Provision = ({ match, history }) => {
         });
     };
 
+    const updateSuppliersList = (user = provision.user) => {
+        const filteredSuppliers = suppliers.filter(s => {
+            const filtered = isDefinedAndNotVoid(s.products) && isDefinedAndNotVoid(user.products) ? s.products.find(p => {
+                return user.products.includes(p);
+            }) !== undefined : false;
+            return filtered;
+        });
+        const finalSuppliers = filteredSuppliers.length > 0 ? filteredSuppliers : suppliers;
+        const sortedSuppliers = finalSuppliers.sort((a, b) => (a.name > b.name) ? 1 : -1);
+        setAvailableSuppliers(sortedSuppliers);
+        return sortedSuppliers;
+    };
+
     const getProvisionToWrite = () => {
         const { seller, supplier, provisionDate, status, user } = provision;
-        const { id, emails, phone, ...othersVariables } = supplier;
+        // const { id, emails, phone, ...othersVariables } = supplier;
+        const { emails, ...othersVariables } = supplier;
         return {
             ...provision, 
             seller: seller['@id'],
-            supplier: {id, phone, emails: emails.split(',').map(email => email.trim())},
+            supplier: {...othersVariables, emails: typeof emails === 'string' ? emails.split(',').map(email => email.trim()) : emails},
             provisionDate: new Date(provisionDate),
             sendingMode,
             user: user['@id'],
@@ -246,7 +259,9 @@ const Provision = ({ match, history }) => {
                             <CRow>
                                 <CCol xs="12" sm="12" md="6" className="mt-4">
                                     <Select className="mr-2" name="supplier" label="Fournisseur" onChange={ handleSupplierChange } value={ isDefined(provision.supplier) ? provision.supplier.id : 0 }>
-                                        { availableSuppliers.map(supplier => <option key={ supplier.id } value={ supplier.id }>{ supplier.name }</option>) }
+                                        { availableSuppliers
+                                            .map(supplier => <option key={ supplier.id } value={ supplier.id }>{ supplier.name }</option>) 
+                                        }
                                     </Select>
                                 </CCol>
                                 <CCol xs="12" lg="6" className="mt-4">

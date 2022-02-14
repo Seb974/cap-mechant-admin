@@ -42,7 +42,11 @@ const Supplier = ({ match, history }) => {
             setEditing(true);
             SupplierActions.find(id)
                 .then(response => {
-                    const formattedEmails = isDefinedAndNotVoid(response.emails) ? response.emails.join(', ') : "";
+                    console.log(response);
+                    // const formattedEmails = isDefinedAndNotVoid(response.emails) ? response.emails.join(', ') : "";
+                    const formattedEmails = isDefined(response.emails) ? 
+                                                typeof response.emails === 'string' ? response.emails : 
+                                                isDefinedAndNotVoid(response.emails) ? response.emails.join(', ') : "" : "";
                     setSupplier({...response, emails: formattedEmails});
                 })
                 .catch(error => {

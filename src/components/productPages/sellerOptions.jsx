@@ -81,12 +81,16 @@ const SellerOptions = ({ product, setProduct, history }) => {
                     </CSelect>
                 </CCol>
                 <CCol xs="12" md="4">
-                    <CLabel htmlFor="select">Unité de vente</CLabel>
-                    <CSelect custom name="unit" id="unit" value={ product.unit } onChange={ handleChange }>
-                        <option value="Kg">Kilogramme</option>
-                        <option value="U">Unité</option>
-                        <option value="L">Litre</option>
-                    </CSelect>
+                    <CFormGroup>
+                        <CLabel htmlFor="unit">Unité de vente</CLabel>
+                        <CInput
+                            id="unit"
+                            name="unit"
+                            value={ product.unit }
+                            onChange={ handleChange }
+                            placeholder="Unité"
+                        />
+                    </CFormGroup>
                 </CCol>
                 <CCol xs="12" md="4" className="mt-4">
                     <CFormGroup row className="mb-0 ml-1 d-flex align-items-end">
