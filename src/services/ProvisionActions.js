@@ -10,15 +10,16 @@ function findAll() {
         .then(response => response.data['hydra:member'].sort((a, b) => (a.provisionDate > b.provisionDate) ? 1 : -1));
 }
 
-function findAllSuppliersBetween(dates, suppliers, user) {
+function findAllSuppliersBetween(dates, suppliers, page = 1, items = 30) {
     const supplierList = getSuppliersMultipleList(suppliers);
     const UTCDates = formatUTC(dates);
     const dateLimits = `provisionDate[after]=${ getStringDate(UTCDates.start) }&provisionDate[before]=${ getStringDate(UTCDates.end) }`;
     return api
-        .get(`/api/provisions?${ supplierList }&${ dateLimits }`)
-        .then(response => {
-            return response.data['hydra:member'].sort((a, b) => (new Date(a.deliveryDate) < new Date(b.deliveryDate)) ? -1 : 1)
-        });
+        .get(`/api/provisions?${ supplierList }&${ dateLimits }&pagination=true&page=${ page }&itemsPerPage=${ items }&order[provisionDate]=asc`)
+        .then(response => response.data);
+        // .then(response => {
+        //     return response.data['hydra:member'].sort((a, b) => (new Date(a.provisionDate) < new Date(b.provisionDate)) ? -1 : 1)
+        // });
 }
 
 function findSuppliersBetween(dates, suppliers, sellers, user) {

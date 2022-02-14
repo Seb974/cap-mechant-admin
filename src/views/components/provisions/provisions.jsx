@@ -18,7 +18,7 @@ import 'src/assets/css/form.css';
 
 const Provisions = (props) => {
 
-    const itemsPerPage = 30;
+    const itemsPerPage = 20;
     const fields = ['Client', 'Fournisseur', 'Date', 'Total', ' '];
     const { currentUser, seller } = useContext(AuthContext);
     const [provisions, setProvisions] = useState([]);
@@ -32,6 +32,9 @@ const Provisions = (props) => {
     const [mercureOpering, setMercureOpering] = useState(false);
     const [csvContent, setCsvContent] = useState("");
 
+    const [totalItems, setTotalItems] = useState(0);
+    const [currentPage, setCurrentPage] = useState(1);
+
     const csvCode = 'data:text/csv;charset=utf-8,SEP=,%0A' + encodeURIComponent(csvContent);
 
     useEffect(() => {
@@ -41,15 +44,17 @@ const Provisions = (props) => {
 
     useEffect(() => setIsAdmin(Roles.hasAdminPrivileges(currentUser)), [currentUser]);
 
+    useEffect(() => getProvisions(currentPage), [currentPage]);
+
+    useEffect(() => {
+        if (isDefinedAndNotVoid(selectedSuppliers))
+            getProvisions();
+    }, [dates, selectedSuppliers]);
+
     useEffect(() => {
         if (suppliers.length > 0 && !isDefinedAndNotVoid(selectedSuppliers))
             setSelectedSuppliers(getFormattedEntities(suppliers));
     }, [suppliers]);
-
-    useEffect(() => {
-        if (isDefinedAndNotVoid(selectedSuppliers))
-            fetchProvisions()
-    }, [dates, selectedSuppliers]);
 
     useEffect(() => {
         if (isDefinedAndNotVoid(updatedProvisions) && !mercureOpering) {
@@ -64,18 +69,23 @@ const Provisions = (props) => {
             setCsvContent(getCsvContent());
     },[provisions]);
 
-    const fetchProvisions = () => {
+    const getProvisions = async (page = 1) => {
+        const response = page >= 1 ? await fetchPaginatedProvisions(page) : null;
+        if (isDefined(response)) {
+            setProvisions(response['hydra:member']);
+            setTotalItems(response['hydra:totalItems']);
+            setLoading(false);
+        }
+    };
+
+    const fetchPaginatedProvisions = (page = 1) => {
         setLoading(true);
-        const UTCDates = getUTCDates(dates);
-        ProvisionActions.findAllSuppliersBetween(UTCDates, selectedSuppliers, currentUser)
-                .then(response =>{
-                    setProvisions(response);
-                    setLoading(false);
-                })
-                .catch(error => {
-                    console.log(error);
-                    setLoading(false);
-                });
+        return ProvisionActions
+            .findAllSuppliersBetween(getUTCDates(dates), selectedSuppliers, page, itemsPerPage)
+            .catch(error => {
+                console.log(error);
+                setLoading(false);
+            });
     };
 
     const fetchSuppliers = () => {
@@ -247,7 +257,14 @@ const Provisions = (props) => {
                                     fields={ isAdmin ? fields : fields.filter(f => f !== 'Total') }
                                     bordered
                                     itemsPerPage={ itemsPerPage }
-                                    pagination
+                                    pagination={{
+                                        'pages': Math.ceil(totalItems / itemsPerPage),
+                                        'activePage': currentPage,
+                                        'onActivePageChange': page => setCurrentPage(page),
+                                        'align': 'center',
+                                        'dots': true,
+                                        'className': Math.ceil(totalItems / itemsPerPage) > 1 ? "d-block" : "d-none"
+                                      }}
                                     hover
                                     scopedSlots = {{
                                         'Client':
@@ -301,7 +318,7 @@ const Provisions = (props) => {
                                                             hover
                                                             scopedSlots = {{
                                                                 'Produit':
-                                                                    item => <td>{ getProductName(item.product, item.variation, item.size) }</td>
+                                                                    item => <td>{ item.product.name }</td>
                                                                 ,
                                                                 'Stock':
                                                                     item => <td>{ isDefined(item.stock) ? item.stock.toFixed(2) + " " + item.unit : "-" }</td>

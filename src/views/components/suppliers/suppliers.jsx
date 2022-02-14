@@ -35,8 +35,6 @@ const Suppliers = (props) => {
     const getDisplayedSuppliers = async (page = 1) => {
         const response = isDefined(search) && search.length > 0 ? await getSearchedSuppliers(search, page) : await getSuppliers(page);
         if (isDefined(response)) {
-            console.log(response['hydra:member']);
-            console.log(response['hydra:totalItems']);
             setSuppliers(response['hydra:member']);
             setTotalItems(response['hydra:totalItems']);
         }
