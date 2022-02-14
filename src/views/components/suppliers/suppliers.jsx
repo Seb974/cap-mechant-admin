@@ -11,7 +11,7 @@ import { Spinner } from 'react-bootstrap';
 const Suppliers = (props) => {
 
     const itemsPerPage = 15;
-    const fields = ['Vendeur', 'Nom', ' '];
+    const fields = ['Nom', ' '];
     const { currentUser } = useContext(AuthContext);
     const [isAdmin, setIsAdmin] = useState(Roles.hasAdminPrivileges(currentUser));
     const [suppliers, setSuppliers] = useState([]);
@@ -93,14 +93,11 @@ const Suppliers = (props) => {
             <CCardBody>
             <CDataTable
               items={ suppliers.sort((a, b) => (a.name > b.name) ? 1 : -1) }
-              fields={ isAdmin ? fields : fields.filter(f => f !== 'Vendeur' && f !== ' ') }
+              fields={ fields }
               bordered
               itemsPerPage={ itemsPerPage }
               pagination
               scopedSlots = {{
-                'Vendeur':
-                  item => <td>{ isDefined(item.seller) && isDefined(item.seller.name) ? item.seller.name : "-" }</td>
-                ,
                 'Nom':
                   item => <td><Link to={ "/components/suppliers/" + item.id }>{ item.name }</Link></td>
                 ,

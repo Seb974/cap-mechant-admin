@@ -52,9 +52,18 @@ function importUsers() {
     return api.get('/api/vif/users')
 }
 
+function findInternUsers() {
+    return api
+        .get('/api/users?isIntern=true')
+        .then(response => {
+            return response.data['hydra:member'].filter(u => !u.roles.includes("ROLE_SUPER_ADMIN") && !u.roles.includes("ROLE_SELLER"))
+        });
+}
+
 export default {
     register,
     findAll,
+    findInternUsers,
     delete: deleteUser,
     import: importUsers,
     find, 

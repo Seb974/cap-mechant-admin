@@ -8,14 +8,12 @@ import RangeDatePicker from 'src/components/forms/RangeDatePicker';
 import { isDefined, isDefinedAndNotVoid } from 'src/helpers/utils';
 import { isSameDate, getDateFrom, getArchiveDate } from 'src/helpers/days';
 import Spinner from 'react-bootstrap/Spinner'
-import OrderDetails from 'src/components/preparationPages/orderDetails';
 import SelectMultiple from 'src/components/forms/SelectMultiple';
 import SupplierActions from 'src/services/SupplierActions';
-import SellerActions from 'src/services/SellerActions';
 import ProvisionModal from 'src/components/provisionPages/provisionModal';
 import CIcon from '@coreui/icons-react';
 import MercureContext from 'src/contexts/MercureContext';
-import { updateBetween, updateSuppliersBetween } from 'src/data/dataProvider/eventHandlers/provisionEvents';
+import { updateBetween } from 'src/data/dataProvider/eventHandlers/provisionEvents';
 import 'src/assets/css/form.css';
 
 const Provisions = (props) => {
@@ -25,13 +23,11 @@ const Provisions = (props) => {
     const { currentUser, seller } = useContext(AuthContext);
     const [provisions, setProvisions] = useState([]);
     const [suppliers, setSuppliers] = useState([]);
-    const [sellers, setSellers] = useState([]);
     const [isAdmin, setIsAdmin] = useState(false);
     const [loading, setLoading] = useState(false);
     const [dates, setDates] = useState({start: new Date(), end: new Date() });
     const [details, setDetails] = useState([]);
     const [selectedSuppliers, setSelectedSuppliers] = useState([]);
-    const [selectedSellers, setSelectedSellers] = useState([]);
     const { updatedProvisions, setUpdatedProvisions } = useContext(MercureContext);
     const [mercureOpering, setMercureOpering] = useState(false);
     const [csvContent, setCsvContent] = useState("");
@@ -41,7 +37,6 @@ const Provisions = (props) => {
     useEffect(() => {
         setIsAdmin(Roles.hasAdminPrivileges(currentUser));
         fetchSuppliers();
-        fetchSellers();
     }, []);
 
     useEffect(() => setIsAdmin(Roles.hasAdminPrivileges(currentUser)), [currentUser]);
@@ -52,14 +47,9 @@ const Provisions = (props) => {
     }, [suppliers]);
 
     useEffect(() => {
-        if (sellers.length > 0 && !isDefinedAndNotVoid(selectedSellers))
-            setSelectedSellers(getFormattedEntities(sellers));
-    }, [sellers]);
-
-    useEffect(() => {
-        if (isDefinedAndNotVoid(selectedSuppliers) && isDefinedAndNotVoid(selectedSellers))
+        if (isDefinedAndNotVoid(selectedSuppliers))
             fetchProvisions()
-    }, [dates, selectedSuppliers, selectedSellers]);
+    }, [dates, selectedSuppliers]);
 
     useEffect(() => {
         if (isDefinedAndNotVoid(updatedProvisions) && !mercureOpering) {
@@ -70,16 +60,15 @@ const Provisions = (props) => {
     }, [updatedProvisions]);
 
     useEffect(() => {
-        // if (isDefinedAndNotVoid(provisions))
+        if (isDefinedAndNotVoid(provisions))
             setCsvContent(getCsvContent());
     },[provisions]);
 
     const fetchProvisions = () => {
         setLoading(true);
         const UTCDates = getUTCDates(dates);
-        ProvisionActions.findSuppliersBetween(UTCDates, selectedSuppliers, selectedSellers, currentUser)
+        ProvisionActions.findAllSuppliersBetween(UTCDates, selectedSuppliers, currentUser)
                 .then(response =>{
-                    console.log(response);
                     setProvisions(response);
                     setLoading(false);
                 })
@@ -93,15 +82,9 @@ const Provisions = (props) => {
         SupplierActions
             .findAll()
             .then(response => {
-                const externSuppliers = response;       // .filter(s => !s.isIntern)
+                const externSuppliers = response;
                 setSuppliers(externSuppliers);
             });
-    };
-
-    const fetchSellers = () => {
-        SellerActions
-            .findAll()
-            .then(response => setSellers(response));
     };
 
     const handleDelete = item => {
@@ -123,7 +106,6 @@ const Provisions = (props) => {
     };
 
     const handleSuppliersChange = suppliers => setSelectedSuppliers(suppliers);
-    const handleSellersChange = sellers => setSelectedSellers(sellers);
 
     const getUTCDates = () => {
         const UTCStart = new Date(dates.start.getFullYear(), dates.start.getMonth(), dates.start.getDate(), 4, 0, 0);
@@ -239,22 +221,10 @@ const Provisions = (props) => {
                                     className = "form-control mb-3"
                                 />
                             </CCol>
-                            { !isAdmin && 
-                                <CCol xs="12" lg="6">
-                                    <SelectMultiple className="supplier-select" name="suppliers" label="Founisseurs" value={ selectedSuppliers } onChange={ handleSuppliersChange } data={ getFormattedEntities(suppliers) }/>
-                                </CCol>
-                            }
+                            <CCol xs="12" lg="6">
+                                <SelectMultiple className="supplier-select" name="suppliers" label="Founisseurs" value={ selectedSuppliers } onChange={ handleSuppliersChange } data={ getFormattedEntities(suppliers) }/>
+                            </CCol>
                         </CRow>
-                        { isAdmin && 
-                            <CRow>
-                                <CCol xs="12" lg="6">
-                                    <SelectMultiple name="sellers" label="Vendeurs" value={ selectedSellers } onChange={ handleSellersChange } data={ getFormattedEntities(sellers) }/>
-                                </CCol>
-                                <CCol xs="12" lg="6">
-                                    <SelectMultiple name="suppliers" label="Founisseurs" value={ selectedSuppliers } onChange={ handleSuppliersChange } data={ getFormattedEntities(suppliers) }/>
-                                </CCol>
-                            </CRow>
-                        }
                         { loading ?
                             <CRow>
                                 <CCol xs="12" lg="12" className="text-center">
@@ -274,7 +244,7 @@ const Provisions = (props) => {
                                 }
                                 <CDataTable
                                     items={ provisions }
-                                    fields={ isAdmin ? fields : fields.filter(f => f !== 'Total') }     // f !== "Vendeur" &&
+                                    fields={ isAdmin ? fields : fields.filter(f => f !== 'Total') }
                                     bordered
                                     itemsPerPage={ itemsPerPage }
                                     pagination
@@ -324,7 +294,7 @@ const Provisions = (props) => {
                                             item => <CCollapse show={details.includes(item.id)}>
                                                         <CDataTable
                                                             items={ item.goods }
-                                                            fields={  ['Produit', 'Stock', 'Commandé', 'Reçu'] }     // isAdmin ? ['Produit', 'Commandé', 'Reçu', 'Prix U','Sous-total'] :
+                                                            fields={  ['Produit', 'Stock', 'Commandé', 'Reçu'] }
                                                             bordered
                                                             itemsPerPage={ itemsPerPage }
                                                             pagination
@@ -340,13 +310,7 @@ const Provisions = (props) => {
                                                                     item => <td>{ item.quantity.toFixed(2) + " " + item.unit }</td>
                                                                 ,
                                                                 'Reçu':
-                                                                    item => <td>{ isDefined(item.received) ? item.received.toFixed(2) + " " + item.unit : "-" }</td>        //  item.received.toFixed(2) + " " + item.unit item.received + " U :" + (typeof item.received)
-                                                                ,
-                                                                // 'Prix U':
-                                                                //     item => <td>{ isDefined(item.price) ? item.price.toFixed(2) + " €" : "-" }</td>     // item.price.toFixed(2) + " €"  item.price + " € :" + (typeof item.price)
-                                                                // ,
-                                                                // 'Sous-total':
-                                                                //     item => <td>{ isDefined(item.price) && isDefined(item.received) ? (item.received * item.price).toFixed(2) + " €" : "-" }</td>
+                                                                    item => <td>{ isDefined(item.received) ? item.received.toFixed(2) + " " + item.unit : "-" }</td>
                                                             }}
                                                         />
                                                     </CCollapse>

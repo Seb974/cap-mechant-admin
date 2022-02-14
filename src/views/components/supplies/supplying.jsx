@@ -54,13 +54,22 @@ const Supplying = (props) => {
     const getWaitingProvisions = () => {
         setLoading(true);
         const UTCDates = getUTCDates(dates);
-        // .findNeedsPerSuppliersBetween(UTCDates)
+        // ProvisionActions
+            // .findNeedsPerSuppliersBetweenOrderDates(UTCDates)
+            // .then(response => {
+            //     const externProvisions = response.filter(p => !p.supplier.isIntern)
+            //                                      .map(p => ({...p, selected: false, emailEnabled: false}));
+            //     setProvisions(externProvisions);
+            //     setLoading(false);
+            // })
+            // .catch(error => {
+            //     console.log(error);
+            //     setLoading(false);
+            // });
         ProvisionActions
-            .findNeedsPerSuppliersBetweenOrderDates(UTCDates)
+            .findInternProvisionBetween(UTCDates)
             .then(response => {
-                const externProvisions = response.filter(p => !p.supplier.isIntern)
-                                                 .map(p => ({...p, selected: false, emailEnabled: false}));
-                setProvisions(externProvisions);
+                setProvisions(response.map(p => ({...p, selected: false, emailEnabled: false})));
                 setLoading(false);
             })
             .catch(error => {
@@ -148,10 +157,10 @@ const Supplying = (props) => {
 
     const getFormattedProvisions = provisions => {
         return provisions.map(provision => {
-            const { seller, metas, user, goods, provisionDate } = provision;
+            const { metas, user, goods, provisionDate } = provision;
             return {
                 ...provision,
-                seller: isDefined(seller) ? seller['@id'] : '/api/sellers/1',
+                // seller: isDefined(seller) ? seller['@id'] : '/api/sellers/1',
                 supplier: {id: selectedSupplier.id, emails: Array.isArray(selectedSupplier.emails) ? selectedSupplier.emails : selectedSupplier.emails.split(',').map(email => email.trim()), phone: selectedSupplier.phone},
                 provisionDate: new Date(provisionDate),
                 user: user['@id'],

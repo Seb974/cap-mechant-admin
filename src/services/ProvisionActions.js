@@ -10,6 +10,17 @@ function findAll() {
         .then(response => response.data['hydra:member'].sort((a, b) => (a.provisionDate > b.provisionDate) ? 1 : -1));
 }
 
+function findAllSuppliersBetween(dates, suppliers, user) {
+    const supplierList = getSuppliersMultipleList(suppliers);
+    const UTCDates = formatUTC(dates);
+    const dateLimits = `provisionDate[after]=${ getStringDate(UTCDates.start) }&provisionDate[before]=${ getStringDate(UTCDates.end) }`;
+    return api
+        .get(`/api/provisions?${ supplierList }&${ dateLimits }`)
+        .then(response => {
+            return response.data['hydra:member'].sort((a, b) => (new Date(a.deliveryDate) < new Date(b.deliveryDate)) ? -1 : 1)
+        });
+}
+
 function findSuppliersBetween(dates, suppliers, sellers, user) {
     const supplierList = getSuppliersMultipleList(suppliers);
     const sellerList = getSellersList(sellers);
@@ -55,6 +66,17 @@ function findNeedsPerSuppliersBetweenOrderDates(dates, suppliers = null) {
         .then(response => {
             return response.data['hydra:member'].sort((a, b) => (new Date(a.deliveryDate) < new Date(b.deliveryDate)) ? -1 : 1)
         });
+}
+
+function findInternProvisionBetween(dates) {
+    const status = `status[]=WAITING`;
+    const UTCDates = formatUTC(dates);
+    const dateLimits = `orderDate[after]=${ getStringDate(UTCDates.start) }&orderDate[before]=${ getStringDate(UTCDates.end) }`;
+    return api
+    .get(`/api/provisions?isIntern=false&${ status }&${ dateLimits }`)
+    .then(response => {
+        return response.data['hydra:member'].sort((a, b) => (new Date(a.deliveryDate) < new Date(b.deliveryDate)) ? -1 : 1)
+    });
 }
 
 
@@ -122,6 +144,8 @@ export default {
     findAll,
     findBetween,
     findSuppliersBetween,
+    findAllSuppliersBetween,
+    findInternProvisionBetween,
     findNeedsPerSuppliersBetweenOrderDates,
     findNeedsPerSuppliersBetween,
     delete: deleteProvision,

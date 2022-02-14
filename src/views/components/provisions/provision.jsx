@@ -20,8 +20,8 @@ const Provision = ({ match, history }) => {
     const { id = "new" } = match.params;
     const [editing, setEditing] = useState(false);
     const { products } = useContext(ProductsContext);
-    const { currentUser, seller } = useContext(AuthContext);
-    const [provision, setProvision] = useState({ provisionDate: getDateFrom(today, today.getDay() === 6 ? 2 : 1), status: "ORDERED", seller });
+    const { currentUser } = useContext(AuthContext);
+    const [provision, setProvision] = useState({ provisionDate: getDateFrom(today, today.getDay() === 6 ? 2 : 1), status: "ORDERED" });
     const defaultErrors = { provisionDate: "" };
     const [errors, setErrors] = useState(defaultErrors);
     const [defaultGood, setDefaultGood] = useState({product: products[0], count: 0, quantity: "", received: "", stock: 0, unit: "Kg"});     //  products[0].unit
@@ -67,7 +67,7 @@ const Provision = ({ match, history }) => {
         if (isDefined(provision) && isDefinedAndNotVoid(products) && isDefinedAndNotVoid(consumers)) {
             const selectedUser = isDefined(provision.user) && isDefinedAndNotVoid(consumers) ? consumers.find(c => c.id === provision.user.id) : null;
             const usersProducts = isDefined(selectedUser) ? products.filter(p => selectedUser.products.includes(p['@id'])) : products;
-            const suppliersProducts = isDefined(provision.supplier) ? usersProducts.filter(p => p.suppliers.find(s => s.id === provision.supplier.id)) : products;
+            const suppliersProducts = isDefined(provision.supplier) ? usersProducts.filter(p => isDefinedAndNotVoid(p.suppliers) && p.suppliers.find(s => s.id === provision.supplier.id)) : products;
             if (isDefinedAndNotVoid(suppliersProducts)) {
                 setDefaultGood({...defaultGood, product: suppliersProducts[0]});
             }
@@ -77,9 +77,9 @@ const Provision = ({ match, history }) => {
 
     const fetchUsers = () => {
         UserActions
-            .findAll()
+            .findInternUsers()
             .then(response => {
-                setConsumers(response.filter(u => !u.roles.includes("ROLE_SUPER_ADMIN") && !u.roles.includes("ROLE_SELLER") && (isDefined(u.isIntern) && u.isIntern)));
+                setConsumers(response);
             });
     }
 
@@ -181,12 +181,10 @@ const Provision = ({ match, history }) => {
     };
 
     const getProvisionToWrite = () => {
-        const { seller, supplier, provisionDate, status, user } = provision;
-        // const { id, emails, phone, ...othersVariables } = supplier;
+        const { supplier, provisionDate, status, user } = provision;
         const { emails, ...othersVariables } = supplier;
         return {
             ...provision, 
-            seller: seller['@id'],
             supplier: {...othersVariables, emails: typeof emails === 'string' ? emails.split(',').map(email => email.trim()) : emails},
             provisionDate: new Date(provisionDate),
             sendingMode,
