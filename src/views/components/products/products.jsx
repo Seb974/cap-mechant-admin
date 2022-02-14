@@ -7,39 +7,59 @@ import { Link } from 'react-router-dom';
 import AuthContext from 'src/contexts/AuthContext';
 import Roles from 'src/config/Roles';
 import { Spinner } from 'react-bootstrap';
+import { isDefined } from 'src/helpers/utils';
 
 const Products = (props) => {
 
     const itemsPerPage = 15;
     const fields = ['name', ' '];
     const { currentUser } = useContext(AuthContext);
-    const { products, setProducts } = useContext(ProductsContext);
     const [displayedProducts, setDisplayedProducts] = useState([]);
     const [isAdmin, setIsAdmin] = useState(false);
     const [importLoading, setImportLoading] = useState(false);
     const [toasts, setToasts] = useState([]);
+
+    const [totalItems, setTotalItems] = useState(0);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [search, setSearch] = useState("");
+
     const successMessage = "Les produits ont bien été importés.";
     const failMessage = "Un problème est survenu lors de l'importation des produits.";
+    const failLoadingMessage = "Un problème est survenu lors du chargement des données. Vérifiez l'état de votre connexion.\n";
     const successToast = { position: 'top-right', autohide: 3000, closeButton: true, fade: true, color: 'success', messsage: successMessage, title: 'Succès' };
     const failToast = { position: 'top-right', autohide: 7000, closeButton: true, fade: true, color: 'warning', messsage: failMessage, title: 'Importation inachevée' };
-
+    const failLoadingToast = { position: 'top-right', autohide: 7000, closeButton: true, fade: true, color: 'warning', messsage: failLoadingMessage, title: 'Echec du chargement' };
 
     useEffect(() => setIsAdmin(Roles.hasAdminPrivileges(currentUser)), []);
     useEffect(() => setIsAdmin(Roles.hasAdminPrivileges(currentUser)), [currentUser]);
 
-    useEffect(() => {
-        ProductActions
-            .findAll()
-            .then(response => {
-                setDisplayedProducts(response);
-                setProducts(response);
-            })
-            .catch(error => console.log(error.response));
-    }, []);
+    useEffect(() => getDisplayedProducts(), []);
 
-    useEffect(() => {
-        setDisplayedProducts(products);
-    }, [products]);
+    useEffect(() => getDisplayedProducts(), [search]);
+    useEffect(() => getDisplayedProducts(currentPage), [currentPage]);
+
+    const getDisplayedProducts = async (page = 1) => {
+        const response = isDefined(search) && search.length > 0 ? await getSearchedProducts(search, page) : await getProducts(page);
+        if (isDefined(response)) {
+            setDisplayedProducts(response['hydra:member']);
+            setTotalItems(response['hydra:totalItems']);
+        }
+    };
+
+    const getProducts = (page = 1) => page >=1 ? fetchPaginatedProducts(page) : undefined;
+    const getSearchedProducts = (word, page = 1) => fetchProductsContainingWord(word, page);
+
+    const fetchPaginatedProducts = (page) => {
+        return ProductActions
+                  .findAllPaginated(page, itemsPerPage)
+                  .catch(error => addToast(failLoadingToast));
+    };
+
+    const fetchProductsContainingWord = (word, page) => {
+        return ProductActions
+                  .findWord(word, page, itemsPerPage)
+                  .catch(error => addToast(failLoadingToast));
+    };
 
     const handleDelete = (id) => {
         const originalProducts = [...displayedProducts];
@@ -82,7 +102,7 @@ const Products = (props) => {
           <CCard>
             <CCardHeader>
                 Liste des produits
-                <CCol col="6" sm="4" md="2" className="ml-auto">
+                <CCol col="6" sm="12" md="6" className="ml-auto">
                     <CButton block variant="outline" color="success" onClick={ handleImport }>
                       { importLoading ? 
                           <Spinner as="span" animation="border" size="sm"role="status"/>
@@ -98,7 +118,16 @@ const Products = (props) => {
               fields={ isAdmin ? fields : fields.filter(f => f !== ' ') }
               bordered
               itemsPerPage={ itemsPerPage }
-              pagination
+              pagination={{
+                'pages': Math.ceil(totalItems / itemsPerPage),
+                'activePage': currentPage,
+                'onActivePageChange': page => setCurrentPage(page),
+                'align': 'center',
+                'dots': true,
+                'className': Math.ceil(totalItems / itemsPerPage) > 1 ? "d-block" : "d-none"
+              }}
+              tableFilter
+              onTableFilterChange={ word => setSearch(word) }
               scopedSlots = {{
                 'name':
                   item => <td><Link to={ "/components/products/" + item.id }>{ item.name }</Link></td>

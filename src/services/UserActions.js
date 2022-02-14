@@ -12,6 +12,18 @@ function findAll() {
         .then(response => response.data['hydra:member']);
 }
 
+function findAllPaginated(page = 1, items = 30) {
+    return api
+        .get(`/api/users?&pagination=true&order[name]=asc&page=${ page }&itemsPerPage=${ items }`)
+        .then(response => response.data);
+}
+
+function findWord(word, page = 1, items = 30) {
+    return api
+        .get(`/api/users?name=${ word }&order[name]=asc&pagination=true&page=${ page }&itemsPerPage=${ items }`)
+        .then(response => response.data);
+}
+
 function deleteUser(id) {
     return api
         .delete('/api/users/' + id);
@@ -63,7 +75,9 @@ function findInternUsers() {
 export default {
     register,
     findAll,
+    findWord,
     findInternUsers,
+    findAllPaginated,
     delete: deleteUser,
     import: importUsers,
     find, 

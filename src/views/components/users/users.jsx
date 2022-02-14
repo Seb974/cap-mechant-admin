@@ -5,6 +5,7 @@ import { CBadge, CCard, CCardBody, CCardHeader, CCol, CDataTable, CRow, CButton,
 import { Link } from 'react-router-dom';
 import AuthContext from 'src/contexts/AuthContext';
 import { Spinner } from 'react-bootstrap';
+import { isDefined } from 'src/helpers/utils';
 
 const Users = (props) => {
 
@@ -15,10 +16,16 @@ const Users = (props) => {
     const [importLoading, setImportLoading] = useState(false);
     const [isAdmin, setIsAdmin] = useState(Roles.hasAdminPrivileges(currentUser));
     const [toasts, setToasts] = useState([]);
+    const [totalItems, setTotalItems] = useState(0);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [search, setSearch] = useState("");
+
     const successMessage = "Les utilisateurs ont bien été importés.";
     const failMessage = "Un problème est survenu lors de l'importation des utilisateurs.";
+    const failLoadingMessage = "Un problème est survenu lors du chargement des données. Vérifiez l'état de votre connexion.\n";
     const successToast = { position: 'top-right', autohide: 3000, closeButton: true, fade: true, color: 'success', messsage: successMessage, title: 'Succès' };
     const failToast = { position: 'top-right', autohide: 7000, closeButton: true, fade: true, color: 'warning', messsage: failMessage, title: 'Importation inachevée' };
+    const failLoadingToast = { position: 'top-right', autohide: 7000, closeButton: true, fade: true, color: 'warning', messsage: failLoadingMessage, title: 'Echec du chargement' };
 
     const getBadge = role => {
       const name = role.toUpperCase();
@@ -27,18 +34,23 @@ const Users = (props) => {
              name.includes('USER') ? 'secondary' : 'success';
     }
 
-    useEffect(() => fetchUsers(), []);
-
     useEffect(() => setIsAdmin(Roles.hasAdminPrivileges(currentUser)), [currentUser]);
 
-    const fetchUsers = () => {
-        UserActions.findAll()
-          .then(response => {
-              const newUsers = !isAdmin ? response.filter(u => !Roles.hasAdminPrivileges({...u, roles: Roles.filterRoles(u.roles)})) : response;
-              setUsers(newUsers);
-          })
-          .catch(error => console.log(error.response));
+    useEffect(() => getDisplayedUsers(), []);
+    useEffect(() => getDisplayedUsers(), [search]);
+    useEffect(() => getDisplayedUsers(currentPage), [currentPage]);
+
+    const getDisplayedUsers = async (page = 1) => {
+        const response = isDefined(search) && search.length > 0 ? await getSearchedUsers(search, page) : await getUsers(page);
+        if (isDefined(response)) {
+          const newUsers = !isAdmin ? response['hydra:member'].filter(u => !Roles.hasAdminPrivileges({...u, roles: Roles.filterRoles(u.roles)})) : response['hydra:member'];
+            setUsers(newUsers);
+            setTotalItems(response['hydra:totalItems']);
+        }
     };
+
+    const getUsers = (page = 1) => page >=1 ? fetchPaginatedUsers(page) : undefined;
+    const getSearchedUsers = (word, page = 1) => fetchUsersContainingWord(word, page);
 
     const handleDelete = (id) => {
       const originalUsers = [...users];
@@ -46,8 +58,20 @@ const Users = (props) => {
       UserActions.delete(id)
                  .catch(error => {
                       setUsers(originalUsers);
-                      console.log(error.response);
+                      addToast(failLoadingToast);
                  });
+    };
+
+  const fetchPaginatedUsers = page => {
+    return UserActions
+        .findAllPaginated(page, itemsPerPage)
+        .catch(error => addToast(failLoadingToast));
+  };
+
+  const fetchUsersContainingWord = (word, page) => {
+      return UserActions
+          .findWord(word, page, itemsPerPage)
+          .catch(error => addToast(failLoadingToast));
   };
 
   const handleImport = () => {
@@ -84,12 +108,12 @@ const Users = (props) => {
                   <CCol xs="12" md="6">
                       Liste des utilisateurs
                   </CCol>
-                  <CCol xs="6" md="3">
+                  {/* <CCol xs="6" md="3">
                       <Link role="button" to="/components/users/new" block variant="outline" color="success">
                           <CButton block variant="outline" color="warning">CRÉER</CButton>
                       </Link>
-                  </CCol>
-                  <CCol xs="6" md="3">
+                  </CCol> */}
+                  <CCol xs="12" md="6">
                       <CButton block variant="outline" color="success" onClick={ handleImport }>
                         { importLoading ? 
                             <Spinner as="span" animation="border" size="sm"role="status"/>
@@ -106,7 +130,16 @@ const Users = (props) => {
               fields={ isAdmin ? fields : fields.filter(f => f !== 'roles' && f !== ' ') }
               bordered
               itemsPerPage={ itemsPerPage }
-              pagination
+              pagination={{
+                'pages': Math.ceil(totalItems / itemsPerPage),
+                'activePage': currentPage,
+                'onActivePageChange': page => setCurrentPage(page),
+                'align': 'center',
+                'dots': true,
+                'className': Math.ceil(totalItems / itemsPerPage) > 1 ? "d-block" : "d-none"
+              }}
+              tableFilter
+              onTableFilterChange={ word => setSearch(word) }
               scopedSlots = {{
                 'name':
                   item => <td><Link to={"/components/users/" + item.id}>{ item.name }</Link></td>

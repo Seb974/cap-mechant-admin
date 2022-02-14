@@ -11,24 +11,51 @@ import { Spinner } from 'react-bootstrap';
 const Suppliers = (props) => {
 
     const itemsPerPage = 15;
-    const fields = ['Nom', ' '];
+    const fields = ['name', ' '];
     const { currentUser } = useContext(AuthContext);
     const [isAdmin, setIsAdmin] = useState(Roles.hasAdminPrivileges(currentUser));
     const [suppliers, setSuppliers] = useState([]);
     const [importLoading, setImportLoading] = useState(false);
     const [toasts, setToasts] = useState([]);
+    const [totalItems, setTotalItems] = useState(0);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [search, setSearch] = useState("");
     const successMessage = "Les fournisseurs ont bien été importés.";
     const failMessage = "Un problème est survenu lors de l'importation des fournisseurs.";
+    const failLoadingMessage = "Un problème est survenu lors du chargement des données. Vérifiez l'état de votre connexion.\n";
     const successToast = { position: 'top-right', autohide: 3000, closeButton: true, fade: true, color: 'success', messsage: successMessage, title: 'Succès' };
     const failToast = { position: 'top-right', autohide: 7000, closeButton: true, fade: true, color: 'warning', messsage: failMessage, title: 'Importation inachevée' };
-
-    useEffect(() => {
-        SupplierActions.findAll()
-            .then(response => setSuppliers(response))
-            .catch(error => console.log(error.response));
-    }, []);
+    const failLoadingToast = { position: 'top-right', autohide: 7000, closeButton: true, fade: true, color: 'warning', messsage: failLoadingMessage, title: 'Echec du chargement' };
 
     useEffect(() => setIsAdmin(Roles.hasAdminPrivileges(currentUser)), [currentUser]);
+    useEffect(() => getDisplayedSuppliers(), []);
+    useEffect(() => getDisplayedSuppliers(), [search]);
+    useEffect(() => getDisplayedSuppliers(currentPage), [currentPage]);
+
+    const getDisplayedSuppliers = async (page = 1) => {
+        const response = isDefined(search) && search.length > 0 ? await getSearchedSuppliers(search, page) : await getSuppliers(page);
+        if (isDefined(response)) {
+            console.log(response['hydra:member']);
+            console.log(response['hydra:totalItems']);
+            setSuppliers(response['hydra:member']);
+            setTotalItems(response['hydra:totalItems']);
+        }
+    };
+
+    const getSuppliers = (page = 1) => page >=1 ? fetchPaginatedSuppliers(page) : undefined;
+    const getSearchedSuppliers = (word, page = 1) => fetchSuppliersContainingWord(word, page);
+
+    const fetchPaginatedSuppliers = (page) => {
+      return SupplierActions
+                .findAllPaginated(page, itemsPerPage)
+                .catch(error => addToast(failLoadingToast));
+    };
+
+    const fetchSuppliersContainingWord = (word, page) => {
+        return SupplierActions
+                  .findWord(word, page, itemsPerPage)
+                  .catch(error => addToast(failLoadingToast));
+    };
 
     const handleDelete = (id) => {
         const originalSuppliers = [...suppliers];
@@ -74,12 +101,12 @@ const Suppliers = (props) => {
                       <CCol xs="12" md="6">
                           Liste des fournisseurs
                       </CCol>
-                      <CCol xs="6" md="3">
+                      {/* <CCol xs="6" md="3">
                           <Link role="button" to="/components/suppliers/new" block variant="outline" color="warning">
                               <CButton block variant="outline" color="warning">CRÉER</CButton>
                           </Link>
-                      </CCol>
-                      <CCol xs="6" md="3">
+                      </CCol> */}
+                      <CCol xs="12" md="6">
                           <CButton block variant="outline" color="success" onClick={ handleImport }>
                             { importLoading ? 
                                 <Spinner as="span" animation="border" size="sm"role="status"/>
@@ -96,9 +123,18 @@ const Suppliers = (props) => {
               fields={ fields }
               bordered
               itemsPerPage={ itemsPerPage }
-              pagination
+              pagination={{
+                'pages': Math.ceil(totalItems / itemsPerPage),
+                'activePage': currentPage,
+                'onActivePageChange': page => setCurrentPage(page),
+                'align': 'center',
+                'dots': true,
+                'className': Math.ceil(totalItems / itemsPerPage) > 1 ? "d-block" : "d-none"
+              }}
+              tableFilter
+              onTableFilterChange={ word => setSearch(word) }
               scopedSlots = {{
-                'Nom':
+                'name':
                   item => <td><Link to={ "/components/suppliers/" + item.id }>{ item.name }</Link></td>
                 ,
                 ' ':

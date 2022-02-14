@@ -54,18 +54,6 @@ const Supplying = (props) => {
     const getWaitingProvisions = () => {
         setLoading(true);
         const UTCDates = getUTCDates(dates);
-        // ProvisionActions
-            // .findNeedsPerSuppliersBetweenOrderDates(UTCDates)
-            // .then(response => {
-            //     const externProvisions = response.filter(p => !p.supplier.isIntern)
-            //                                      .map(p => ({...p, selected: false, emailEnabled: false}));
-            //     setProvisions(externProvisions);
-            //     setLoading(false);
-            // })
-            // .catch(error => {
-            //     console.log(error);
-            //     setLoading(false);
-            // });
         ProvisionActions
             .findInternProvisionBetween(UTCDates)
             .then(response => {

@@ -6,6 +6,18 @@ function findAll() {
         .then(response => response.data['hydra:member'].sort((a, b) => (a.name > b.name) ? 1 : -1));
 }
 
+function findAllPaginated(page = 1, items = 30) {
+    return api
+        .get(`/api/products?&order[name]=asc&pagination=true&itemsPerPage=${ items }&page=${ page }`)
+        .then(response => response.data);
+}
+
+function findWord(word, page = 1, items = 30) {
+    return api
+        .get(`/api/products?name[]=${ word }&order[name]=asc&pagination=true&page=${ page }&itemsPerPage=${ items }`)
+        .then(response => response.data);
+}
+
 function deleteProduct(id) {
     return api
         .delete('/api/products/' + id);
@@ -66,6 +78,8 @@ function importProducts() {
 
 export default { 
     findAll,
+    findAllPaginated,
+    findWord,
     delete: deleteProduct,
     import: importProducts,
     find,
