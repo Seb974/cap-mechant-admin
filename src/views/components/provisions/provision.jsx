@@ -84,6 +84,8 @@ const Provision = ({ match, history }) => {
     }
 
     const fetchProvision = id => {
+        console.log(id);
+        console.log(typeof id);
         if (id !== "new") {
             setEditing(true);
             ProvisionActions.find(id)

@@ -70,8 +70,9 @@ const Suppliers = (props) => {
       SupplierActions
           .import()
           .then(response => {
+            const newToast = response.data === 0 ? successToast : failToast;
             setImportLoading(false);
-            addToast(successToast);
+            addToast(newToast);
           })
           .catch(error => {
               setImportLoading(false);
